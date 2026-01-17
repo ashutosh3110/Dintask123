@@ -13,7 +13,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 import useAuthStore from '@/store/authStore';
 
-const TopNav = ({ onMenuClick }) => {
+const TopNav = ({ onMenuClick, isSidebarCollapsed }) => {
     const { user, logout, role } = useAuthStore();
     const [isDarkMode, setIsDarkMode] = useState(false);
     const navigate = useNavigate();
@@ -31,7 +31,10 @@ const TopNav = ({ onMenuClick }) => {
     };
 
     return (
-        <header className="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md fixed top-0 right-0 left-0 lg:left-64 z-40 transition-all duration-300">
+        <header className={cn(
+            "h-16 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md fixed top-0 right-0 z-40 transition-all duration-300 left-0",
+            isSidebarCollapsed ? "lg:left-20" : "lg:left-64"
+        )}>
             <div className="flex h-full items-center justify-between px-4 lg:px-8">
                 <div className="flex items-center gap-4">
                     <Button

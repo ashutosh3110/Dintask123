@@ -7,17 +7,30 @@ import { pageVariants } from '@/shared/utils/animations';
 
 const AdminLayout = ({ role }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const location = useLocation();
 
     return (
         <div className="fixed inset-0 h-[100dvh] w-full bg-slate-50 dark:bg-slate-950 flex font-sans transition-colors duration-300 overflow-hidden">
             {/* Sidebar with mobile responsiveness */}
-            <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} role={role} />
+            <Sidebar
+                isOpen={isSidebarOpen}
+                setIsOpen={setIsSidebarOpen}
+                isCollapsed={isSidebarCollapsed}
+                setIsCollapsed={setIsSidebarCollapsed}
+                role={role}
+            />
 
             {/* Main Content Area */}
-            <div className="flex-1 flex flex-col lg:ml-64 relative h-full w-full">
+            <div className={cn(
+                "flex-1 flex flex-col relative h-full w-full transition-all duration-300",
+                isSidebarCollapsed ? "lg:ml-20" : "lg:ml-64"
+            )}>
                 {/* Header/Top Navigation */}
-                <TopNav onMenuClick={() => setIsSidebarOpen(true)} />
+                <TopNav
+                    onMenuClick={() => setIsSidebarOpen(true)}
+                    isSidebarCollapsed={isSidebarCollapsed}
+                />
 
                 {/* Scrollable Page Content */}
                 <div className="flex-1 overflow-y-auto scroll-smooth w-full">

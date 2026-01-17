@@ -18,8 +18,8 @@ import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/components/ui/button';
 import useAuthStore from '@/store/authStore';
 
-const Sidebar = ({ role, isOpen, setIsOpen }) => {
-    const [isCollapsed, setIsCollapsed] = useState(false);
+const Sidebar = ({ role, isOpen, setIsOpen, isCollapsed, setIsCollapsed }) => {
+    // const [isCollapsed, setIsCollapsed] = useState(false); // Removed internal state
     const logout = useAuthStore(state => state.logout);
     const navigate = useNavigate();
 
