@@ -18,7 +18,7 @@ import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/components/ui/button';
 import useAuthStore from '@/store/authStore';
 
-const Sidebar = ({ role }) => {
+const Sidebar = ({ role, isOpen, setIsOpen }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const logout = useAuthStore(state => state.logout);
     const navigate = useNavigate();
@@ -53,7 +53,11 @@ const Sidebar = ({ role }) => {
         <aside
             className={cn(
                 "fixed left-0 top-0 h-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-300 z-50",
-                isCollapsed ? "w-20" : "w-64"
+                isCollapsed ? "w-20" : "w-64",
+                // Mobile responsiveness: slide in/out
+                isOpen ? "translate-x-0" : "-translate-x-full",
+                // Desktop: always visible (reset translation)
+                "lg:translate-x-0"
             )}
         >
             <div className="flex flex-col h-full">
@@ -82,6 +86,7 @@ const Sidebar = ({ role }) => {
                             key={item.path}
                             to={item.path}
                             end={item.path === `/${role}`}
+                            onClick={() => setIsOpen(false)}
                             className={({ isActive }) => cn(
                                 "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all font-medium group",
                                 isActive

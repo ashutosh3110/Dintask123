@@ -121,103 +121,105 @@ const AdminAccounts = () => {
                     </div>
 
                     <CardContent className="p-0">
-                        <Table>
-                            <TableHeader>
-                                <TableRow className="hover:bg-transparent border-slate-50 dark:border-slate-800">
-                                    <TableHead className="pl-8 text-[10px] font-black uppercase tracking-widest text-slate-400">Company & Owner</TableHead>
-                                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Current Plan</TableHead>
-                                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Team Size</TableHead>
-                                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Tasks</TableHead>
-                                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Status</TableHead>
-                                    <TableHead className="text-right pr-8 text-[10px] font-black uppercase tracking-widest text-slate-400">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                <AnimatePresence mode="popLayout">
-                                    {filteredAdmins.length === 0 ? (
-                                        <TableRow>
-                                            <TableCell colSpan={6} className="h-48 text-center text-slate-400">
-                                                <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-full w-fit mx-auto mb-4">
-                                                    <ShieldAlert size={32} className="opacity-20 text-slate-900 dark:text-white" />
-                                                </div>
-                                                <p className="font-bold text-slate-900 dark:text-white">No administrative accounts found.</p>
-                                            </TableCell>
-                                        </TableRow>
-                                    ) : (
-                                        filteredAdmins.map((adm) => (
-                                            <motion.tr
-                                                key={adm.id}
-                                                variants={fadeInUp}
-                                                initial="initial"
-                                                animate="animate"
-                                                exit="exit"
-                                                layout
-                                                className="border-slate-50 dark:border-slate-800 group hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors"
-                                            >
-                                                <TableCell className="pl-8">
-                                                    <div className="space-y-1 py-1">
-                                                        <p className="font-black text-slate-900 dark:text-white leading-tight text-sm tracking-tight">{adm.name}</p>
-                                                        <p className="text-[10px] text-slate-400 flex items-center gap-1.5 font-bold">
-                                                            {adm.owner} <span className="text-slate-200 dark:text-slate-700">•</span> {adm.email}
-                                                        </p>
+                        <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow className="hover:bg-transparent border-slate-50 dark:border-slate-800">
+                                        <TableHead className="pl-8 text-[10px] font-black uppercase tracking-widest text-slate-400 min-w-[200px]">Company & Owner</TableHead>
+                                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 min-w-[100px]">Current Plan</TableHead>
+                                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 min-w-[90px]">Team Size</TableHead>
+                                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 min-w-[100px]">Tasks</TableHead>
+                                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 min-w-[100px]">Status</TableHead>
+                                        <TableHead className="text-right pr-8 text-[10px] font-black uppercase tracking-widest text-slate-400 min-w-[50px]">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    <AnimatePresence mode="popLayout">
+                                        {filteredAdmins.length === 0 ? (
+                                            <TableRow>
+                                                <TableCell colSpan={6} className="h-48 text-center text-slate-400">
+                                                    <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-full w-fit mx-auto mb-4">
+                                                        <ShieldAlert size={32} className="opacity-20 text-slate-900 dark:text-white" />
                                                     </div>
+                                                    <p className="font-bold text-slate-900 dark:text-white">No administrative accounts found.</p>
                                                 </TableCell>
-                                                <TableCell>
-                                                    <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest border-none bg-slate-100 dark:bg-slate-800 text-slate-500 px-2.5 py-1 rounded-lg">
-                                                        {adm.plan}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell className="text-xs font-bold text-slate-600 dark:text-slate-400">
-                                                    {adm.employees} Members
-                                                </TableCell>
-                                                <TableCell className="text-xs font-bold text-slate-600 dark:text-slate-400">
-                                                    {adm.tasks} Generated
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Badge className={cn(
-                                                        "text-[9px] h-6 font-black uppercase tracking-widest gap-1.5 border px-2.5 rounded-full shadow-sm",
-                                                        statusColors[adm.status]
-                                                    )}>
-                                                        {statusIcons[adm.status]}
-                                                        {adm.status}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell className="text-right pr-8">
-                                                    <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-400 hover:bg-white dark:hover:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-800">
-                                                                <MoreVertical size={18} />
-                                                            </Button>
-                                                        </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end" className="w-52 rounded-2xl p-2">
-                                                            <DropdownMenuLabel className="text-xs font-black uppercase tracking-widest text-slate-400 px-2 py-1.5">Manage Account</DropdownMenuLabel>
-                                                            <DropdownMenuItem className="gap-3 cursor-pointer rounded-xl font-bold text-xs py-2.5">
-                                                                <Eye size={16} className="text-primary-500" /> View Details
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuSeparator className="my-2" />
-                                                            <DropdownMenuLabel className="text-[10px] uppercase font-black tracking-[0.2em] text-slate-400 px-2 py-1.5">Set Status</DropdownMenuLabel>
-                                                            <DropdownMenuItem className="gap-3 cursor-pointer rounded-xl font-bold text-xs py-2.5 text-emerald-600 focus:text-emerald-700 focus:bg-emerald-50 dark:focus:bg-emerald-900/10" onClick={() => handleStatusChange(adm.id, 'active')}>
-                                                                <CheckCircle2 size={16} /> Mark Active
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem className="gap-3 cursor-pointer rounded-xl font-bold text-xs py-2.5 text-amber-600 focus:text-amber-700 focus:bg-amber-50 dark:focus:bg-amber-900/10" onClick={() => handleStatusChange(adm.id, 'pending')}>
-                                                                <Clock size={16} /> Mark Pending
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem className="gap-3 cursor-pointer rounded-xl font-bold text-xs py-2.5 text-red-600 focus:text-red-700 focus:bg-red-50 dark:focus:bg-red-900/10" onClick={() => handleStatusChange(adm.id, 'suspended')}>
-                                                                <XOctagon size={16} /> Suspend Account
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuSeparator className="my-2" />
-                                                            <DropdownMenuItem className="gap-3 cursor-pointer rounded-xl font-black text-xs py-2.5 text-red-600 focus:text-red-700 focus:bg-red-50 dark:focus:bg-red-900/10" onClick={() => deleteAdmin(adm.id)}>
-                                                                <Trash2 size={16} /> Delete Company
-                                                            </DropdownMenuItem>
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenu>
-                                                </TableCell>
-                                            </motion.tr>
-                                        ))
-                                    )}
-                                </AnimatePresence>
-                            </TableBody>
-                        </Table>
+                                            </TableRow>
+                                        ) : (
+                                            filteredAdmins.map((adm) => (
+                                                <motion.tr
+                                                    key={adm.id}
+                                                    variants={fadeInUp}
+                                                    initial="initial"
+                                                    animate="animate"
+                                                    exit="exit"
+                                                    layout
+                                                    className="border-slate-50 dark:border-slate-800 group hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors"
+                                                >
+                                                    <TableCell className="pl-8">
+                                                        <div className="space-y-1 py-1">
+                                                            <p className="font-black text-slate-900 dark:text-white leading-tight text-sm tracking-tight">{adm.name}</p>
+                                                            <p className="text-[10px] text-slate-400 flex items-center gap-1.5 font-bold">
+                                                                {adm.owner} <span className="text-slate-200 dark:text-slate-700">•</span> {adm.email}
+                                                            </p>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest border-none bg-slate-100 dark:bg-slate-800 text-slate-500 px-2.5 py-1 rounded-lg">
+                                                            {adm.plan}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell className="text-xs font-bold text-slate-600 dark:text-slate-400">
+                                                        {adm.employees} Members
+                                                    </TableCell>
+                                                    <TableCell className="text-xs font-bold text-slate-600 dark:text-slate-400">
+                                                        {adm.tasks} Generated
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Badge className={cn(
+                                                            "text-[9px] h-6 font-black uppercase tracking-widest gap-1.5 border px-2.5 rounded-full shadow-sm",
+                                                            statusColors[adm.status]
+                                                        )}>
+                                                            {statusIcons[adm.status]}
+                                                            {adm.status}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell className="text-right pr-8">
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-400 hover:bg-white dark:hover:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-800">
+                                                                    <MoreVertical size={18} />
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent align="end" className="w-52 rounded-2xl p-2">
+                                                                <DropdownMenuLabel className="text-xs font-black uppercase tracking-widest text-slate-400 px-2 py-1.5">Manage Account</DropdownMenuLabel>
+                                                                <DropdownMenuItem className="gap-3 cursor-pointer rounded-xl font-bold text-xs py-2.5">
+                                                                    <Eye size={16} className="text-primary-500" /> View Details
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuSeparator className="my-2" />
+                                                                <DropdownMenuLabel className="text-[10px] uppercase font-black tracking-[0.2em] text-slate-400 px-2 py-1.5">Set Status</DropdownMenuLabel>
+                                                                <DropdownMenuItem className="gap-3 cursor-pointer rounded-xl font-bold text-xs py-2.5 text-emerald-600 focus:text-emerald-700 focus:bg-emerald-50 dark:focus:bg-emerald-900/10" onClick={() => handleStatusChange(adm.id, 'active')}>
+                                                                    <CheckCircle2 size={16} /> Mark Active
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem className="gap-3 cursor-pointer rounded-xl font-bold text-xs py-2.5 text-amber-600 focus:text-amber-700 focus:bg-amber-50 dark:focus:bg-amber-900/10" onClick={() => handleStatusChange(adm.id, 'pending')}>
+                                                                    <Clock size={16} /> Mark Pending
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem className="gap-3 cursor-pointer rounded-xl font-bold text-xs py-2.5 text-red-600 focus:text-red-700 focus:bg-red-50 dark:focus:bg-red-900/10" onClick={() => handleStatusChange(adm.id, 'suspended')}>
+                                                                    <XOctagon size={16} /> Suspend Account
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuSeparator className="my-2" />
+                                                                <DropdownMenuItem className="gap-3 cursor-pointer rounded-xl font-black text-xs py-2.5 text-red-600 focus:text-red-700 focus:bg-red-50 dark:focus:bg-red-900/10" onClick={() => deleteAdmin(adm.id)}>
+                                                                    <Trash2 size={16} /> Delete Company
+                                                                </DropdownMenuItem>
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
+                                                    </TableCell>
+                                                </motion.tr>
+                                            ))
+                                        )}
+                                    </AnimatePresence>
+                                </TableBody>
+                            </Table>
+                        </div>
                     </CardContent>
                 </Card>
             </motion.div>

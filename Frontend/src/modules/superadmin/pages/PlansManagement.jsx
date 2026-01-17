@@ -163,32 +163,34 @@ const PlansManagement = () => {
                         <CardTitle className="text-lg font-bold">Comprehensive Plan List</CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
-                        <Table>
-                            <TableHeader>
-                                <TableRow className="hover:bg-transparent border-slate-50 dark:border-slate-800">
-                                    <TableHead className="pl-8 text-[10px] font-black uppercase tracking-widest text-slate-400">Tier Name</TableHead>
-                                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Monthly Fee</TableHead>
-                                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">User Cap</TableHead>
-                                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Status</TableHead>
-                                    <TableHead className="text-right pr-8 text-[10px] font-black uppercase tracking-widest text-slate-400">Last Modified</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {plans.map((plan) => (
-                                    <TableRow key={plan.id} className="border-slate-50 dark:border-slate-800 transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
-                                        <TableCell className="pl-8 font-black text-slate-900 dark:text-white text-sm">{plan.name}</TableCell>
-                                        <TableCell className="text-sm font-bold text-primary-600">₹{plan.price}/mo</TableCell>
-                                        <TableCell className="text-xs font-bold text-slate-500">{plan.limit} Employees</TableCell>
-                                        <TableCell>
-                                            <Badge className={cn("text-[8px] h-5 font-black tracking-widest px-2", plan.isActive ? "bg-emerald-500" : "bg-slate-400")}>
-                                                {plan.isActive ? 'VISIBLE' : 'HIDDEN'}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right pr-8 text-[10px] text-slate-400 font-bold uppercase tracking-widest">TODAY, 14:15</TableCell>
+                        <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow className="hover:bg-transparent border-slate-50 dark:border-slate-800">
+                                        <TableHead className="pl-8 text-[10px] font-black uppercase tracking-widest text-slate-400 min-w-[120px]">Tier Name</TableHead>
+                                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 min-w-[100px]">Monthly Fee</TableHead>
+                                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 min-w-[100px]">User Cap</TableHead>
+                                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 min-w-[100px]">Status</TableHead>
+                                        <TableHead className="text-right pr-8 text-[10px] font-black uppercase tracking-widest text-slate-400 min-w-[120px]">Last Modified</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                </TableHeader>
+                                <TableBody>
+                                    {plans.map((plan) => (
+                                        <TableRow key={plan.id} className="border-slate-50 dark:border-slate-800 transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
+                                            <TableCell className="pl-8 font-black text-slate-900 dark:text-white text-sm">{plan.name}</TableCell>
+                                            <TableCell className="text-sm font-bold text-primary-600">₹{plan.price}/mo</TableCell>
+                                            <TableCell className="text-xs font-bold text-slate-500">{plan.limit} Employees</TableCell>
+                                            <TableCell>
+                                                <Badge className={cn("text-[8px] h-5 font-black tracking-widest px-2", plan.isActive ? "bg-emerald-500" : "bg-slate-400")}>
+                                                    {plan.isActive ? 'VISIBLE' : 'HIDDEN'}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-right pr-8 text-[10px] text-slate-400 font-bold uppercase tracking-widest">TODAY, 14:15</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
                     </CardContent>
                 </Card>
             </motion.div>

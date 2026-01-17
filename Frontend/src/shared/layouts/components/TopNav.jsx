@@ -13,7 +13,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 import useAuthStore from '@/store/authStore';
 
-const TopNav = ({ onMobileMenuToggle }) => {
+const TopNav = ({ onMenuClick }) => {
     const { user, logout, role } = useAuthStore();
     const [isDarkMode, setIsDarkMode] = useState(false);
     const navigate = useNavigate();
@@ -38,7 +38,7 @@ const TopNav = ({ onMobileMenuToggle }) => {
                         variant="ghost"
                         size="icon"
                         className="lg:hidden"
-                        onClick={onMobileMenuToggle}
+                        onClick={onMenuClick}
                     >
                         <Menu className="h-6 w-6" />
                     </Button>

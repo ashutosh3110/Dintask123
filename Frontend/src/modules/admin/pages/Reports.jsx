@@ -218,66 +218,68 @@ const Reports = () => {
                     <CardDescription>Line items based on selected filters</CardDescription>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <Table>
-                        <TableHeader>
-                            <TableRow className="hover:bg-transparent border-slate-100 dark:border-slate-800">
-                                <TableHead className="pl-6">Task Name</TableHead>
-                                <TableHead>Assigned To</TableHead>
-                                <TableHead>Created Date</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right pr-6">Efficiency</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredData.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={5} className="h-32 text-center text-slate-400">
-                                        No data available for the selected period.
-                                    </TableCell>
+                    <div className="overflow-x-auto">
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="hover:bg-transparent border-slate-100 dark:border-slate-800">
+                                    <TableHead className="pl-6 min-w-[200px]">Task Name</TableHead>
+                                    <TableHead className="min-w-[120px]">Assigned To</TableHead>
+                                    <TableHead className="min-w-[120px]">Created Date</TableHead>
+                                    <TableHead className="min-w-[100px]">Status</TableHead>
+                                    <TableHead className="text-right pr-6 min-w-[80px]">Efficiency</TableHead>
                                 </TableRow>
-                            ) : (
-                                filteredData.map((data) => (
-                                    <TableRow key={data.id} className="border-slate-50 dark:border-slate-800">
-                                        <TableCell className="pl-6 font-medium text-slate-900 dark:text-white">
-                                            {data.title}
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex -space-x-1">
-                                                {data.assignedTo.map(id => {
-                                                    const emp = employees.find(e => e.id === id);
-                                                    return (
-                                                        <Avatar key={id} className="h-6 w-6 border-2 border-white dark:border-slate-900">
-                                                            <AvatarImage src={emp?.avatar} />
-                                                            <AvatarFallback className="text-[8px]">{emp?.name.charAt(0)}</AvatarFallback>
-                                                        </Avatar>
-                                                    );
-                                                })}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-xs text-slate-500">
-                                            {format(new Date(data.createdAt), 'MMM dd, yyyy')}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge variant={data.status === 'completed' ? 'default' : 'secondary'} className={cn(
-                                                "text-[10px] h-5",
-                                                data.status === 'completed' ? "bg-emerald-500" : ""
-                                            )}>
-                                                {data.status}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right pr-6">
-                                            <span className={cn(
-                                                "text-xs font-bold",
-                                                data.priority === 'urgent' ? "text-red-500" : "text-slate-900 dark:text-slate-300"
-                                            )}>
-                                                {data.status === 'completed' ? '100%' : '25%'}
-                                            </span>
+                            </TableHeader>
+                            <TableBody>
+                                {filteredData.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="h-32 text-center text-slate-400">
+                                            No data available for the selected period.
                                         </TableCell>
                                     </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
+                                ) : (
+                                    filteredData.map((data) => (
+                                        <TableRow key={data.id} className="border-slate-50 dark:border-slate-800">
+                                            <TableCell className="pl-6 font-medium text-slate-900 dark:text-white">
+                                                {data.title}
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex -space-x-1">
+                                                    {data.assignedTo.map(id => {
+                                                        const emp = employees.find(e => e.id === id);
+                                                        return (
+                                                            <Avatar key={id} className="h-6 w-6 border-2 border-white dark:border-slate-900">
+                                                                <AvatarImage src={emp?.avatar} />
+                                                                <AvatarFallback className="text-[8px]">{emp?.name.charAt(0)}</AvatarFallback>
+                                                            </Avatar>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-xs text-slate-500">
+                                                {format(new Date(data.createdAt), 'MMM dd, yyyy')}
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge variant={data.status === 'completed' ? 'default' : 'secondary'} className={cn(
+                                                    "text-[10px] h-5",
+                                                    data.status === 'completed' ? "bg-emerald-500" : ""
+                                                )}>
+                                                    {data.status}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-right pr-6">
+                                                <span className={cn(
+                                                    "text-xs font-bold",
+                                                    data.priority === 'urgent' ? "text-red-500" : "text-slate-900 dark:text-slate-300"
+                                                )}>
+                                                    {data.status === 'completed' ? '100%' : '25%'}
+                                                </span>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </CardContent>
             </Card>
         </div>
