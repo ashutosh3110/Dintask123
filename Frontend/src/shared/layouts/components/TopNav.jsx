@@ -12,6 +12,7 @@ import {
 } from '@/shared/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 import useAuthStore from '@/store/authStore';
+import { cn } from '@/shared/utils/cn';
 
 const TopNav = ({ onMenuClick, isSidebarCollapsed }) => {
     const { user, logout, role } = useAuthStore();

@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar';
 import TopNav from './components/TopNav';
 import { motion, AnimatePresence } from 'framer-motion';
 import { pageVariants } from '@/shared/utils/animations';
+import { cn } from '@/shared/utils/cn';
 
 const AdminLayout = ({ role }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
