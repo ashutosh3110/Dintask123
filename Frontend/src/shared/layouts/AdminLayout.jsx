@@ -10,18 +10,18 @@ const AdminLayout = ({ role }) => {
     const location = useLocation();
 
     return (
-        <div className="h-screen bg-slate-50 dark:bg-slate-950 flex font-sans transition-colors duration-300 overflow-hidden">
+        <div className="fixed inset-0 h-[100dvh] w-full bg-slate-50 dark:bg-slate-950 flex font-sans transition-colors duration-300 overflow-hidden">
             {/* Sidebar with mobile responsiveness */}
             <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} role={role} />
 
             {/* Main Content Area */}
-            <div className="flex-1 flex flex-col lg:ml-64 relative h-full">
+            <div className="flex-1 flex flex-col lg:ml-64 relative h-full w-full">
                 {/* Header/Top Navigation */}
                 <TopNav onMenuClick={() => setIsSidebarOpen(true)} />
 
                 {/* Scrollable Page Content */}
-                <div className="flex-1 overflow-y-auto no-scrollbar scroll-smooth">
-                    <main className="w-full min-h-full px-4 md:px-8 pt-24 pb-12">
+                <div className="flex-1 overflow-y-auto scroll-smooth w-full">
+                    <main className="w-full min-h-full px-4 md:px-8 pt-20 pb-8">
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={location.pathname}
@@ -30,6 +30,7 @@ const AdminLayout = ({ role }) => {
                                 exit="exit"
                                 variants={pageVariants}
                                 transition={{ duration: 0.2 }}
+                                className="w-full"
                             >
                                 <Outlet />
                             </motion.div>
