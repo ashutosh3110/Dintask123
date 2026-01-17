@@ -262,61 +262,63 @@ const SuperAdminDashboard = () => {
             {/* Recent Activity Table */}
             <motion.div variants={fadeInUp}>
                 <Card className="border-none shadow-sm bg-white dark:bg-slate-900 rounded-[2rem] overflow-hidden">
-                    <CardHeader className="flex flex-row items-center justify-between px-8 py-6">
+                    <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 md:px-8 py-6 gap-4">
                         <div>
                             <CardTitle className="text-lg font-bold">Recent Company Registrations</CardTitle>
                             <CardDescription>Newly boarded administrative accounts</CardDescription>
                         </div>
-                        <Button variant="ghost" size="sm" className="text-xs font-black uppercase tracking-widest gap-1 text-primary-600 hover:bg-primary-50 rounded-xl">
+                        <Button variant="ghost" size="sm" className="text-xs font-black uppercase tracking-widest gap-1 text-primary-600 hover:bg-primary-50 rounded-xl w-full sm:w-auto justify-center">
                             View All <ChevronRight size={14} />
                         </Button>
                     </CardHeader>
                     <CardContent className="p-0">
-                        <Table>
-                            <TableHeader>
-                                <TableRow className="hover:bg-transparent border-slate-50 dark:border-slate-800">
-                                    <TableHead className="pl-8 text-[10px] font-black uppercase tracking-widest text-slate-400">Company Name</TableHead>
-                                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Admin Owner</TableHead>
-                                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Current Plan</TableHead>
-                                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Joined</TableHead>
-                                    <TableHead className="text-right pr-8 text-[10px] font-black uppercase tracking-widest text-slate-400">Status</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {admins.slice(0, 3).map((adm) => (
-                                    <TableRow key={adm.id} className="border-slate-50 dark:border-slate-800 group cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-shadow duration-300">
-                                        <TableCell className="pl-8 font-black text-slate-900 dark:text-white text-sm">
-                                            {adm.name}
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex items-center gap-3">
-                                                <Avatar className="h-7 w-7 border-2 border-white dark:border-slate-800 shadow-sm">
-                                                    <AvatarFallback className="text-[10px] font-black bg-primary-50 text-primary-600">{adm.owner.charAt(0)}</AvatarFallback>
-                                                </Avatar>
-                                                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{adm.owner}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge variant="outline" className="text-[10px] font-black border-none bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-widest px-2 py-1 rounded-lg">
-                                                {adm.plan}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-[10px] text-slate-400 uppercase font-black tracking-widest">
-                                            {adm.joinedDate}
-                                        </TableCell>
-                                        <TableCell className="text-right pr-8">
-                                            <Badge className={cn(
-                                                "text-[9px] h-6 px-2.5 font-black uppercase tracking-widest rounded-full",
-                                                adm.status === 'active' ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]" :
-                                                    adm.status === 'pending' ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.3)]" : "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.3)]"
-                                            )}>
-                                                {adm.status}
-                                            </Badge>
-                                        </TableCell>
+                        <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow className="hover:bg-transparent border-slate-50 dark:border-slate-800">
+                                        <TableHead className="pl-4 md:pl-8 text-[10px] font-black uppercase tracking-widest text-slate-400 min-w-[200px]">Company Name</TableHead>
+                                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 min-w-[150px]">Admin Owner</TableHead>
+                                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 min-w-[100px]">Current Plan</TableHead>
+                                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 min-w-[100px]">Joined</TableHead>
+                                        <TableHead className="text-right pr-4 md:pr-8 text-[10px] font-black uppercase tracking-widest text-slate-400 min-w-[100px]">Status</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                </TableHeader>
+                                <TableBody>
+                                    {admins.slice(0, 3).map((adm) => (
+                                        <TableRow key={adm.id} className="border-slate-50 dark:border-slate-800 group cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-shadow duration-300">
+                                            <TableCell className="pl-4 md:pl-8 font-black text-slate-900 dark:text-white text-sm">
+                                                {adm.name}
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex items-center gap-3">
+                                                    <Avatar className="h-7 w-7 border-2 border-white dark:border-slate-800 shadow-sm">
+                                                        <AvatarFallback className="text-[10px] font-black bg-primary-50 text-primary-600">{adm.owner.charAt(0)}</AvatarFallback>
+                                                    </Avatar>
+                                                    <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{adm.owner}</span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge variant="outline" className="text-[10px] font-black border-none bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-widest px-2 py-1 rounded-lg">
+                                                    {adm.plan}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-[10px] text-slate-400 uppercase font-black tracking-widest">
+                                                {adm.joinedDate}
+                                            </TableCell>
+                                            <TableCell className="text-right pr-4 md:pr-8">
+                                                <Badge className={cn(
+                                                    "text-[9px] h-6 px-2.5 font-black uppercase tracking-widest rounded-full",
+                                                    adm.status === 'active' ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]" :
+                                                        adm.status === 'pending' ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.3)]" : "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.3)]"
+                                                )}>
+                                                    {adm.status}
+                                                </Badge>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
                     </CardContent>
                 </Card>
             </motion.div>

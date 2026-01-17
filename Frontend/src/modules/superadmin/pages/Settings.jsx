@@ -97,11 +97,11 @@ const SuperAdminSettings = () => {
                             <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-6">
                                 <motion.div variants={fadeInUp}>
                                     <Card className="border-none shadow-sm bg-white dark:bg-slate-900 rounded-[2rem] overflow-hidden">
-                                        <CardHeader className="p-8 pb-4">
+                                        <CardHeader className="p-4 md:p-8 pb-4">
                                             <CardTitle className="text-xl font-black text-slate-900 dark:text-white">Platform Branding</CardTitle>
                                             <CardDescription>Visual identification for all tenants</CardDescription>
                                         </CardHeader>
-                                        <CardContent className="space-y-6 p-8 pt-2">
+                                        <CardContent className="space-y-6 p-4 md:p-8 pt-2">
                                             <div className="grid gap-2">
                                                 <Label className="text-xs font-bold uppercase text-slate-500 tracking-wide">Platform Name</Label>
                                                 <Input defaultValue="DinTask CRM" className="bg-slate-50 dark:bg-slate-800 border-none h-12 rounded-xl font-bold focus-visible:ring-primary-500" />
@@ -116,11 +116,11 @@ const SuperAdminSettings = () => {
 
                                 <motion.div variants={fadeInUp}>
                                     <Card className="border-none shadow-sm bg-white dark:bg-slate-900 rounded-[2rem] overflow-hidden">
-                                        <CardHeader className="p-8 pb-4">
+                                        <CardHeader className="p-4 md:p-8 pb-4">
                                             <CardTitle className="text-xl font-black text-slate-900 dark:text-white">System Maintenance</CardTitle>
                                             <CardDescription>Control global platform availability</CardDescription>
                                         </CardHeader>
-                                        <CardContent className="space-y-4 px-8 pt-2">
+                                        <CardContent className="space-y-4 px-4 md:px-8 pt-2">
                                             <div className="flex items-center justify-between p-4 rounded-2xl bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/20">
                                                 <div className="space-y-1">
                                                     <Label className="text-amber-700 dark:text-amber-500 font-bold">Maintenance Mode</Label>
@@ -129,7 +129,7 @@ const SuperAdminSettings = () => {
                                                 <Switch />
                                             </div>
                                         </CardContent>
-                                        <CardFooter className="bg-slate-50/50 dark:bg-slate-800/30 px-8 py-6 flex justify-end">
+                                        <CardFooter className="bg-slate-50/50 dark:bg-slate-800/30 px-4 md:px-8 py-6 flex justify-end">
                                             <motion.div {...scaleOnTap}>
                                                 <Button
                                                     onClick={handleSave}
@@ -181,11 +181,11 @@ const SuperAdminSettings = () => {
                         <TabsContent value="security" className="m-0 space-y-6">
                             <motion.div variants={fadeInUp} initial="initial" animate="animate">
                                 <Card className="border-none shadow-sm bg-white dark:bg-slate-900 rounded-[2rem] overflow-hidden">
-                                    <CardHeader className="p-8 pb-4">
+                                    <CardHeader className="p-4 md:p-8 pb-4">
                                         <CardTitle className="text-xl font-black text-slate-900 dark:text-white">Global Security Policies</CardTitle>
                                         <CardDescription>Enforce strict security across all admin accounts</CardDescription>
                                     </CardHeader>
-                                    <CardContent className="space-y-2 p-8 pt-2">
+                                    <CardContent className="space-y-2 p-4 md:p-8 pt-2">
                                         <div className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                                             <div className="space-y-1">
                                                 <p className="text-sm font-bold text-slate-900 dark:text-white">Force 2FA</p>
@@ -202,7 +202,7 @@ const SuperAdminSettings = () => {
                                             <Switch defaultChecked />
                                         </div>
                                     </CardContent>
-                                    <CardFooter className="bg-slate-50/50 dark:bg-slate-800/30 px-8 py-6 flex justify-end">
+                                    <CardFooter className="bg-slate-50/50 dark:bg-slate-800/30 px-4 md:px-8 py-6 flex justify-end">
                                         <Button variant="outline" onClick={handleSave} className="gap-2 rounded-xl h-11 border-slate-200 font-bold">
                                             Apply Security Rules
                                         </Button>
@@ -214,11 +214,11 @@ const SuperAdminSettings = () => {
                         <TabsContent value="network" className="m-0 space-y-6">
                             <motion.div variants={fadeInUp} initial="initial" animate="animate">
                                 <Card className="border-none shadow-sm bg-white dark:bg-slate-900 rounded-[2rem] overflow-hidden">
-                                    <CardHeader className="p-8 pb-4">
+                                    <CardHeader className="p-4 md:p-8 pb-4">
                                         <CardTitle className="text-xl font-black text-slate-900 dark:text-white">Server Nodes</CardTitle>
                                         <CardDescription>Monitor platform cluster health</CardDescription>
                                     </CardHeader>
-                                    <CardContent className="space-y-4 p-8 pt-2">
+                                    <CardContent className="space-y-4 p-4 md:p-8 pt-2">
                                         {[1, 2].map(node => (
                                             <motion.div
                                                 key={node}
