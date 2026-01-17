@@ -162,5 +162,78 @@
             "Engineering"
         ],
         "activity": []
+    },
+    {
+        "id": "1001",
+        "title": "Submit Weekly Progress Report",
+        "description": "Compile the weekly development and marketing metrics for the team meeting. Ensure all KPIs are up to date.",
+        "deadline": "2026-01-17T17:00:00",
+        "priority": "high",
+        "status": "pending",
+        "assignedTo": [
+            "103"
+        ],
+        "createdAt": "2026-01-17T09:00:00",
+        "progress": 0,
+        "labels": [
+            "Internal",
+            "Reporting"
+        ],
+        "activity": []
+    },
+    {
+        "id": "1002",
+        "title": "Review Design Mockups",
+        "description": "Review the new Figma screens for the profile flow and leave comments for the design team.",
+        "deadline": "2026-01-17T15:00:00",
+        "priority": "medium",
+        "status": "pending",
+        "assignedTo": [
+            "103"
+        ],
+        "createdAt": "2026-01-16T14:00:00",
+        "progress": 30,
+        "labels": [
+            "Design",
+            "Mobile"
+        ],
+        "activity": []
+    },
+    {
+        "id": "1003",
+        "title": "System Architecture Update",
+        "description": "Update the diagrams to reflect the new microservices added last sprint.",
+        "deadline": "2026-01-21T12:00:00",
+        "priority": "low",
+        "status": "pending",
+        "assignedTo": [
+            "103"
+        ],
+        "createdAt": "2026-01-15T11:00:00",
+        "progress": 15,
+        "labels": [
+            "Engineering",
+            "Docs"
+        ],
+        "activity": []
+    },
+    {
+        "id": "1004",
+        "title": "Onboard New Junior Developer",
+        "description": "Walk through the codebase and setup the dev environment for the new hire.",
+        "deadline": "2026-01-15T16:00:00",
+        "priority": "high",
+        "status": "completed",
+        "completedAt": "2026-01-15T16:00:00",
+        "assignedTo": [
+            "103"
+        ],
+        "createdAt": "2026-01-14T09:00:00",
+        "progress": 100,
+        "labels": [
+            "HR",
+            "Mentorship"
+        ],
+        "activity": []
     }
 ]
