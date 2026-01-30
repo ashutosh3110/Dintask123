@@ -21,15 +21,51 @@ import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Badge } from '@/shared/components/ui/badge';
 import { cn } from '@/shared/utils/cn';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/shared/components/ui/dialog";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/shared/components/ui/select";
+import { Label } from "@/shared/components/ui/label";
+import { Textarea } from "@/shared/components/ui/textarea";
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/components/ui/popover";
+import { Calendar } from "@/shared/components/ui/calendar";
+import { toast } from "sonner";
 
 const ManagerSchedule = () => {
     const { user } = useAuthStore();
     const employees = useEmployeeStore(state => state.employees);
     const tasks = useTaskStore(state => state.tasks);
-    const { schedules } = useScheduleStore();
+    const { schedules, addScheduleEvent, deleteScheduleEvent } = useScheduleStore();
 
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedMember, setSelectedMember] = useState('all');
+
+    // Modal States
+    const [isAddEventOpen, setIsAddEventOpen] = useState(false);
+    const [isViewEventOpen, setIsViewEventOpen] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState(null);
+
+    // Form State
+    const [newEventData, setNewEventData] = useState({
+        title: '',
+        description: '',
+        date: new Date(),
+        time: '09:00',
+        type: 'meeting', // meeting, deadline, reminder
+        participants: []
+    });
 
     const teamMembers = useMemo(() => {
         return employees.filter(e => e.managerId === user?.id);
@@ -46,7 +82,59 @@ const ManagerSchedule = () => {
         const teamTasks = tasks.filter(t => (t.delegatedBy === user?.id || t.assignedToManager === user?.id) && isSameDay(new Date(t.deadline), day));
         const userSchedules = schedules.filter(s => (s.managerId === user?.id) && isSameDay(new Date(s.date), day));
 
-        return [...teamTasks.map(t => ({ ...t, type: 'task' })), ...userSchedules.map(s => ({ ...s, type: 'schedule' }))];
+        let filteredSchedules = userSchedules;
+        if (selectedMember !== 'all') {
+            // Filter schedules if they are targeted to a specific user (if logic supports it)
+            // For now assuming schedules are general or just for manager to see. 
+            // If we wanna filter tasks:
+        }
+
+        const taskEvents = teamTasks.map(t => ({ ...t, type: 'task', date: t.deadline }));
+        const scheduleEvents = filteredSchedules.map(s => ({ ...s, type: s.type || 'schedule', date: s.date }));
+
+        return [...taskEvents, ...scheduleEvents];
+    };
+
+    const handleCreateEvent = () => {
+        if (!newEventData.title || !newEventData.date) {
+            toast.error("Please fill in the required fields");
+            return;
+        }
+
+        const event = {
+            ...newEventData,
+            managerId: user?.id,
+            // If date is a Date object, keep it, store expects ISO string possibly? 
+            // The store example uses date string. Let's ensure consistency.
+            date: newEventData.date.toISOString(),
+        };
+
+        addScheduleEvent(event);
+        toast.success("Event created successfully");
+        setIsAddEventOpen(false);
+        setNewEventData({
+            title: '',
+            description: '',
+            date: new Date(),
+            time: '09:00',
+            type: 'meeting',
+            participants: []
+        });
+    };
+
+    const handleEventClick = (event) => {
+        setSelectedEvent(event);
+        setIsViewEventOpen(true);
+    };
+
+    const handleDeleteEvent = () => {
+        if (selectedEvent?.type === 'task') {
+            toast.error("Cannot delete tasks from schedule view. Go to Tasks.");
+            return;
+        }
+        deleteScheduleEvent(selectedEvent.id);
+        toast.success("Event deleted");
+        setIsViewEventOpen(false);
     };
 
     return (
@@ -58,7 +146,7 @@ const ManagerSchedule = () => {
                         Coordinate tasks and manage team availability.
                     </p>
                 </div>
-                <Button className="gap-2">
+                <Button className="gap-2" onClick={() => setIsAddEventOpen(true)}>
                     <Plus size={18} />
                     New Schedule Event
                 </Button>
@@ -159,10 +247,16 @@ const ManagerSchedule = () => {
                                         </div>
                                         <div className="space-y-1 overflow-hidden">
                                             {events.slice(0, 3).map((event, eIdx) => (
-                                                <div key={eIdx} className={cn(
-                                                    "px-1.5 py-0.5 rounded text-[8px] font-bold truncate transition-all",
-                                                    event.type === 'task' ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" : "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
-                                                )}>
+                                                <div
+                                                    key={eIdx}
+                                                    onClick={() => handleEventClick(event)}
+                                                    className={cn(
+                                                        "px-1.5 py-0.5 rounded text-[8px] font-bold truncate transition-all cursor-pointer hover:opacity-80",
+                                                        event.type === 'task' ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" :
+                                                            event.type === 'meeting' ? "bg-purple-100 text-purple-600" :
+                                                                "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
+                                                    )}>
+                                                    {event.time && <span className="mr-1 opacity-75">{event.time}</span>}
                                                     {event.title}
                                                 </div>
                                             ))}
@@ -179,6 +273,135 @@ const ManagerSchedule = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Add Event Dialog */}
+            <Dialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Add Schedule Event</DialogTitle>
+                        <DialogDescription>
+                            Create a new meeting, reminder, or event for your team.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="title">Event Title</Label>
+                            <Input
+                                id="title"
+                                placeholder="e.g., Weekly Team Sync"
+                                value={newEventData.title}
+                                onChange={(e) => setNewEventData({ ...newEventData, title: e.target.value })}
+                            />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="grid gap-2">
+                                <Label>Date</Label>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant={"outline"}
+                                            className={cn(
+                                                "w-full justify-start text-left font-normal",
+                                                !newEventData.date && "text-muted-foreground"
+                                            )}
+                                        >
+                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            {newEventData.date ? format(newEventData.date, "PPP") : <span>Pick a date</span>}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                        <Calendar
+                                            mode="single"
+                                            selected={newEventData.date}
+                                            onSelect={(date) => setNewEventData({ ...newEventData, date: date })}
+                                            initialFocus
+                                        />
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="time">Time</Label>
+                                <Input
+                                    id="time"
+                                    type="time"
+                                    value={newEventData.time}
+                                    onChange={(e) => setNewEventData({ ...newEventData, time: e.target.value })}
+                                />
+                            </div>
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="type">Event Type</Label>
+                            <Select
+                                value={newEventData.type}
+                                onValueChange={(value) => setNewEventData({ ...newEventData, type: value })}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="meeting">Meeting</SelectItem>
+                                    <SelectItem value="reminder">Reminder</SelectItem>
+                                    <SelectItem value="deadline">Deadline</SelectItem>
+                                    <SelectItem value="other">Other</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="description">Description</Label>
+                            <Textarea
+                                id="description"
+                                placeholder="Add details..."
+                                value={newEventData.description}
+                                onChange={(e) => setNewEventData({ ...newEventData, description: e.target.value })}
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsAddEventOpen(false)}>Cancel</Button>
+                        <Button onClick={handleCreateEvent}>Create Event</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* View/Edit Event Dialog */}
+            <Dialog open={isViewEventOpen} onOpenChange={setIsViewEventOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{selectedEvent?.title}</DialogTitle>
+                        <DialogDescription>
+                            {selectedEvent?.date && format(new Date(selectedEvent.date), "PPP")} at {selectedEvent?.time}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4 space-y-4">
+                        <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="uppercase tracking-widest text-[10px]">
+                                {selectedEvent?.type}
+                            </Badge>
+                            {selectedEvent?.type === 'task' && <Badge className="bg-blue-100 text-blue-600">Task</Badge>}
+                        </div>
+
+                        <p className="text-sm text-slate-600 dark:text-slate-300">
+                            {selectedEvent?.description || "No description provided."}
+                        </p>
+
+                        {selectedEvent?.participants && selectedEvent.participants.length > 0 && (
+                            <div className="flex -space-x-2 overflow-hidden">
+                                {selectedEvent.participants.map((p, i) => (
+                                    <div key={i} className="inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900 bg-slate-200 flex items-center justify-center text-xs font-bold">
+                                        {p.charAt(0)}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        {selectedEvent?.type !== 'task' && (
+                            <Button variant="destructive" onClick={handleDeleteEvent}>Delete Event</Button>
+                        )}
+                        <Button variant="outline" onClick={() => setIsViewEventOpen(false)}>Close</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

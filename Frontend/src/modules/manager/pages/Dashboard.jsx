@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard,
     CheckSquare,
@@ -24,6 +25,7 @@ const ManagerDashboard = () => {
     const { user } = useAuthStore();
     const tasks = useTaskStore(state => state.tasks);
     const employees = useEmployeeStore(state => state.employees);
+    const navigate = useNavigate();
 
     // Manager statistics
     const stats = useMemo(() => {
@@ -88,11 +90,11 @@ const ManagerDashboard = () => {
                     </p>
                 </motion.div>
                 <div className="flex items-center gap-3">
-                    <Button variant="outline" className="gap-2">
+                    <Button variant="outline" className="gap-2" onClick={() => navigate('/manager/schedule')}>
                         <CalendarIcon size={18} />
                         View Schedule
                     </Button>
-                    <Button className="gap-2">
+                    <Button className="gap-2" onClick={() => navigate('/manager/delegation')}>
                         <CheckSquare size={18} />
                         Delegate Tasks
                     </Button>

@@ -19,7 +19,8 @@ import {
     Palette,
     Globe,
     ChevronDown,
-    Briefcase
+    Briefcase,
+    ListChecks
 } from 'lucide-react';
 import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/components/ui/button';
@@ -50,7 +51,8 @@ const Sidebar = ({ role, isOpen, setIsOpen, isCollapsed, setIsCollapsed }) => {
         ...(role === 'manager'
             ? [
                 { name: 'Dashboard', path: '/manager', icon: LayoutDashboard },
-                { name: 'My Tasks', path: '/manager/my-tasks', icon: CheckSquare },
+                { name: 'Assign Task', path: '/manager/assign-task', icon: CheckSquare },
+                { name: 'My Tasks', path: '/manager/my-tasks', icon: ListChecks },
                 { name: 'Delegation', path: '/manager/delegation', icon: Users },
                 { name: 'Team', path: '/manager/team', icon: Users },
                 { name: 'CRM', path: '/manager/crm', icon: Briefcase },
@@ -100,9 +102,6 @@ const Sidebar = ({ role, isOpen, setIsOpen, isCollapsed, setIsCollapsed }) => {
         ? [
             { name: 'Profile Information', path: '/manager/settings/profile', icon: User },
             { name: 'Notifications', path: '/manager/settings/notifications', icon: Bell },
-            { name: 'Security & Access', path: '/manager/settings/security', icon: Shield },
-            { name: 'Team Customization', path: '/manager/settings/customization', icon: Palette },
-            { name: 'Language & Region', path: '/manager/settings/language', icon: Globe },
         ]
         : [];
 

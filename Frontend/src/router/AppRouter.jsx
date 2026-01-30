@@ -48,6 +48,7 @@ import ManagerLogin from '@/modules/manager/pages/ManagerLogin';
 
 // Manager Pages
 import ManagerDashboard from '@/modules/manager/pages/Dashboard';
+import AssignTask from '@/modules/manager/pages/AssignTask';
 import MyTasks from '@/modules/manager/pages/MyTasks';
 import TaskDelegation from '@/modules/manager/pages/TaskDelegation';
 import TeamManagement from '@/modules/manager/pages/TeamManagement';
@@ -101,10 +102,13 @@ import AdminAccounts from '@/modules/superadmin/pages/AdminAccounts';
 import PlansManagement from '@/modules/superadmin/pages/PlansManagement';
 import SuperAdminSettings from '@/modules/superadmin/pages/Settings';
 
+// ... imports
+import CRMLayout from '@/shared/layouts/CRMLayout';
+
 const AppRouter = () => {
     return (
         <Routes>
-            {/* Public Routes */}
+            {/* Public Routes ... (keep as is) */}
             <Route path="/employee/login" element={<EmployeeLogin />} />
             <Route path="/employee/forgot-password" element={<ForgotPassword returnPath="/employee/login" />} />
             <Route path="/manager/login" element={<ManagerLogin />} />
@@ -116,15 +120,9 @@ const AppRouter = () => {
             <Route path="/sales/login" element={<SalesLogin />} />
             <Route path="/sales/forgot-password" element={<ForgotPassword returnPath="/sales/login" />} />
 
-            {/* Admin Routes */}
-            <Route
-                path="/admin"
-                element={
-                    <ProtectedRoute allowedRoles={['admin']}>
-                        <AdminLayout role="admin" />
-                    </ProtectedRoute>
-                }
-            >
+            {/* --- ADMIN ROUTES --- */}
+            {/* Main Admin Panel */}
+            <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminLayout role="admin" /></ProtectedRoute>}>
                 <Route index element={<AdminDashboard />} />
                 <Route path="managers" element={<ManagerManagement />} />
                 <Route path="employees" element={<EmployeeManagement />} />
@@ -134,26 +132,20 @@ const AppRouter = () => {
                 <Route path="calendar" element={<AdminCalendar />} />
                 <Route path="subscription" element={<Subscription />} />
                 <Route path="settings" element={<Settings />} />
-                {/* CRM Routes */}
-                <Route path="crm">
-                    <Route index element={<AdminCRM />} />
-                    <Route path="leads" element={<LeadsManagement />} />
-                    <Route path="pipeline" element={<SalesPipeline />} />
-                    <Route path="follow-ups" element={<FollowUps />} />
-                    <Route path="contacts" element={<Contacts />} />
-                </Route>
             </Route>
 
-            {/* Employee Routes */}
-            <Route
-                path="/employee"
-                element={
-                    <ProtectedRoute allowedRoles={['employee']}>
-                        <EmployeeLayout />
-                    </ProtectedRoute>
-                }
-            >
-                <Route path="crm" element={<EmployeeCRM />} />
+            {/* Admin CRM Panel */}
+            <Route path="/admin/crm" element={<ProtectedRoute allowedRoles={['admin']}><CRMLayout role="admin" /></ProtectedRoute>}>
+                <Route index element={<AdminCRM />} />
+                <Route path="leads" element={<LeadsManagement />} />
+                <Route path="pipeline" element={<SalesPipeline />} />
+                <Route path="follow-ups" element={<FollowUps />} />
+                <Route path="contacts" element={<Contacts />} />
+            </Route>
+
+            {/* --- EMPLOYEE ROUTES --- */}
+            {/* Main Employee Panel */}
+            <Route path="/employee" element={<ProtectedRoute allowedRoles={['employee']}><EmployeeLayout /></ProtectedRoute>}>
                 <Route index element={<EmployeeDashboard />} />
                 <Route path="tasks/:id" element={<TaskDetail />} />
                 <Route path="tasks/new" element={<AddTask />} />
@@ -174,41 +166,41 @@ const AppRouter = () => {
                 <Route path="profile/help/api" element={<ApiDocs />} />
             </Route>
 
-            {/* Super Admin Routes */}
-            <Route
-                path="/superadmin"
-                element={
-                    <ProtectedRoute allowedRoles={['superadmin', 'superadmin_employee']}>
-                        <AdminLayout role="superadmin" />
-                    </ProtectedRoute>
-                }
-            >
+            {/* Employee CRM Panel */}
+            <Route path="/employee/crm" element={<ProtectedRoute allowedRoles={['employee']}><CRMLayout role="employee" /></ProtectedRoute>}>
+                <Route index element={<EmployeeCRM />} />
+                <Route path="leads" element={<LeadsManagement />} />
+                <Route path="pipeline" element={<SalesPipeline />} />
+                <Route path="follow-ups" element={<FollowUps />} />
+                <Route path="contacts" element={<Contacts />} />
+            </Route>
+
+
+            {/* --- SUPER ADMIN ROUTES --- */}
+            {/* Main Super Admin Panel */}
+            <Route path="/superadmin" element={<ProtectedRoute allowedRoles={['superadmin', 'superadmin_employee']}><AdminLayout role="superadmin" /></ProtectedRoute>}>
                 <Route index element={<SuperAdminDashboard />} />
                 <Route path="admins" element={<AdminAccounts />} />
                 <Route path="plans" element={<PlansManagement />} />
                 <Route path="settings" element={<SuperAdminSettings />} />
                 <Route path="reports" element={<div>System Reports (Coming Soon)</div>} />
                 <Route path="calendar" element={<div>System Calendar (Coming Soon)</div>} />
-                {/* CRM Routes */}
-                <Route path="crm">
-                    <Route index element={<AdminCRM />} />
-                    <Route path="leads" element={<LeadsManagement />} />
-                    <Route path="pipeline" element={<SalesPipeline />} />
-                    <Route path="follow-ups" element={<FollowUps />} />
-                    <Route path="contacts" element={<Contacts />} />
-                </Route>
             </Route>
 
-            {/* Manager Routes */}
-            <Route
-                path="/manager"
-                element={
-                    <ProtectedRoute allowedRoles={['manager']}>
-                        <ManagerLayout />
-                    </ProtectedRoute>
-                }
-            >
+            {/* Super Admin CRM Panel */}
+            <Route path="/superadmin/crm" element={<ProtectedRoute allowedRoles={['superadmin', 'superadmin_employee']}><CRMLayout role="superadmin" /></ProtectedRoute>}>
+                <Route index element={<AdminCRM />} />
+                <Route path="leads" element={<LeadsManagement />} />
+                <Route path="pipeline" element={<SalesPipeline />} />
+                <Route path="follow-ups" element={<FollowUps />} />
+                <Route path="contacts" element={<Contacts />} />
+            </Route>
+
+            {/* --- MANAGER ROUTES --- */}
+            {/* Main Manager Panel */}
+            <Route path="/manager" element={<ProtectedRoute allowedRoles={['manager']}><ManagerLayout /></ProtectedRoute>}>
                 <Route index element={<ManagerDashboard />} />
+                <Route path="assign-task" element={<AssignTask />} />
                 <Route path="my-tasks" element={<MyTasks />} />
                 <Route path="delegation" element={<TaskDelegation />} />
                 <Route path="team" element={<TeamManagement />} />
@@ -221,25 +213,20 @@ const AppRouter = () => {
                 <Route path="settings/security" element={<ManagerSettings />} />
                 <Route path="settings/customization" element={<ManagerSettings />} />
                 <Route path="settings/language" element={<ManagerSettings />} />
-                {/* CRM Routes */}
-                <Route path="crm">
-                    <Route index element={<EmployeeCRM />} />
-                    <Route path="leads" element={<LeadsManagement />} />
-                    <Route path="pipeline" element={<SalesPipeline />} />
-                    <Route path="follow-ups" element={<FollowUps />} />
-                    <Route path="contacts" element={<Contacts />} />
-                </Route>
             </Route>
 
-            {/* Sales Routes */}
-            <Route
-                path="/sales"
-                element={
-                    <ProtectedRoute allowedRoles={['sales']}>
-                        <ManagerLayout role="sales" />
-                    </ProtectedRoute>
-                }
-            >
+            {/* Manager CRM Panel */}
+            <Route path="/manager/crm" element={<ProtectedRoute allowedRoles={['manager']}><CRMLayout role="manager" /></ProtectedRoute>}>
+                <Route index element={<EmployeeCRM />} />
+                <Route path="leads" element={<LeadsManagement />} />
+                <Route path="pipeline" element={<SalesPipeline />} />
+                <Route path="follow-ups" element={<FollowUps />} />
+                <Route path="contacts" element={<Contacts />} />
+            </Route>
+
+            {/* --- SALES ROUTES --- */}
+            {/* Main Sales Panel */}
+            <Route path="/sales" element={<ProtectedRoute allowedRoles={['sales']}><ManagerLayout role="sales" /></ProtectedRoute>}>
                 <Route index element={<SalesDashboard />} />
                 <Route path="deals" element={<Deals />} />
                 <Route path="tasks" element={<SalesTasks />} />
@@ -247,14 +234,15 @@ const AppRouter = () => {
                 <Route path="schedule" element={<Schedule />} />
                 <Route path="reports" element={<SalesReports />} />
                 <Route path="settings" element={<SalesSettings />} />
-                {/* CRM Routes */}
-                <Route path="crm">
-                    <Route index element={<EmployeeCRM />} />
-                    <Route path="leads" element={<LeadsManagement />} />
-                    <Route path="pipeline" element={<SalesPipeline />} />
-                    <Route path="follow-ups" element={<FollowUps />} />
-                    <Route path="contacts" element={<Contacts />} />
-                </Route>
+            </Route>
+
+            {/* Sales CRM Panel */}
+            <Route path="/sales/crm" element={<ProtectedRoute allowedRoles={['sales']}><CRMLayout role="sales" /></ProtectedRoute>}>
+                <Route index element={<EmployeeCRM />} />
+                <Route path="leads" element={<LeadsManagement />} />
+                <Route path="pipeline" element={<SalesPipeline />} />
+                <Route path="follow-ups" element={<FollowUps />} />
+                <Route path="contacts" element={<Contacts />} />
             </Route>
 
             {/* Default Redirection */}

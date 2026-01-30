@@ -25,12 +25,37 @@ import { Input } from '@/shared/components/ui/input';
 import { Badge } from '@/shared/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 import { cn } from '@/shared/utils/cn';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/shared/components/ui/dialog";
+import { toast } from 'sonner';
 
 const TaskDelegation = () => {
     const { user } = useAuthStore();
     const tasks = useTaskStore(state => state.tasks);
+    const delegateTaskToEmployee = useTaskStore(state => state.delegateTaskToEmployee);
     const employees = useEmployeeStore(state => state.employees);
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedTask, setSelectedTask] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handleDelegateClick = (task) => {
+        setSelectedTask(task);
+        setIsModalOpen(true);
+    };
+
+    const handleDelegateTask = (employeeId) => {
+        if (!selectedTask) return;
+
+        delegateTaskToEmployee(selectedTask.id, employeeId, user.id, "Delegated via Manager Dashboard");
+        toast.success(`Task delegated successfully`);
+        setIsModalOpen(false);
+        setSelectedTask(null);
+    };
 
     const pendingTasks = useMemo(() => {
         return tasks.filter(t =>
@@ -124,7 +149,11 @@ const TaskDelegation = () => {
                                                         </span>
                                                     </div>
                                                 </div>
-                                                <Button size="sm" className="rounded-xl h-9 px-4 gap-2 text-xs font-bold">
+                                                <Button
+                                                    size="sm"
+                                                    className="rounded-xl h-9 px-4 gap-2 text-xs font-bold"
+                                                    onClick={() => handleDelegateClick(task)}
+                                                >
                                                     Delegate <UserPlus size={14} />
                                                 </Button>
                                             </div>
@@ -202,6 +231,38 @@ const TaskDelegation = () => {
                     </motion.div>
                 </div>
             </div>
+            {/* Delegation Modal */}
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Delegate Task: {selectedTask?.title}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 pt-4">
+                        <p className="text-sm text-slate-500">Select a team member to assign this task to:</p>
+                        <div className="grid gap-2">
+                            {teamMembers.map(member => (
+                                <div
+                                    key={member.id}
+                                    className="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer group"
+                                    onClick={() => handleDelegateTask(member.id)}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <Avatar className="h-8 w-8">
+                                            <AvatarImage src={member.avatar} />
+                                            <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <p className="text-sm font-bold text-slate-900 dark:text-white">{member.name}</p>
+                                            <p className="text-[10px] text-slate-500">{member.role}</p>
+                                        </div>
+                                    </div>
+                                    <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100">Select</Button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

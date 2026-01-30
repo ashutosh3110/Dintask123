@@ -30,9 +30,9 @@ const useAuthStore = create(
 
                 if (user && user.email === email && user.password === password) {
                     userData = {
-                        id: selectedRole === 'employee' ? '103' : 
-                           selectedRole === 'manager' ? 'M001' : 
-                           selectedRole === 'sales' ? 'S001' : selectedRole,
+                        id: selectedRole === 'employee' ? '103' :
+                            selectedRole === 'manager' ? 'M001' :
+                                selectedRole === 'sales' ? 'S001' : selectedRole,
                         name: user.name,
                         email: user.email,
                     };
@@ -60,6 +60,12 @@ const useAuthStore = create(
                     isAuthenticated: false,
                     error: null,
                 });
+            },
+
+            updateUser: (updatedData) => {
+                set((state) => ({
+                    user: { ...state.user, ...updatedData }
+                }));
             },
 
             clearError: () => set({ error: null }),

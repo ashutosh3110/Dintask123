@@ -25,11 +25,27 @@ import { Badge } from '@/shared/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 import { cn } from '@/shared/utils/cn';
 
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/shared/components/ui/dialog";
+import { Textarea } from "@/shared/components/ui/textarea";
+import { Label } from "@/shared/components/ui/label";
+import useNotificationStore from '@/store/notificationStore';
+
 const TeamManagement = () => {
     const { user } = useAuthStore();
+    const navigate = useNavigate();
     const employees = useEmployeeStore(state => state.employees);
     const tasks = useTaskStore(state => state.tasks);
     const [searchTerm, setSearchTerm] = useState('');
+    const addNotification = useNotificationStore(state => state.addNotification);
 
     const teamMembers = useMemo(() => {
         return employees.filter(e =>
@@ -45,6 +61,32 @@ const TeamManagement = () => {
             case 'offline': return 'bg-slate-300';
             default: return 'bg-slate-300';
         }
+    };
+    const [selectedMember, setSelectedMember] = useState(null);
+    const [messageContent, setMessageContent] = useState("");
+    const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
+
+    const handleOpenMessageModal = (member) => {
+        setSelectedMember(member);
+        setMessageContent("");
+        setIsMessageModalOpen(true);
+    };
+
+    const handleSendMessage = () => {
+        if (!messageContent.trim()) {
+            toast.error("Please enter a message");
+            return;
+        }
+
+        addNotification({
+            title: `Message from ${user?.name || 'Manager'}`,
+            description: messageContent,
+            category: 'message',
+            recipientId: selectedMember?.id // Ideally used for filtering
+        });
+
+        toast.success(`Message sent to ${selectedMember.name}`);
+        setIsMessageModalOpen(false);
     };
 
     return (
@@ -141,10 +183,20 @@ const TeamManagement = () => {
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-3 mt-6">
-                                            <Button variant="outline" size="sm" className="w-full rounded-xl gap-2 font-bold text-[10px] uppercase tracking-widest border-slate-200">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="w-full rounded-xl gap-2 font-bold text-[10px] uppercase tracking-widest border-slate-200"
+                                                onClick={() => handleOpenMessageModal(member)}
+                                            >
                                                 <MessageSquare size={14} /> Message
                                             </Button>
-                                            <Button variant="default" size="sm" className="w-full rounded-xl gap-2 font-bold text-[10px] uppercase tracking-widest">
+                                            <Button
+                                                variant="default"
+                                                size="sm"
+                                                className="w-full rounded-xl gap-2 font-bold text-[10px] uppercase tracking-widest"
+                                                onClick={() => navigate('/manager/progress')}
+                                            >
                                                 <Clock size={14} /> Tracker
                                             </Button>
                                         </div>
@@ -161,6 +213,33 @@ const TeamManagement = () => {
                     )}
                 </AnimatePresence>
             </motion.div>
+
+            {/* Message Modal */}
+            <Dialog open={isMessageModalOpen} onOpenChange={setIsMessageModalOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Message {selectedMember?.name}</DialogTitle>
+                        <DialogDescription>
+                            Send a direct message to your team member.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="message">Message</Label>
+                            <Textarea
+                                id="message"
+                                placeholder="Type your message here..."
+                                value={messageContent}
+                                onChange={(e) => setMessageContent(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsMessageModalOpen(false)}>Cancel</Button>
+                        <Button onClick={handleSendMessage}>Send Message</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

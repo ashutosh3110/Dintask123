@@ -21,11 +21,19 @@ import { Input } from '@/shared/components/ui/input';
 import { Badge } from '@/shared/components/ui/badge';
 import { cn } from '@/shared/utils/cn';
 
+import { toast } from 'sonner';
+
 const MyTasks = () => {
     const { user } = useAuthStore();
     const tasks = useTaskStore(state => state.tasks);
+    const completeTask = useTaskStore(state => state.completeTask);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
+
+    const handleCompleteTask = (taskId) => {
+        completeTask(taskId, "Manager Dashboard", { completedBy: user.id });
+        toast.success("Task marked as completed");
+    };
 
     const myTasks = useMemo(() => {
         return tasks.filter(t =>
@@ -156,7 +164,11 @@ const MyTasks = () => {
                                                         <ChevronRight size={20} />
                                                     </Button>
                                                     {task.status !== 'completed' && (
-                                                        <Button size="sm" className="rounded-full px-4 text-[10px] font-bold uppercase tracking-widest">
+                                                        <Button
+                                                            size="sm"
+                                                            className="rounded-full px-4 text-[10px] font-bold uppercase tracking-widest bg-emerald-500 hover:bg-emerald-600 text-white"
+                                                            onClick={() => handleCompleteTask(task.id)}
+                                                        >
                                                             Complete Task
                                                         </Button>
                                                     )}

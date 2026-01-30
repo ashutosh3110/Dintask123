@@ -39,7 +39,11 @@ const TaskHome = () => {
 
         const userTasks = tasks.filter(t => t.assignedTo?.includes(user.id));
 
-        const todayCount = userTasks.filter(t => isToday(parseISO(t.deadline)) && t.status !== 'completed').length;
+        const todayCount = userTasks.filter(t => {
+            const date = typeof t.deadline === 'string' ? parseISO(t.deadline) : t.deadline;
+            return isToday(date) && t.status !== 'completed';
+        }).length;
+
         const pendingCount = userTasks.filter(t => t.status !== 'completed').length;
         const doneCount = userTasks.filter(t => t.status === 'completed').length;
         return { today: todayCount, pending: pendingCount, done: doneCount };
@@ -53,7 +57,8 @@ const TaskHome = () => {
             // Filter by current user assignment
             if (!task.assignedTo?.includes(user.id)) return false;
 
-            const taskDate = parseISO(task.deadline);
+            const taskDate = typeof task.deadline === 'string' ? parseISO(task.deadline) : task.deadline;
+
             if (activeTab === 'today') {
                 return isToday(taskDate) && task.status !== 'completed';
             }
@@ -178,12 +183,15 @@ const TaskHome = () => {
                                     <div className="flex items-center gap-1.5">
                                         <div className={cn(
                                             "h-1.5 w-1.5 rounded-full",
-                                            task.delegatedBy ? "bg-primary-500" : "bg-amber-500"
+                                            task.assignedBy === 'self' ? "bg-emerald-500" :
+                                                task.delegatedBy ? "bg-primary-500" : "bg-amber-500"
                                         )} />
                                         <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
-                                            {task.delegatedBy
-                                                ? `From: ${managers.find(m => m.id === task.delegatedBy)?.name}`
-                                                : "From: Admin"}
+                                            {task.assignedBy === 'self'
+                                                ? "Self Task"
+                                                : task.delegatedBy
+                                                    ? `From: ${managers.find(m => m.id === task.delegatedBy)?.name}`
+                                                    : "From: Admin"}
                                         </span>
                                     </div>
                                     {task.delegatedBy && (

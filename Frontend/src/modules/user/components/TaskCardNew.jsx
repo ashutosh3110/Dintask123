@@ -26,6 +26,19 @@ const TaskCardNew = ({ task, onClick }) => {
                     <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide", config.color)}>
                         {config.label}
                     </span>
+                    {task.labels && task.labels.map((label, index) => (
+                        <span
+                            key={index}
+                            className={cn(
+                                "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border",
+                                label === 'Self Task'
+                                    ? "bg-purple-100 text-purple-600 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800"
+                                    : "bg-slate-50 text-slate-500 border-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
+                            )}
+                        >
+                            {label}
+                        </span>
+                    ))}
                 </div>
                 <div className="flex size-6 items-center justify-center">
                     <input

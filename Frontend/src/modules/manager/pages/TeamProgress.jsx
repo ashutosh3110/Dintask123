@@ -31,6 +31,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/sha
 import { Button } from '@/shared/components/ui/button';
 import { Progress } from '@/shared/components/ui/progress';
 import { cn } from '@/shared/utils/cn';
+import { toast } from 'sonner';
 
 const TeamProgress = () => {
     const { user } = useAuthStore();
@@ -81,7 +82,7 @@ const TeamProgress = () => {
                         Detailed analytics and performance tracking for your team.
                     </p>
                 </div>
-                <Button className="gap-2">
+                <Button className="gap-2" onClick={() => toast.success("Report exported successfully!")}>
                     <BarChart3 size={18} />
                     Export Detailed Report
                 </Button>
