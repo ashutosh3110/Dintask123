@@ -30,7 +30,9 @@ const useAuthStore = create(
 
                 if (user && user.email === email && user.password === password) {
                     userData = {
-                        id: selectedRole === 'employee' ? '103' : (selectedRole === 'manager' ? 'M001' : selectedRole),
+                        id: selectedRole === 'employee' ? '103' : 
+                           selectedRole === 'manager' ? 'M001' : 
+                           selectedRole === 'sales' ? 'S001' : selectedRole,
                         name: user.name,
                         email: user.email,
                     };

@@ -67,7 +67,7 @@ const AdminLogin = () => {
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between">
                                         <Label htmlFor="password">Password</Label>
-                                        <a href="#" className="text-xs font-medium text-blue-600 hover:text-blue-500">
+                                        <a href="/admin/forgot-password" className="text-xs font-medium text-blue-600 hover:text-blue-500">
                                             Reset Password
                                         </a>
                                     </div>

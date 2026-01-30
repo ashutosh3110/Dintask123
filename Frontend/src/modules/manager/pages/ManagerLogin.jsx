@@ -66,7 +66,9 @@ const ManagerLogin = () => {
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="password">Password</Label>
-                                <Lock size={14} className="text-slate-400" />
+                                <a href="/manager/forgot-password" className="text-xs font-medium text-primary-600 hover:text-primary-500">
+                                    Forgot password?
+                                </a>
                             </div>
                             <Input
                                 id="password"

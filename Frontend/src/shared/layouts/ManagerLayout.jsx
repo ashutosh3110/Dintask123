@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { pageVariants } from '@/shared/utils/animations';
 import { cn } from '@/shared/utils/cn';
 
-const ManagerLayout = () => {
+const ManagerLayout = ({ role = 'manager' }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const location = useLocation();
@@ -19,7 +19,7 @@ const ManagerLayout = () => {
                 setIsOpen={setIsSidebarOpen}
                 isCollapsed={isSidebarCollapsed}
                 setIsCollapsed={setIsSidebarCollapsed}
-                role="manager"
+                role={role}
             />
 
             {/* Main Content Area */}

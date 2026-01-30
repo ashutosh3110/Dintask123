@@ -51,9 +51,13 @@ import { fadeInUp, staggerContainer, scaleOnTap } from '@/shared/utils/animation
 
 import { useNavigate } from 'react-router-dom';
 
+import useAuthStore from '@/store/authStore';
+
 const SuperAdminDashboard = () => {
     const navigate = useNavigate();
     const { admins, plans, stats } = useSuperAdminStore();
+    const { role } = useAuthStore();
+    const isSuperAdmin = role === 'superadmin';
 
     const chartData = [
         { name: 'Jul', revenue: 250000, growth: 12 },
@@ -76,7 +80,8 @@ const SuperAdminDashboard = () => {
             value: `₹${stats.totalRevenue.toLocaleString('en-IN')}`,
             trend: '+12.5%',
             icon: <IndianRupee className="text-emerald-500" size={20} />,
-            bg: 'bg-emerald-50 dark:bg-emerald-900/10'
+            bg: 'bg-emerald-50 dark:bg-emerald-900/10',
+            restricted: true // Only for superadmin
         },
         {
             title: 'Active Companies',
@@ -99,7 +104,7 @@ const SuperAdminDashboard = () => {
             icon: <Activity className="text-amber-500" size={20} />,
             bg: 'bg-amber-50 dark:bg-amber-900/10'
         },
-    ];
+    ].filter(card => !card.restricted || isSuperAdmin);
 
     return (
         <motion.div
@@ -157,65 +162,67 @@ const SuperAdminDashboard = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Growth Chart */}
-                <motion.div variants={fadeInUp} className="lg:col-span-2">
-                    <Card className="h-full border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden rounded-[2rem]">
-                        <CardHeader className="flex flex-row items-center justify-between px-8 pt-8">
-                            <div>
-                                <CardTitle className="text-lg font-bold">Revenue Growth</CardTitle>
-                                <CardDescription>Platform-wide monthly performance</CardDescription>
-                            </div>
-                            <Select defaultValue="6">
-                                <SelectTrigger className="w-[120px] h-9 text-[10px] bg-slate-50 border-none dark:bg-slate-800 rounded-xl">
-                                    <SelectValue placeholder="Period" />
-                                </SelectTrigger>
-                                <SelectContent className="rounded-xl">
-                                    <SelectItem value="6">Last 6 Months</SelectItem>
-                                    <SelectItem value="12">Last Year</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </CardHeader>
-                        <CardContent className="px-8 pb-8">
-                            <div className="h-[300px] w-full mt-4">
-                                <ResponsiveContainer width="100%" height="100%" debounce={50}>
-                                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                                        <defs>
-                                            <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
-                                                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                                            </linearGradient>
-                                        </defs>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                        <XAxis
-                                            dataKey="name"
-                                            axisLine={false}
-                                            tickLine={false}
-                                            tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 600 }}
-                                            dy={10}
-                                        />
-                                        <YAxis
-                                            axisLine={false}
-                                            tickLine={false}
-                                            tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 600 }}
-                                        />
-                                        <Tooltip
-                                            contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '12px' }}
-                                        />
-                                        <Area
-                                            type="monotone"
-                                            dataKey="revenue"
-                                            stroke="#3b82f6"
-                                            strokeWidth={4}
-                                            fillOpacity={1}
-                                            fill="url(#colorRev)"
-                                            animationDuration={2000}
-                                            animationBegin={500}
-                                        />
-                                    </AreaChart>
-                                </ResponsiveContainer>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </motion.div>
+                {isSuperAdmin && (
+                    <motion.div variants={fadeInUp} className="lg:col-span-2">
+                        <Card className="h-full border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden rounded-[2rem]">
+                            <CardHeader className="flex flex-row items-center justify-between px-8 pt-8">
+                                <div>
+                                    <CardTitle className="text-lg font-bold">Revenue Growth</CardTitle>
+                                    <CardDescription>Platform-wide monthly performance</CardDescription>
+                                </div>
+                                <Select defaultValue="6">
+                                    <SelectTrigger className="w-[120px] h-9 text-[10px] bg-slate-50 border-none dark:bg-slate-800 rounded-xl">
+                                        <SelectValue placeholder="Period" />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-xl">
+                                        <SelectItem value="6">Last 6 Months</SelectItem>
+                                        <SelectItem value="12">Last Year</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </CardHeader>
+                            <CardContent className="px-8 pb-8">
+                                <div className="h-[300px] w-full mt-4">
+                                    <ResponsiveContainer width="100%" height="100%" debounce={50}>
+                                        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                                            <defs>
+                                                <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
+                                                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                            <XAxis
+                                                dataKey="name"
+                                                axisLine={false}
+                                                tickLine={false}
+                                                tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 600 }}
+                                                dy={10}
+                                            />
+                                            <YAxis
+                                                axisLine={false}
+                                                tickLine={false}
+                                                tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 600 }}
+                                            />
+                                            <Tooltip
+                                                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '12px' }}
+                                            />
+                                            <Area
+                                                type="monotone"
+                                                dataKey="revenue"
+                                                stroke="#3b82f6"
+                                                strokeWidth={4}
+                                                fillOpacity={1}
+                                                fill="url(#colorRev)"
+                                                animationDuration={2000}
+                                                animationBegin={500}
+                                            />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                )}
 
                 {/* Plan Distribution */}
                 <motion.div variants={fadeInUp}>

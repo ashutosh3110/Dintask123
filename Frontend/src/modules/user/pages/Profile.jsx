@@ -23,12 +23,21 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avat
 import { Switch } from "@/shared/components/ui/switch";
 import { Separator } from "@/shared/components/ui/separator";
 import useAuthStore from '@/store/authStore';
+import useEmployeeStore from '@/store/employeeStore';
 import { fadeInUp, staggerContainer, scaleOnTap } from '@/shared/utils/animations';
 
 const EmployeeProfile = () => {
     const { user, logout } = useAuthStore();
+    const { employees } = useEmployeeStore();
     const navigate = useNavigate();
     const [isSyncing, setIsSyncing] = useState(false);
+
+    // Find detailed employee profile based on logged-in user ID
+    const employeeDetails = employees.find(e => e.id === user?.id) || {
+        role: 'Employee',
+        department: 'General Staff',
+        stats: { rating: 0, tasksCompleted: 0 }
+    };
 
     const handleLogout = async () => {
         const logoutPromise = new Promise(resolve => setTimeout(resolve, 1000));
@@ -41,9 +50,6 @@ const EmployeeProfile = () => {
 
         await logoutPromise;
         logout();
-        // The router will likely redirect to /employee/login automatically due to ProtectedRoute
-        // but explicit navigation is safer for UX transitions
-        // navigate('/employee/login'); 
     };
 
     const menuItems = [
@@ -106,19 +112,19 @@ const EmployeeProfile = () => {
                                 </motion.div>
                             </div>
                             <h3 className="text-lg font-black text-slate-900 dark:text-white leading-tight">{user?.name}</h3>
-                            <p className="text-xs text-slate-500 font-medium">Employee • Marketing Team</p>
+                            <p className="text-xs text-slate-500 font-medium">{employeeDetails.role} • {employeeDetails.department}</p>
 
                             <div className="flex gap-4 mt-6 w-full">
                                 <div className="flex-1 bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-800">
                                     <p className="text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-tighter">Performance</p>
                                     <div className="flex items-center justify-center gap-1.5 font-black text-slate-900 dark:text-white">
                                         <Star size={14} className="text-amber-400 fill-amber-400" />
-                                        <span>4.9</span>
+                                        <span>{employeeDetails.stats?.rating || 'N/A'}</span>
                                     </div>
                                 </div>
                                 <div className="flex-1 bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-800">
                                     <p className="text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-tighter">Tasks Monthly</p>
-                                    <div className="font-black text-slate-900 dark:text-white">42</div>
+                                    <div className="font-black text-slate-900 dark:text-white">{employeeDetails.stats?.tasksCompleted || 0}</div>
                                 </div>
                             </div>
                         </div>

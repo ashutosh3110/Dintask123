@@ -36,10 +36,14 @@ import { cn } from '@/shared/utils/cn';
 import { fadeInUp, staggerContainer, scaleOnTap } from '@/shared/utils/animations';
 
 const Notes = () => {
-    const { notes, addNote, deleteNote } = useNotesStore();
+    const { notes, addNote, updateNote, deleteNote } = useNotesStore();
     const [searchTerm, setSearchTerm] = useState('');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+    // State to track editing
+    const [editingId, setEditingId] = useState(null);
     const [newNote, setNewNote] = useState({ title: '', content: '', category: 'General' });
+
     const [listRef] = useAutoAnimate();
 
     const filteredNotes = notes.filter(note =>
@@ -47,11 +51,37 @@ const Notes = () => {
         note.content.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const handleAddNote = () => {
+    const handleSaveNote = () => {
         if (!newNote.title || !newNote.content) return;
-        addNote(newNote);
+
+        if (editingId) {
+            // Update existing note
+            updateNote(editingId, newNote);
+        } else {
+            // Create new note
+            addNote(newNote);
+        }
+
+        // Reset state
         setNewNote({ title: '', content: '', category: 'General' });
+        setEditingId(null);
         setIsAddModalOpen(false);
+    };
+
+    const handleEditClick = (note) => {
+        setNewNote({
+            title: note.title,
+            content: note.content,
+            category: note.category
+        });
+        setEditingId(note.id);
+        setIsAddModalOpen(true);
+    };
+
+    const handleOpenAddModal = () => {
+        setNewNote({ title: '', content: '', category: 'General' });
+        setEditingId(null);
+        setIsAddModalOpen(true);
     };
 
     const handleDeleteNote = (id) => {
@@ -75,7 +105,7 @@ const Notes = () => {
                         size="icon"
                         variant="ghost"
                         className="rounded-xl bg-slate-100 dark:bg-slate-800 focus:ring-0"
-                        onClick={() => setIsAddModalOpen(true)}
+                        onClick={handleOpenAddModal}
                     >
                         <Plus size={20} className="text-primary-600" />
                     </Button>
@@ -123,7 +153,10 @@ const Notes = () => {
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="rounded-xl border-slate-100 dark:border-slate-800">
-                                                <DropdownMenuItem className="gap-2 text-xs font-medium rounded-lg">
+                                                <DropdownMenuItem
+                                                    className="gap-2 text-xs font-medium rounded-lg cursor-pointer"
+                                                    onClick={() => handleEditClick(note)}
+                                                >
                                                     <Edit2 size={14} /> Edit Note
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem
@@ -153,9 +186,9 @@ const Notes = () => {
             <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
                 <DialogContent className="sm:max-w-[425px] rounded-3xl border-none shadow-2xl bg-white dark:bg-slate-900">
                     <DialogHeader>
-                        <DialogTitle className="text-xl font-black">New Note</DialogTitle>
+                        <DialogTitle className="text-xl font-black">{editingId ? 'Edit Note' : 'New Note'}</DialogTitle>
                         <DialogDescription className="text-xs font-medium text-slate-500">
-                            Capture your thoughts or reminders instantly.
+                            {editingId ? 'Modify your existing note below.' : 'Capture your thoughts or reminders instantly.'}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
@@ -201,9 +234,9 @@ const Notes = () => {
                     <DialogFooter>
                         <Button
                             className="w-full rounded-xl h-12 font-black text-sm bg-primary-600 hover:bg-primary-700 active:scale-[0.98] transition-all shadow-lg shadow-primary-500/30"
-                            onClick={handleAddNote}
+                            onClick={handleSaveNote}
                         >
-                            Save Note
+                            {editingId ? 'Update Note' : 'Save Note'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -224,7 +257,7 @@ const Notes = () => {
                     <Button
                         size="icon"
                         className="h-14 w-14 rounded-full shadow-2xl shadow-primary-500/50 bg-primary-600 hover:bg-primary-700 transition-colors"
-                        onClick={() => setIsAddModalOpen(true)}
+                        onClick={handleOpenAddModal}
                     >
                         <Plus size={28} />
                     </Button>

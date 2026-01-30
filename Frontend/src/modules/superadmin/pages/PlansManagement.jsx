@@ -52,9 +52,21 @@ import { cn } from '@/shared/utils/cn';
 import { fadeInUp, staggerContainer, scaleOnTap } from '@/shared/utils/animations';
 
 const PlansManagement = () => {
-    const { plans, updatePlan } = useSuperAdminStore();
+    const { plans, updatePlan, addPlan } = useSuperAdminStore();
     const [selectedPlan, setSelectedPlan] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+    const handleCreatePlan = () => {
+        const newPlan = {
+            name: 'New Tier',
+            price: 1999,
+            limit: 10,
+            isActive: false,
+            trialDays: 0
+        };
+        addPlan(newPlan);
+        toast.success('New plan tier created');
+    };
 
     const handleEditClick = (plan) => {
         setSelectedPlan({ ...plan });
@@ -84,7 +96,7 @@ const PlansManagement = () => {
                 </div>
 
                 <motion.div {...scaleOnTap}>
-                    <Button className="flex items-center gap-2 shadow-lg shadow-primary-200 dark:shadow-none bg-emerald-600 hover:bg-emerald-700 h-11 px-6 rounded-xl">
+                    <Button onClick={handleCreatePlan} className="flex items-center gap-2 shadow-lg shadow-primary-200 dark:shadow-none bg-emerald-600 hover:bg-emerald-700 h-11 px-6 rounded-xl">
                         <Plus size={18} />
                         <span className="font-bold">Create New Tier</span>
                     </Button>
@@ -110,10 +122,19 @@ const PlansManagement = () => {
                                         </Badge>
                                         <Switch checked={plan.isActive} onCheckedChange={(val) => updatePlan(plan.id, { isActive: !!val })} />
                                     </div>
-                                    <CardTitle className="text-2xl font-black">{plan.name}</CardTitle>
+                                    <CardTitle className="text-2xl font-black flex items-center gap-2">
+                                        {plan.name}
+                                        {plan.trialDays > 0 && (
+                                            <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-none text-[8px] uppercase tracking-widest">
+                                                {plan.trialDays} Day Free Trial
+                                            </Badge>
+                                        )}
+                                    </CardTitle>
                                     <CardDescription className="text-4xl font-black text-slate-900 dark:text-white mt-2 tracking-tighter flex items-end gap-1">
                                         ₹{plan.price}
-                                        <span className="text-xs font-bold text-slate-400 mb-1 tracking-normal uppercase">/ Month</span>
+                                        <span className="text-xs font-bold text-slate-400 mb-1 tracking-normal uppercase">
+                                            {plan.trialDays > 0 ? '/ Month after trial' : '/ Month'}
+                                        </span>
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="flex-1 space-y-6 pt-4 px-8">
@@ -236,6 +257,15 @@ const PlansManagement = () => {
                                         className="bg-slate-50 dark:bg-slate-800 border-none rounded-xl h-12 font-bold focus-visible:ring-primary-500"
                                     />
                                 </div>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label className="text-xs font-bold uppercase text-slate-500 tracking-wide">Trial Period (Days)</Label>
+                                <Input
+                                    type="number"
+                                    value={selectedPlan.trialDays || 0}
+                                    onChange={(e) => setSelectedPlan({ ...selectedPlan, trialDays: parseInt(e.target.value) })}
+                                    className="bg-slate-50 dark:bg-slate-800 border-none rounded-xl h-12 font-bold focus-visible:ring-primary-500"
+                                />
                             </div>
                             <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50">
                                 <div className="space-y-0.5">

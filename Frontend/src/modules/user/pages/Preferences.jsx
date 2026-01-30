@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Zap, Moon, Sun, Globe, Zap as ZapIcon, Layout, Monitor } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, Globe, Zap as ZapIcon, Layout, Monitor } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
 import { Card, CardContent } from '@/shared/components/ui/card';
+import { Button } from '@/shared/components/ui/button';
 import { Switch } from "@/shared/components/ui/switch";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/shared/components/ui/select";
 import { fadeInUp } from '@/shared/utils/animations';
 
 const Preferences = () => {
@@ -14,7 +22,8 @@ const Preferences = () => {
         darkMode: document.documentElement.classList.contains('dark'),
         hapticFeedback: true,
         reducedMotion: false,
-        autoSync: true
+        autoSync: true,
+        language: 'en'
     });
 
     const toggleDarkMode = () => {
@@ -27,6 +36,11 @@ const Preferences = () => {
     const toggleSetting = (key) => {
         setSettings(prev => ({ ...prev, [key]: !prev[key] }));
         toast.success('Preference updated');
+    };
+
+    const handleLanguageChange = (value) => {
+        setSettings(prev => ({ ...prev, language: value }));
+        toast.success(`Language changed to ${value === 'en' ? 'English' : value === 'es' ? 'Spanish' : value === 'fr' ? 'French' : 'German'}`);
     };
 
     return (
@@ -103,10 +117,21 @@ const Preferences = () => {
                                     </div>
                                     <div>
                                         <p className="text-sm font-bold text-slate-900 dark:text-white">Language</p>
-                                        <p className="text-[10px] text-slate-400 font-medium">English (United States)</p>
+                                        <p className="text-[10px] text-slate-400 font-medium">Select preferred language</p>
                                     </div>
                                 </div>
-                                <button className="text-xs font-black text-primary px-3 py-1 bg-primary/10 rounded-full">Change</button>
+                                <Select value={settings.language} onValueChange={handleLanguageChange}>
+                                    <SelectTrigger className="w-[140px] h-8 text-xs font-bold bg-slate-50 dark:bg-slate-800 border-none rounded-lg">
+                                        <SelectValue placeholder="Language" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="en">English (US)</SelectItem>
+                                        <SelectItem value="es">Español</SelectItem>
+                                        <SelectItem value="fr">Français</SelectItem>
+                                        <SelectItem value="de">Deutsch</SelectItem>
+                                        <SelectItem value="hi">Hindi</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </CardContent>
                     </Card>

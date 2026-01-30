@@ -43,7 +43,9 @@ const useSuperAdminStore = create(
             plans: [
                 { id: 'p1', name: 'Starter', price: 999, limit: 2, isActive: true },
                 { id: 'p2', name: 'Pro Team', price: 2499, limit: 5, isActive: true },
-                { id: 'p3', name: 'Business', price: 4999, limit: 20, isActive: true }
+                { id: 'p3', name: 'Business', price: 4999, limit: 20, isActive: true },
+                { id: 'p4', name: 'Trial Plan', price: 2499, limit: 5, isActive: true, trialDays: 7 },
+                { id: 'p5', name: 'Enterprise', price: 9999, limit: 100, isActive: true, trialDays: 7 }
             ],
 
             stats: {
@@ -64,6 +66,12 @@ const useSuperAdminStore = create(
             deleteAdmin: (id) => {
                 set((state) => ({
                     admins: state.admins.filter((adm) => adm.id !== id),
+                }));
+            },
+
+            addPlan: (newPlan) => {
+                set((state) => ({
+                    plans: [...state.plans, { ...newPlan, id: `p${Date.now()}` }]
                 }));
             },
 

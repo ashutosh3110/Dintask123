@@ -5,7 +5,8 @@ import {
     Calendar as CalendarIcon,
     StickyNote,
     User,
-    Bell
+    Bell,
+    Briefcase
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 

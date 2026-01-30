@@ -14,7 +14,9 @@ const NotFoundRedirect = () => {
             ? '/admin'
             : role === 'manager'
                 ? '/manager'
-                : '/employee';
+                : role === 'sales'
+                    ? '/sales'
+                    : '/employee';
 
     return <Navigate to={defaultRoute} replace />;
 };
@@ -25,7 +27,9 @@ import EmployeeLayout from '@/shared/layouts/EmployeeLayout';
 import ManagerLayout from '@/shared/layouts/ManagerLayout';
 
 // Auth Pages
+// Auth Pages
 import EmployeeLogin from '@/modules/user/pages/EmployeeLogin';
+import ForgotPassword from '@/modules/user/pages/ForgotPassword';
 import AdminLogin from '@/modules/admin/pages/AdminLogin';
 import SuperAdminLogin from '@/modules/superadmin/pages/SuperAdminLogin';
 
@@ -52,6 +56,25 @@ import ManagerSchedule from '@/modules/manager/pages/Schedule';
 import ManagerReports from '@/modules/manager/pages/Reports';
 import ManagerSettings from '@/modules/manager/pages/Settings';
 
+// Sales Pages
+import SalesLogin from '@/modules/sales/pages/SalesLogin';
+import SalesDashboard from '@/modules/sales/pages/Dashboard';
+import Deals from '@/modules/sales/pages/Deals';
+import Clients from '@/modules/sales/pages/Clients';
+import Schedule from '@/modules/sales/pages/Schedule';
+import SalesReports from '@/modules/sales/pages/Reports';
+import SalesSettings from '@/modules/sales/pages/Settings';
+import SalesTasks from '@/modules/sales/pages/SalesTasks';
+
+// CRM Pages
+import CRMHome from '@/modules/crm/pages/CRMHome';
+import LeadsManagement from '@/modules/crm/pages/LeadsManagement';
+import SalesPipeline from '@/modules/crm/pages/SalesPipeline';
+import FollowUps from '@/modules/crm/pages/FollowUps';
+import Contacts from '@/modules/crm/pages/Contacts';
+import AdminCRM from '@/modules/crm/pages/AdminDashboard';
+import EmployeeCRM from '@/modules/crm/pages/EmployeeDashboard';
+
 // Employee Pages
 import EmployeeDashboard from '@/modules/user/pages/TaskHome';
 import TaskDetail from '@/modules/user/pages/TaskDetail';
@@ -77,9 +100,15 @@ const AppRouter = () => {
         <Routes>
             {/* Public Routes */}
             <Route path="/employee/login" element={<EmployeeLogin />} />
+            <Route path="/employee/forgot-password" element={<ForgotPassword returnPath="/employee/login" />} />
             <Route path="/manager/login" element={<ManagerLogin />} />
+            <Route path="/manager/forgot-password" element={<ForgotPassword returnPath="/manager/login" />} />
             <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/forgot-password" element={<ForgotPassword returnPath="/admin/login" />} />
             <Route path="/superadmin/login" element={<SuperAdminLogin />} />
+            <Route path="/superadmin/forgot-password" element={<ForgotPassword returnPath="/superadmin/login" />} />
+            <Route path="/sales/login" element={<SalesLogin />} />
+            <Route path="/sales/forgot-password" element={<ForgotPassword returnPath="/sales/login" />} />
 
             {/* Admin Routes */}
             <Route
@@ -99,6 +128,14 @@ const AppRouter = () => {
                 <Route path="calendar" element={<AdminCalendar />} />
                 <Route path="subscription" element={<Subscription />} />
                 <Route path="settings" element={<Settings />} />
+                {/* CRM Routes */}
+                <Route path="crm">
+                    <Route index element={<AdminCRM />} />
+                    <Route path="leads" element={<LeadsManagement />} />
+                    <Route path="pipeline" element={<SalesPipeline />} />
+                    <Route path="follow-ups" element={<FollowUps />} />
+                    <Route path="contacts" element={<Contacts />} />
+                </Route>
             </Route>
 
             {/* Employee Routes */}
@@ -110,6 +147,7 @@ const AppRouter = () => {
                     </ProtectedRoute>
                 }
             >
+                <Route path="crm" element={<EmployeeCRM />} />
                 <Route index element={<EmployeeDashboard />} />
                 <Route path="tasks/:id" element={<TaskDetail />} />
                 <Route path="tasks/new" element={<AddTask />} />
@@ -128,7 +166,7 @@ const AppRouter = () => {
             <Route
                 path="/superadmin"
                 element={
-                    <ProtectedRoute allowedRoles={['superadmin']}>
+                    <ProtectedRoute allowedRoles={['superadmin', 'superadmin_employee']}>
                         <AdminLayout role="superadmin" />
                     </ProtectedRoute>
                 }
@@ -139,6 +177,14 @@ const AppRouter = () => {
                 <Route path="settings" element={<SuperAdminSettings />} />
                 <Route path="reports" element={<div>System Reports (Coming Soon)</div>} />
                 <Route path="calendar" element={<div>System Calendar (Coming Soon)</div>} />
+                {/* CRM Routes */}
+                <Route path="crm">
+                    <Route index element={<AdminCRM />} />
+                    <Route path="leads" element={<LeadsManagement />} />
+                    <Route path="pipeline" element={<SalesPipeline />} />
+                    <Route path="follow-ups" element={<FollowUps />} />
+                    <Route path="contacts" element={<Contacts />} />
+                </Route>
             </Route>
 
             {/* Manager Routes */}
@@ -163,6 +209,40 @@ const AppRouter = () => {
                 <Route path="settings/security" element={<ManagerSettings />} />
                 <Route path="settings/customization" element={<ManagerSettings />} />
                 <Route path="settings/language" element={<ManagerSettings />} />
+                {/* CRM Routes */}
+                <Route path="crm">
+                    <Route index element={<EmployeeCRM />} />
+                    <Route path="leads" element={<LeadsManagement />} />
+                    <Route path="pipeline" element={<SalesPipeline />} />
+                    <Route path="follow-ups" element={<FollowUps />} />
+                    <Route path="contacts" element={<Contacts />} />
+                </Route>
+            </Route>
+
+            {/* Sales Routes */}
+            <Route
+                path="/sales"
+                element={
+                    <ProtectedRoute allowedRoles={['sales']}>
+                        <ManagerLayout role="sales" />
+                    </ProtectedRoute>
+                }
+            >
+                <Route index element={<SalesDashboard />} />
+                <Route path="deals" element={<Deals />} />
+                <Route path="tasks" element={<SalesTasks />} />
+                <Route path="clients" element={<Clients />} />
+                <Route path="schedule" element={<Schedule />} />
+                <Route path="reports" element={<SalesReports />} />
+                <Route path="settings" element={<SalesSettings />} />
+                {/* CRM Routes */}
+                <Route path="crm">
+                    <Route index element={<EmployeeCRM />} />
+                    <Route path="leads" element={<LeadsManagement />} />
+                    <Route path="pipeline" element={<SalesPipeline />} />
+                    <Route path="follow-ups" element={<FollowUps />} />
+                    <Route path="contacts" element={<Contacts />} />
+                </Route>
             </Route>
 
             {/* Default Redirection */}

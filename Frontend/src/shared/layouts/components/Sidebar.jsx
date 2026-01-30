@@ -18,7 +18,8 @@ import {
     Shield,
     Palette,
     Globe,
-    ChevronDown
+    ChevronDown,
+    Briefcase
 } from 'lucide-react';
 import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/components/ui/button';
@@ -46,21 +47,36 @@ const Sidebar = ({ role, isOpen, setIsOpen, isCollapsed, setIsCollapsed }) => {
     };
 
     const navItems = [
-        { name: 'Dashboard', path: `/${role}`, icon: LayoutDashboard },
-        ...(isManager
+        ...(role === 'manager'
             ? [
+                { name: 'Dashboard', path: '/manager', icon: LayoutDashboard },
                 { name: 'My Tasks', path: '/manager/my-tasks', icon: CheckSquare },
                 { name: 'Delegation', path: '/manager/delegation', icon: Users },
                 { name: 'Team', path: '/manager/team', icon: Users },
+                { name: 'CRM', path: '/manager/crm', icon: Briefcase },
                 { name: 'Progress', path: '/manager/progress', icon: BarChart3 },
                 { name: 'Schedule', path: '/manager/schedule', icon: CalendarIcon },
                 { name: 'Settings', path: '/manager/settings', icon: Settings },
                 { name: 'Reports', path: '/manager/reports', icon: BarChart3 },
             ]
             : []),
+        ...(role === 'sales'
+            ? [
+                { name: 'Dashboard', path: '/sales', icon: LayoutDashboard },
+                { name: 'CRM', path: '/sales/crm', icon: Briefcase },
+                { name: 'Deals', path: '/sales/deals', icon: CheckSquare },
+                { name: 'Sales Tasks', path: '/sales/tasks', icon: CheckSquare },
+                { name: 'Clients', path: '/sales/clients', icon: Users },
+                { name: 'Reports', path: '/sales/reports', icon: BarChart3 },
+                { name: 'Schedule', path: '/sales/schedule', icon: CalendarIcon },
+                { name: 'Settings', path: '/sales/settings', icon: Settings },
+            ]
+            : []),
         ...(role === 'admin'
             ? [
+                { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
                 { name: 'Tasks', path: `/${role}/tasks`, icon: CheckSquare },
+                { name: 'CRM', path: '/admin/crm', icon: Briefcase },
                 { name: 'Managers', path: '/admin/managers', icon: ShieldCheck },
                 { name: 'Employees', path: '/admin/employees', icon: Users },
                 { name: 'Reports', path: `/${role}/reports`, icon: BarChart3 },
@@ -71,6 +87,8 @@ const Sidebar = ({ role, isOpen, setIsOpen, isCollapsed, setIsCollapsed }) => {
             : []),
         ...(role === 'superadmin'
             ? [
+                { name: 'Dashboard', path: '/superadmin', icon: LayoutDashboard },
+                { name: 'CRM', path: '/superadmin/crm', icon: Briefcase },
                 { name: 'Admins', path: '/superadmin/admins', icon: Users },
                 { name: 'Plans', path: '/superadmin/plans', icon: CreditCard },
                 { name: 'Settings', path: `/${role}/settings`, icon: Settings },

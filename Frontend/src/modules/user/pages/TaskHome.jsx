@@ -35,15 +35,24 @@ const TaskHome = () => {
 
     // -- Summary Stats Logic --
     const stats = useMemo(() => {
-        const todayCount = tasks.filter(t => isToday(parseISO(t.deadline)) && t.status !== 'completed').length;
-        const pendingCount = tasks.filter(t => t.status !== 'completed').length;
-        const doneCount = tasks.filter(t => t.status === 'completed').length;
+        if (!user?.id) return { today: 0, pending: 0, done: 0 };
+
+        const userTasks = tasks.filter(t => t.assignedTo?.includes(user.id));
+
+        const todayCount = userTasks.filter(t => isToday(parseISO(t.deadline)) && t.status !== 'completed').length;
+        const pendingCount = userTasks.filter(t => t.status !== 'completed').length;
+        const doneCount = userTasks.filter(t => t.status === 'completed').length;
         return { today: todayCount, pending: pendingCount, done: doneCount };
-    }, [tasks]);
+    }, [tasks, user]);
 
     // -- Filtering Logic --
     const filteredTasks = useMemo(() => {
+        if (!user?.id) return [];
+
         return tasks.filter(task => {
+            // Filter by current user assignment
+            if (!task.assignedTo?.includes(user.id)) return false;
+
             const taskDate = parseISO(task.deadline);
             if (activeTab === 'today') {
                 return isToday(taskDate) && task.status !== 'completed';
@@ -61,7 +70,7 @@ const TaskHome = () => {
                     : !!task.delegatedBy;
             return matchesCategory;
         });
-    }, [tasks, activeTab, filterCategory]);
+    }, [tasks, activeTab, filterCategory, user]);
 
     return (
         <div className="bg-background-light dark:bg-background-dark min-h-screen w-full font-display text-text-main dark:text-white pb-28">
