@@ -12,7 +12,8 @@ import {
     User as UserIcon,
     MessageSquare,
     Trash2,
-    Edit2
+    Edit2,
+    Send
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -56,6 +57,14 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
+import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetDescription,
+    SheetFooter
+} from "@/shared/components/ui/sheet";
 
 import useTaskStore from '@/store/taskStore';
 import useEmployeeStore from '@/store/employeeStore';
@@ -64,12 +73,18 @@ import { cn } from '@/shared/utils/cn';
 import { fadeInUp, staggerContainer, scaleOnTap } from '@/shared/utils/animations';
 
 const TaskManagement = () => {
-    const { tasks, addTask, updateTask, deleteTask } = useTaskStore();
+    const { tasks, addTask, updateTask, deleteTask, addComment } = useTaskStore();
     const { employees } = useEmployeeStore();
 
     const [activeTab, setActiveTab] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+    // Discussion State
+    const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
+    const [activeTaskForDiscussion, setActiveTaskForDiscussion] = useState(null);
+    const [newMessage, setNewMessage] = useState('');
+
     const { managers } = useManagerStore();
     const [assignType, setAssignType] = useState('employee'); // 'employee' or 'manager'
 
@@ -136,6 +151,27 @@ const TaskManagement = () => {
                 : [...prev.assignedTo, empId]
         }));
     };
+
+    const handleOpenDiscussion = (task) => {
+        setActiveTaskForDiscussion(task);
+        setIsDiscussionOpen(true);
+    };
+
+    const handleSendMessage = () => {
+        if (!newMessage.trim() || !activeTaskForDiscussion) return;
+
+        addComment(activeTaskForDiscussion.id, {
+            text: newMessage,
+            sender: 'Admin', // In a real app, this would be the logged-in user
+            senderId: 'admin',
+            role: 'admin'
+        });
+
+        setNewMessage('');
+    };
+
+    // Get live object for active discussion task from store
+    const currentDiscussionTask = activeTaskForDiscussion ? tasks.find(t => t.id === activeTaskForDiscussion.id) : null;
 
     return (
         <motion.div
@@ -407,7 +443,11 @@ const TaskManagement = () => {
                                                     </div>
                                                 </CardContent>
                                                 <CardFooter className="pt-4 px-6 pb-6 border-t border-slate-50 dark:border-slate-800 flex justify-between gap-3 bg-slate-50/30 dark:bg-slate-900/50">
-                                                    <Button variant="ghost" className="text-[10px] font-black uppercase tracking-widest h-9 px-4 rounded-xl hover:bg-white dark:hover:bg-slate-800 hover:shadow-sm">
+                                                    <Button
+                                                        variant="ghost"
+                                                        className="text-[10px] font-black uppercase tracking-widest h-9 px-4 rounded-xl hover:bg-white dark:hover:bg-slate-800 hover:shadow-sm"
+                                                        onClick={() => handleOpenDiscussion(task)}
+                                                    >
                                                         <MessageSquare size={13} className="mr-2 text-primary-500" />
                                                         Discussions
                                                     </Button>
@@ -450,6 +490,73 @@ const TaskManagement = () => {
                     </TabsContent>
                 </Tabs>
             </div>
+
+            <Sheet open={isDiscussionOpen} onOpenChange={setIsDiscussionOpen}>
+                <SheetContent side="right" className="w-full sm:w-[400px] flex flex-col gap-0 p-0 rounded-l-3xl border-l border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-900">
+                    <SheetHeader className="p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900">
+                        <SheetTitle className="text-xl font-black">
+                            {currentDiscussionTask?.title || 'Task Discussion'}
+                        </SheetTitle>
+                        <SheetDescription className="text-xs font-medium">
+                            Collaborate with your team on this task.
+                        </SheetDescription>
+                    </SheetHeader>
+
+                    <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                        {currentDiscussionTask?.comments && currentDiscussionTask.comments.length > 0 ? (
+                            currentDiscussionTask.comments.map((comment) => (
+                                <div key={comment.id} className={cn(
+                                    "flex flex-col gap-1 max-w-[85%]",
+                                    comment.senderId === 'admin' ? "ml-auto items-end" : "items-start"
+                                )}>
+                                    <div className={cn(
+                                        "p-3 rounded-2xl text-sm font-medium",
+                                        comment.senderId === 'admin'
+                                            ? "bg-primary-600 text-white rounded-tr-sm"
+                                            : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-tl-sm"
+                                    )}>
+                                        {comment.text}
+                                    </div>
+                                    <span className="text-[10px] text-slate-400 font-bold px-1">
+                                        {comment.sender} • {format(new Date(comment.createdAt), 'h:mm a')}
+                                    </span>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="h-full flex flex-col items-center justify-center text-slate-400 opacity-50">
+                                <MessageSquare size={48} className="mb-2" />
+                                <p className="text-sm font-bold">No messages yet</p>
+                                <p className="text-xs">Start the conversation!</p>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+                        <div className="flex items-center gap-2">
+                            <Input
+                                placeholder="Type a message..."
+                                value={newMessage}
+                                onChange={(e) => setNewMessage(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                                className="rounded-xl h-11 bg-slate-50 dark:bg-slate-800 border-none focus:ring-1 focus:ring-primary-500"
+                            />
+                            <Button
+                                size="icon"
+                                onClick={handleSendMessage}
+                                className={cn(
+                                    "h-11 w-11 rounded-xl transition-all shadow-lg",
+                                    newMessage.trim()
+                                        ? "bg-primary-600 hover:bg-primary-700 shadow-primary-200 dark:shadow-none"
+                                        : "bg-slate-200 dark:bg-slate-800 text-slate-400 shadow-none cursor-not-allowed"
+                                )}
+                                disabled={!newMessage.trim()}
+                            >
+                                <Send size={18} />
+                            </Button>
+                        </div>
+                    </div>
+                </SheetContent>
+            </Sheet>
         </motion.div>
     );
 };

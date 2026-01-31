@@ -97,6 +97,19 @@ const useTaskStore = create(
                     ),
                 }));
             },
+
+            addComment: (taskId, comment) => {
+                set((state) => ({
+                    tasks: state.tasks.map((task) =>
+                        task.id === taskId
+                            ? {
+                                ...task,
+                                comments: [...(task.comments || []), { ...comment, id: Date.now(), createdAt: new Date().toISOString() }]
+                            }
+                            : task
+                    ),
+                }));
+            },
         }),
         {
             name: 'dintask-tasks-storage',

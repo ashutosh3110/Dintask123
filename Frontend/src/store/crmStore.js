@@ -17,6 +17,9 @@ const useCRMStore = create(
           owner: '103',
           status: 'New',
           notes: 'Interested in our services',
+          amount: 5000,
+          priority: 'high',
+          deadline: '2026-02-15T00:00:00.000Z',
           createdAt: new Date().toISOString(),
         },
         {
@@ -29,6 +32,9 @@ const useCRMStore = create(
           owner: 'EMP-002',
           status: 'Contacted',
           notes: 'Follow up next week',
+          amount: 12000,
+          priority: 'medium',
+          deadline: '2026-03-01T00:00:00.000Z',
           createdAt: new Date().toISOString(),
         },
       ],
@@ -57,6 +63,9 @@ const useCRMStore = create(
         const newLead = {
           id: `LEAD-${Math.floor(1000 + Math.random() * 9000)}`,
           createdAt: new Date().toISOString(),
+          amount: 0,
+          priority: 'medium',
+          deadline: null,
           ...leadData,
         };
         set((state) => ({

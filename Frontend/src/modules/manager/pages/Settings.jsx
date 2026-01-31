@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
     Palette,
@@ -11,7 +11,8 @@ import {
     MessageSquare,
     Clock,
     Moon,
-    AlertCircle
+    AlertCircle,
+    Lock
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
@@ -20,11 +21,79 @@ import { Switch } from '@/shared/components/ui/switch';
 import { Label } from '@/shared/components/ui/label';
 import { Separator } from '@/shared/components/ui/separator';
 import useAuthStore from '@/store/authStore';
+import { toast } from 'sonner';
 
 const ManagerSettings = () => {
-    const { user } = useAuthStore();
+    const { user, updateProfile, changePassword } = useAuthStore();
     const location = useLocation();
     const isNotificationsPage = location.pathname.includes('/notifications');
+
+    // Profile State
+    const [profileData, setProfileData] = useState({
+        name: '',
+        email: '',
+        department: 'Product Engineering',
+        role: 'Lead Manager'
+    });
+
+    // Password State
+    const [passwordData, setPasswordData] = useState({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+    });
+
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        if (user) {
+            setProfileData({
+                name: user.name || '',
+                email: user.email || '',
+                department: user.department || 'Product Engineering',
+                role: user.roleTitle || 'Lead Manager'
+            });
+        }
+    }, [user]);
+
+    const handleSaveAll = async () => {
+        if (!profileData.name || !profileData.email) {
+            toast.error("Name and Email are required");
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            await updateProfile(profileData);
+            toast.success("Settings saved successfully");
+        } catch (error) {
+            toast.error("Failed to save settings");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handlePasswordChange = async () => {
+        if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+            toast.error("All password fields are required");
+            return;
+        }
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            toast.error("New passwords do not match");
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            await changePassword(passwordData.currentPassword, passwordData.newPassword);
+            toast.success("Password changed successfully");
+            setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        } catch (error) {
+            toast.error("Failed to change password");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     if (isNotificationsPage) {
         return (
@@ -173,12 +242,12 @@ const ManagerSettings = () => {
                 <div className="text-left">
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Account Settings</h1>
                     <p className="text-slate-500 dark:text-slate-400 mt-1">
-                        Configure your profile and team notification preferences.
+                        Configure your profile, security, and team notification preferences.
                     </p>
                 </div>
-                <Button className="gap-2 px-6">
+                <Button className="gap-2 px-6" onClick={handleSaveAll} disabled={isLoading}>
                     <Save size={18} />
-                    Save All Changes
+                    {isLoading ? 'Saving...' : 'Save All Changes'}
                 </Button>
             </div>
 
@@ -189,42 +258,95 @@ const ManagerSettings = () => {
                         <CardDescription>This information will be visible to your team members.</CardDescription>
                     </CardHeader>
                     <CardContent className="p-6 space-y-6">
-                        <div className="flex items-center gap-6 mb-8">
-                            <div className="relative">
-                                <div className="w-24 h-24 rounded-3xl bg-primary-100 flex items-center justify-center text-3xl font-bold text-primary-600 border-4 border-white dark:border-slate-800 shadow-xl overflow-hidden">
-                                    {user?.name?.charAt(0)}
-                                </div>
-                                <Button size="icon" className="absolute -bottom-2 -right-2 rounded-full h-8 w-8 shadow-lg">
-                                    <Palette size={14} />
-                                </Button>
-                            </div>
-                            <div>
-                                <h4 className="font-bold text-slate-900 dark:text-white">Profile Photo</h4>
-                                <p className="text-xs text-slate-500 mt-1">Recommended size: 400x400px. JPG, PNG or GIF.</p>
-                                <div className="flex gap-2 mt-3">
-                                    <Button variant="outline" size="sm" className="h-8 rounded-lg text-xs font-bold">Upload new</Button>
-                                    <Button variant="ghost" size="sm" className="h-8 rounded-lg text-xs font-bold text-red-500">Remove</Button>
-                                </div>
-                            </div>
-                        </div>
+
 
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="space-y-2 text-left">
                                 <label className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Full Name</label>
-                                <Input defaultValue={user?.name} className="rounded-xl h-11 border-slate-100 dark:border-slate-800" />
+                                <Input
+                                    value={profileData.name}
+                                    onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                                    className="rounded-xl h-11 border-slate-100 dark:border-slate-800"
+                                />
                             </div>
                             <div className="space-y-2 text-left">
                                 <label className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Email Address</label>
-                                <Input defaultValue={user?.email} className="rounded-xl h-11 border-slate-100 dark:border-slate-800" />
+                                <Input
+                                    value={profileData.email}
+                                    onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                                    className="rounded-xl h-11 border-slate-100 dark:border-slate-800"
+                                />
                             </div>
                             <div className="space-y-2 text-left">
                                 <label className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Department</label>
-                                <Input defaultValue="Product Engineering" className="rounded-xl h-11 border-slate-100 dark:border-slate-800" />
+                                <Input
+                                    value={profileData.department}
+                                    onChange={(e) => setProfileData({ ...profileData, department: e.target.value })}
+                                    className="rounded-xl h-11 border-slate-100 dark:border-slate-800"
+                                />
                             </div>
                             <div className="space-y-2 text-left">
                                 <label className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Role Title</label>
-                                <Input defaultValue="Lead Manager" className="rounded-xl h-11 border-slate-100 dark:border-slate-800" />
+                                <Input
+                                    value={profileData.role}
+                                    onChange={(e) => setProfileData({ ...profileData, role: e.target.value })}
+                                    className="rounded-xl h-11 border-slate-100 dark:border-slate-800"
+                                />
                             </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Password / Security Section */}
+                <Card className="border-none shadow-sm overflow-hidden">
+                    <CardHeader className="border-b border-slate-50 dark:border-slate-800">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-amber-50 dark:bg-amber-900/10 rounded-lg text-amber-600">
+                                <Lock size={20} />
+                            </div>
+                            <div>
+                                <CardTitle className="text-lg font-bold">Security</CardTitle>
+                                <CardDescription>Update your password and security settings.</CardDescription>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 items-end">
+                            <div className="space-y-2 text-left">
+                                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Current Password</label>
+                                <Input
+                                    type="password"
+                                    value={passwordData.currentPassword}
+                                    onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                                    placeholder="••••••••"
+                                    className="rounded-xl h-11 border-slate-100 dark:border-slate-800"
+                                />
+                            </div>
+                            <div className="space-y-2 text-left">
+                                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">New Password</label>
+                                <Input
+                                    type="password"
+                                    value={passwordData.newPassword}
+                                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                                    placeholder="••••••••"
+                                    className="rounded-xl h-11 border-slate-100 dark:border-slate-800"
+                                />
+                            </div>
+                            <div className="space-y-2 text-left">
+                                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Confirm Password</label>
+                                <Input
+                                    type="password"
+                                    value={passwordData.confirmPassword}
+                                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                                    placeholder="••••••••"
+                                    className="rounded-xl h-11 border-slate-100 dark:border-slate-800"
+                                />
+                            </div>
+                        </div>
+                        <div className="mt-4 flex justify-end">
+                            <Button variant="outline" onClick={handlePasswordChange} disabled={isLoading}>
+                                Update Password
+                            </Button>
                         </div>
                     </CardContent>
                 </Card>

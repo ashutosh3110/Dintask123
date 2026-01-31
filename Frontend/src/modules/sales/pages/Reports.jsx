@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { BarChart3, PieChart, LineChart, Download, Filter, Search, TrendingUp, TrendingDown, Target, Users, FileText, Clock, DollarSign } from 'lucide-react';
+import { BarChart3, PieChart, LineChart, Download, Filter, Search, TrendingUp, TrendingDown, Target, Users, FileText, Clock, IndianRupee } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
@@ -11,9 +11,12 @@ import useAuthStore from '@/store/authStore';
 import useSalesStore from '@/store/salesStore';
 import useSalesTargetsStore from '@/store/salesTargetsStore';
 
+import useCRMStore from '@/store/crmStore';
+
 const SalesReports = () => {
     const { user } = useAuthStore();
     const { salesReps, getSalesRepByEmail } = useSalesStore();
+    const { leads } = useCRMStore();
     const {
         individualTargets,
         teamTargets,
@@ -24,7 +27,7 @@ const SalesReports = () => {
         getTeamTargetsByPeriod,
         getActualPerformanceByPeriod
     } = useSalesTargetsStore();
-    
+
     const [selectedPeriod, setSelectedPeriod] = useState('month');
     const [filters, setFilters] = useState({ status: 'all', type: 'all' });
     const [targetPeriod, setTargetPeriod] = useState('monthly');
@@ -33,7 +36,7 @@ const SalesReports = () => {
     const salesRep = useMemo(() => {
         return getSalesRepByEmail(user?.email);
     }, [user?.email, getSalesRepByEmail]);
-    
+
     // Map reporting period to target period
     const reportingToTargetPeriod = {
         week: 'monthly',
@@ -41,7 +44,7 @@ const SalesReports = () => {
         quarter: 'quarterly',
         year: 'yearly'
     };
-    
+
     // Calculate target progress for reporting
     const targetReportData = useMemo(() => {
         const mappedPeriod = reportingToTargetPeriod[selectedPeriod] || 'monthly';
@@ -64,59 +67,54 @@ const SalesReports = () => {
 
     // Calculate report metrics based on selected period
     const reportMetrics = useMemo(() => {
-        if (!salesRep) {
-            return {
-                totalRevenue: 0,
-                totalDeals: 0,
-                avgDealValue: 0,
-                revenueChange: 0,
-                dealsChange: 0,
-                avgValueChange: 0
-            };
-        }
+        // Filter leads by period (mocking period filtering by just showing all for now as mock dates are recent)
+        // In real app, filter leads where createdAt or updatedAt is within selectedPeriod.
 
-        // Mock data based on period
-        const metrics = {
-            week: {
-                totalRevenue: 24560,
-                totalDeals: 5,
-                avgDealValue: 4912,
-                revenueChange: 15.2,
-                dealsChange: 25,
-                avgValueChange: -7.5
-            },
-            month: {
-                totalRevenue: 124560,
-                totalDeals: 28,
-                avgDealValue: 4448,
-                revenueChange: 12.5,
-                dealsChange: 8,
-                avgValueChange: -2
-            },
-            quarter: {
-                totalRevenue: 389000,
-                totalDeals: 85,
-                avgDealValue: 4576,
-                revenueChange: 18.3,
-                dealsChange: 12,
-                avgValueChange: 5.2
-            },
-            year: {
-                totalRevenue: 1567800,
-                totalDeals: 342,
-                avgDealValue: 4584,
-                revenueChange: 22.1,
-                dealsChange: 15,
-                avgValueChange: 6.8
-            }
+        let filteredLeads = leads; // Placeholder for date filtering
+
+        const totalRevenue = filteredLeads
+            .filter(l => l.status === 'Won')
+            .reduce((sum, l) => sum + (l.amount || 0), 0);
+
+        const totalDeals = filteredLeads.length;
+        const wonDealsCount = filteredLeads.filter(l => l.status === 'Won').length;
+
+        const avgDealValue = totalDeals > 0 ? Math.round(filteredLeads.reduce((sum, l) => sum + (l.amount || 0), 0) / totalDeals) : 0;
+
+        return {
+            totalRevenue,
+            totalDeals,
+            avgDealValue,
+            revenueChange: 0, // Placeholder
+            dealsChange: 0, // Placeholder
+            avgValueChange: 0 // Placeholder
         };
-
-        return metrics[selectedPeriod] || metrics.month;
-    }, [salesRep, selectedPeriod]);
+    }, [salesRep, selectedPeriod, leads]);
 
     const handleExport = () => {
-        // Mock export functionality
-        alert(`Exporting ${selectedPeriod} sales report...`);
+        // Simple CSV Export
+        const rows = [
+            ["ID", "Name", "Company", "Amount", "Status", "Created At"],
+            ...leads.map(l => [
+                l.id,
+                `"${l.name}"`,
+                `"${l.company}"`,
+                l.amount || 0,
+                l.status,
+                l.createdAt ? l.createdAt.split('T')[0] : ''
+            ])
+        ];
+
+        const csvContent = "data:text/csv;charset=utf-8,"
+            + rows.map(e => e.join(",")).join("\n");
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `sales_report_${selectedPeriod}_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     const handleFilterChange = (key, value) => {
@@ -170,7 +168,7 @@ const SalesReports = () => {
                         <CardTitle className="text-base font-bold">Total Revenue</CardTitle>
                     </CardHeader>
                     <CardContent className="p-4">
-                        <div className="text-2xl font-bold text-slate-900 dark:text-white">${reportMetrics.totalRevenue.toLocaleString()}</div>
+                        <div className="text-2xl font-bold text-slate-900 dark:text-white">₹{reportMetrics.totalRevenue.toLocaleString()}</div>
                         <div className={`text-sm mt-1 flex items-center gap-1 ${reportMetrics.revenueChange >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
                             {reportMetrics.revenueChange >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
                             {reportMetrics.revenueChange >= 0 ? '+' : ''}{reportMetrics.revenueChange}% from previous period
@@ -194,7 +192,7 @@ const SalesReports = () => {
                         <CardTitle className="text-base font-bold">Avg. Deal Value</CardTitle>
                     </CardHeader>
                     <CardContent className="p-4">
-                        <div className="text-2xl font-bold text-slate-900 dark:text-white">${reportMetrics.avgDealValue.toLocaleString()}</div>
+                        <div className="text-2xl font-bold text-slate-900 dark:text-white">₹{reportMetrics.avgDealValue.toLocaleString()}</div>
                         <div className={`text-sm mt-1 flex items-center gap-1 ${reportMetrics.avgValueChange >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
                             {reportMetrics.avgValueChange >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
                             {reportMetrics.avgValueChange >= 0 ? '+' : ''}{reportMetrics.avgValueChange}% from previous period
@@ -240,7 +238,7 @@ const SalesReports = () => {
                                         <div className="p-3 bg-white dark:bg-slate-700 rounded-lg shadow-sm">
                                             <p className="text-slate-400">Top Revenue Source</p>
                                             <p className="font-bold text-slate-900 dark:text-white">Software Sales</p>
-                                            <p className="text-emerald-500">${(reportMetrics.totalRevenue * 0.45).toLocaleString()}</p>
+                                            <p className="text-emerald-500">₹{(reportMetrics.totalRevenue * 0.45).toLocaleString()}</p>
                                         </div>
                                         <div className="p-3 bg-white dark:bg-slate-700 rounded-lg shadow-sm">
                                             <p className="text-slate-400">Growth Rate</p>
@@ -341,7 +339,7 @@ const SalesReports = () => {
                         </CardContent>
                     </Card>
                 </TabsContent>
-                
+
                 {/* Sales Targets Tab */}
                 <TabsContent value="targets" className="space-y-6">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -360,7 +358,7 @@ const SalesReports = () => {
                             </SelectContent>
                         </Select>
                     </div>
-                    
+
                     <div className="grid gap-6 lg:grid-cols-2">
                         {/* Individual Targets */}
                         <Card className="border-none shadow-sm">
@@ -378,7 +376,7 @@ const SalesReports = () => {
                                     const individualProgress = calculateIndividualProgress(targetPeriod, metric);
                                     const individualTarget = getIndividualTargetsByPeriod(targetPeriod)[metric];
                                     const actual = getActualPerformanceByPeriod(targetPeriod)[metric];
-                                    
+
                                     return (
                                         <div key={metric} className="space-y-2">
                                             <div className="flex items-center justify-between">
@@ -386,8 +384,8 @@ const SalesReports = () => {
                                                     {metric === 'revenue' ? 'Revenue' : metric}
                                                 </span>
                                                 <span className="text-sm font-bold">
-                                                    {metric === 'revenue' ? 
-                                                        `$${actual?.toLocaleString()} / $${individualTarget?.toLocaleString()}` :
+                                                    {metric === 'revenue' ?
+                                                        `₹${actual?.toLocaleString()} / ₹${individualTarget?.toLocaleString()}` :
                                                         `${actual} / ${individualTarget}`
                                                     }
                                                 </span>
@@ -402,7 +400,7 @@ const SalesReports = () => {
                                         </div>
                                     );
                                 })}
-                                
+
                                 <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                                     <div className="flex items-center justify-between">
                                         <span className="text-sm font-medium text-slate-900 dark:text-white">
@@ -413,15 +411,15 @@ const SalesReports = () => {
                                         </span>
                                     </div>
                                     <div className="space-y-1 mt-2">
-                                        <Progress 
-                                            value={Math.round((targetReportData.individual.revenue + targetReportData.individual.deals + targetReportData.individual.clients) / 3)} 
-                                            className="h-2" 
+                                        <Progress
+                                            value={Math.round((targetReportData.individual.revenue + targetReportData.individual.deals + targetReportData.individual.clients) / 3)}
+                                            className="h-2"
                                         />
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
-                        
+
                         {/* Team Targets */}
                         <Card className="border-none shadow-sm">
                             <CardHeader className="flex flex-row items-center justify-between">
@@ -438,7 +436,7 @@ const SalesReports = () => {
                                     const teamProgress = calculateTeamProgress(targetPeriod, metric);
                                     const teamTarget = getTeamTargetsByPeriod(targetPeriod)[metric];
                                     const actual = getActualPerformanceByPeriod(targetPeriod)[metric];
-                                    
+
                                     return (
                                         <div key={metric} className="space-y-2">
                                             <div className="flex items-center justify-between">
@@ -446,8 +444,8 @@ const SalesReports = () => {
                                                     {metric === 'revenue' ? 'Revenue' : metric}
                                                 </span>
                                                 <span className="text-sm font-bold">
-                                                    {metric === 'revenue' ? 
-                                                        `$${actual?.toLocaleString()} / $${teamTarget?.toLocaleString()}` :
+                                                    {metric === 'revenue' ?
+                                                        `₹${actual?.toLocaleString()} / ₹${teamTarget?.toLocaleString()}` :
                                                         `${actual} / ${teamTarget}`
                                                     }
                                                 </span>
@@ -462,7 +460,7 @@ const SalesReports = () => {
                                         </div>
                                     );
                                 })}
-                                
+
                                 <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                                     <div className="flex items-center justify-between">
                                         <span className="text-sm font-medium text-slate-900 dark:text-white">
@@ -473,16 +471,16 @@ const SalesReports = () => {
                                         </span>
                                     </div>
                                     <div className="space-y-1 mt-2">
-                                        <Progress 
-                                            value={Math.round((targetReportData.team.revenue + targetReportData.team.deals + targetReportData.team.clients) / 3)} 
-                                            className="h-2" 
+                                        <Progress
+                                            value={Math.round((targetReportData.team.revenue + targetReportData.team.deals + targetReportData.team.clients) / 3)}
+                                            className="h-2"
                                         />
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
                     </div>
-                    
+
                     {/* Target Comparison */}
                     <Card className="border-none shadow-sm">
                         <CardHeader>
@@ -496,17 +494,17 @@ const SalesReports = () => {
                                     <div className="mt-6 grid grid-cols-3 gap-6 text-sm">
                                         <div className="p-4 bg-white dark:bg-slate-700 rounded-lg shadow-sm">
                                             <div className="flex items-center justify-center mb-3">
-                                                <DollarSign size={24} className="text-blue-500" />
+                                                <IndianRupee size={24} className="text-blue-500" />
                                             </div>
                                             <h4 className="font-bold text-slate-900 dark:text-white mb-1">Revenue</h4>
                                             <div className="space-y-1">
                                                 <div className="flex justify-between">
                                                     <span className="text-slate-500">Target:</span>
-                                                    <span className="font-medium">${targetReportData.individualTarget.revenue?.toLocaleString()}</span>
+                                                    <span className="font-medium">₹{targetReportData.individualTarget.revenue?.toLocaleString()}</span>
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <span className="text-slate-500">Actual:</span>
-                                                    <span className="font-medium">${targetReportData.actual.revenue?.toLocaleString()}</span>
+                                                    <span className="font-medium">₹{targetReportData.actual.revenue?.toLocaleString()}</span>
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <span className="text-slate-500">Progress:</span>
@@ -514,7 +512,7 @@ const SalesReports = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                        
+
                                         <div className="p-4 bg-white dark:bg-slate-700 rounded-lg shadow-sm">
                                             <div className="flex items-center justify-center mb-3">
                                                 <FileText size={24} className="text-amber-500" />
@@ -535,7 +533,7 @@ const SalesReports = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                        
+
                                         <div className="p-4 bg-white dark:bg-slate-700 rounded-lg shadow-sm">
                                             <div className="flex items-center justify-center mb-3">
                                                 <Users size={24} className="text-purple-500" />

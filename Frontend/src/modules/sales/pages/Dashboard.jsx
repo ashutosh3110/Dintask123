@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard,
-    DollarSign,
+    IndianRupee,
     Users,
     BarChart3,
     Clock,
@@ -22,10 +23,14 @@ import { Button } from '@/shared/components/ui/button';
 import { Progress } from '@/shared/components/ui/progress';
 import { cn } from '@/shared/utils/cn';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
+import useCRMStore from '@/store/crmStore';
+
 
 const SalesDashboard = () => {
+    const navigate = useNavigate();
     const { user } = useAuthStore();
     const { salesReps, getSalesRepByEmail } = useSalesStore();
+    const { leads } = useCRMStore(); // Use leads as source of truth for stats
     const {
         individualTargets,
         teamTargets,
@@ -33,14 +38,39 @@ const SalesDashboard = () => {
         calculateIndividualProgress,
         calculateTeamProgress
     } = useSalesTargetsStore();
-    
+
     const [selectedPeriod, setSelectedPeriod] = useState('monthly');
 
     // Get current sales rep data from store
     const salesRep = useMemo(() => {
         return getSalesRepByEmail(user?.email);
     }, [user?.email, getSalesRepByEmail]);
-    
+
+    // Calculate real stats from CRM leads
+    const realStats = useMemo(() => {
+        const myLeads = leads; // In real app filter by owner: leads.filter(l => l.owner === user?.id)
+
+        const totalSales = myLeads
+            .filter(l => l.status === 'Won')
+            .reduce((sum, l) => sum + (l.amount || 0), 0);
+
+        const activeDeals = myLeads.filter(l => l.status !== 'Won' && l.status !== 'Lost').length;
+
+        const wonCount = myLeads.filter(l => l.status === 'Won').length;
+        const lostCount = myLeads.filter(l => l.status === 'Lost').length;
+        const totalClosed = wonCount + lostCount;
+        const conversionRate = totalClosed > 0 ? Math.round((wonCount / totalClosed) * 100) : 0;
+
+        const clientsCount = new Set(myLeads.filter(l => l.status === 'Won').map(l => l.company || l.name)).size;
+
+        return {
+            totalSales,
+            activeDeals,
+            conversionRate,
+            clientsCount
+        };
+    }, [leads]);
+
     // Calculate target progress for the selected period
     const targetProgress = useMemo(() => {
         return {
@@ -62,50 +92,41 @@ const SalesDashboard = () => {
 
     // Sales stats from store data
     const stats = useMemo(() => {
-        if (!salesRep) {
-            return [
-                { title: 'Total Sales', value: '$0', icon: DollarSign, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/10', trend: 'No data' },
-                { title: 'Active Deals', value: '0', icon: AlertCircle, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/10', trend: 'No data' },
-                { title: 'Conversion Rate', value: '0%', icon: TrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/10', trend: 'No data' },
-                { title: 'Clients', value: '0', icon: Users, color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-900/10', trend: 'No data' }
-            ];
-        }
-
         return [
             {
                 title: 'Total Sales',
-                value: `$${salesRep.totalSales.toLocaleString()}`,
-                icon: DollarSign,
+                value: `₹${realStats.totalSales.toLocaleString()}`,
+                icon: IndianRupee,
                 color: 'text-blue-600',
                 bg: 'bg-blue-50 dark:bg-blue-900/10',
-                trend: '+12% from last month'
+                trend: '+12% from last month' // Placeholder
             },
             {
                 title: 'Active Deals',
-                value: salesRep.activeDeals.toString(),
+                value: realStats.activeDeals.toString(),
                 icon: AlertCircle,
                 color: 'text-amber-600',
                 bg: 'bg-amber-50 dark:bg-amber-900/10',
-                trend: '3 high priority'
+                trend: '3 high priority' // Placeholder
             },
             {
                 title: 'Conversion Rate',
-                value: `${salesRep.conversionRate}%`,
+                value: `${realStats.conversionRate}%`,
                 icon: TrendingUp,
                 color: 'text-emerald-600',
                 bg: 'bg-emerald-50 dark:bg-emerald-900/10',
-                trend: 'Up by 5%'
+                trend: 'Up by 5%' // Placeholder
             },
             {
                 title: 'Clients',
-                value: salesRep.clients.toString(),
+                value: realStats.clientsCount.toString(),
                 icon: Users,
                 color: 'text-purple-600',
                 bg: 'bg-purple-50 dark:bg-purple-900/10',
-                trend: '+3 new this week'
+                trend: '+3 new this week' // Placeholder
             }
         ];
-    }, [salesRep]);
+    }, [realStats]);
 
     return (
         <div className="space-y-8">
@@ -123,12 +144,12 @@ const SalesDashboard = () => {
                     </p>
                 </motion.div>
                 <div className="flex items-center gap-3">
-                    <Button variant="outline" className="gap-2">
+                    <Button variant="outline" className="gap-2" onClick={() => navigate('/sales/schedule')}>
                         <CalendarIcon size={18} />
                         View Schedule
                     </Button>
-                    <Button className="gap-2">
-                        <DollarSign size={18} />
+                    <Button className="gap-2" onClick={() => navigate('/sales/deals')}>
+                        <IndianRupee size={18} />
                         Add Sale
                     </Button>
                 </div>
@@ -171,7 +192,7 @@ const SalesDashboard = () => {
                     </motion.div>
                 ))}
             </motion.div>
-            
+
             {/* Sales Targets Section */}
             <div className="space-y-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -194,7 +215,7 @@ const SalesDashboard = () => {
                         </SelectContent>
                     </Select>
                 </div>
-                
+
                 <div className="grid gap-6 lg:grid-cols-2">
                     {/* Individual Targets */}
                     <Card className="border-none shadow-sm">
@@ -215,8 +236,8 @@ const SalesDashboard = () => {
                                             {metric === 'revenue' ? 'Revenue' : metric}
                                         </span>
                                         <span className="text-sm font-bold">
-                                            {metric === 'revenue' ? 
-                                                `$${targetProgress.actual[metric]?.toLocaleString()} / $${targetProgress.individualTarget[metric]?.toLocaleString()}` :
+                                            {metric === 'revenue' ?
+                                                `₹${targetProgress.actual[metric]?.toLocaleString()} / ₹${targetProgress.individualTarget[metric]?.toLocaleString()}` :
                                                 `${targetProgress.actual[metric]} / ${targetProgress.individualTarget[metric]}`
                                             }
                                         </span>
@@ -232,7 +253,7 @@ const SalesDashboard = () => {
                             ))}
                         </CardContent>
                     </Card>
-                    
+
                     {/* Team Targets */}
                     <Card className="border-none shadow-sm">
                         <CardHeader className="flex flex-row items-center justify-between">
@@ -252,8 +273,8 @@ const SalesDashboard = () => {
                                             {metric === 'revenue' ? 'Revenue' : metric}
                                         </span>
                                         <span className="text-sm font-bold">
-                                            {metric === 'revenue' ? 
-                                                `$${targetProgress.actual[metric]?.toLocaleString()} / $${targetProgress.teamTarget[metric]?.toLocaleString()}` :
+                                            {metric === 'revenue' ?
+                                                `₹${targetProgress.actual[metric]?.toLocaleString()} / ₹${targetProgress.teamTarget[metric]?.toLocaleString()}` :
                                                 `${targetProgress.actual[metric]} / ${targetProgress.teamTarget[metric]}`
                                             }
                                         </span>
@@ -281,7 +302,7 @@ const SalesDashboard = () => {
                             <Clock className="text-primary-500" size={20} />
                             Recent Sales Activity
                         </CardTitle>
-                        <Button variant="ghost" size="sm" className="text-primary-600 gap-1">
+                        <Button variant="ghost" size="sm" className="text-primary-600 gap-1" onClick={() => navigate('/sales/deals')}>
                             View All <ArrowRight size={14} />
                         </Button>
                     </CardHeader>
@@ -295,7 +316,7 @@ const SalesDashboard = () => {
                                     )} />
                                     <div>
                                         <h4 className="text-sm font-semibold text-slate-900 dark:text-white line-clamp-1">Sale #{sale.id}</h4>
-                                        <p className="text-xs text-slate-500 mt-0.5">{sale.client} - ${sale.amount.toLocaleString()}</p>
+                                        <p className="text-xs text-slate-500 mt-0.5">{sale.client} - ₹{sale.amount.toLocaleString()}</p>
                                     </div>
                                 </div>
                                 <div className="text-right">
@@ -321,7 +342,7 @@ const SalesDashboard = () => {
                                 <div key={monthData.month} className="space-y-2">
                                     <div className="flex items-center justify-between">
                                         <span className="text-sm font-medium text-slate-900 dark:text-white">{monthData.month}</span>
-                                        <span className="text-xs text-slate-500 font-bold">${monthData.revenue.toLocaleString()}</span>
+                                        <span className="text-xs text-slate-500 font-bold">₹{monthData.revenue.toLocaleString()}</span>
                                     </div>
                                     <div className="space-y-1">
                                         <div className="flex justify-between text-[10px] text-slate-400">

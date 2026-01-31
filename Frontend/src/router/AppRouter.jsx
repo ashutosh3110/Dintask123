@@ -43,6 +43,7 @@ import Reports from '@/modules/admin/pages/Reports';
 import AdminCalendar from '@/modules/admin/pages/Calendar';
 import Subscription from '@/modules/admin/pages/Subscription';
 import Settings from '@/modules/admin/pages/Settings';
+import SalesManagement from '@/modules/admin/pages/SalesManagement';
 
 import ManagerLogin from '@/modules/manager/pages/ManagerLogin';
 
@@ -102,13 +103,13 @@ import AdminAccounts from '@/modules/superadmin/pages/AdminAccounts';
 import PlansManagement from '@/modules/superadmin/pages/PlansManagement';
 import SuperAdminSettings from '@/modules/superadmin/pages/Settings';
 
-// ... imports
+// Layouts
 import CRMLayout from '@/shared/layouts/CRMLayout';
 
 const AppRouter = () => {
     return (
         <Routes>
-            {/* Public Routes ... (keep as is) */}
+            {/* Public Routes */}
             <Route path="/employee/login" element={<EmployeeLogin />} />
             <Route path="/employee/forgot-password" element={<ForgotPassword returnPath="/employee/login" />} />
             <Route path="/manager/login" element={<ManagerLogin />} />
@@ -126,6 +127,7 @@ const AppRouter = () => {
                 <Route index element={<AdminDashboard />} />
                 <Route path="managers" element={<ManagerManagement />} />
                 <Route path="employees" element={<EmployeeManagement />} />
+                <Route path="sales" element={<SalesManagement />} />
                 <Route path="tasks" element={<TaskManagement />} />
                 <Route path="tasks/:id" element={<TaskCompletion />} />
                 <Route path="reports" element={<Reports />} />
@@ -248,7 +250,7 @@ const AppRouter = () => {
             {/* Default Redirection */}
             <Route path="/" element={<NotFoundRedirect />} />
             <Route path="*" element={<NotFoundRedirect />} />
-        </Routes>
+        </Routes >
     );
 };
 

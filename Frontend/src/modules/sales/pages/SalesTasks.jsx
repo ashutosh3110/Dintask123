@@ -20,14 +20,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/shared/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import useTaskStore from '@/store/taskStore';
-import useSalesStore from '@/store/salesStore';
+import useCRMStore from '@/store/crmStore';
 import useAuthStore from '@/store/authStore';
+import useSalesStore from '@/store/salesStore';
 
 const SalesTasks = () => {
     const { user } = useAuthStore();
-    const { salesReps, getSalesRepByEmail, salesActivities, getRecentActivities } = useSalesStore();
+    const { salesReps, getSalesRepByEmail } = useSalesStore();
+    const { followUps, leads } = useCRMStore();
     const { tasks, addTask, updateTask, deleteTask } = useTaskStore();
-    
+
     // State for filtering and sorting tasks
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedStatus, setSelectedStatus] = useState('all');
@@ -46,7 +48,9 @@ const SalesTasks = () => {
         return tasks
             .filter(task => {
                 // Filter tasks assigned to the current sales rep
-                const isAssigned = task.assignedTo?.includes('1') || task.assignedTo?.includes(salesRep?.id);
+                // Determine user ID - mock sales rep or auth user
+                const userId = salesRep?.id || user?.id || '1';
+                const isAssigned = task.assignedTo?.some(id => id === userId || id === '1'); // Allow '1' for demo visibility
                 const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase());
                 const matchesStatus = selectedStatus === 'all' || task.status === selectedStatus;
                 const matchesPriority = selectedPriority === 'all' || task.priority === selectedPriority;
@@ -65,8 +69,8 @@ const SalesTasks = () => {
                         break;
                     case 'priority':
                         const priorityOrder = { low: 1, medium: 2, high: 3, urgent: 4 };
-                        aVal = priorityOrder[a.priority];
-                        bVal = priorityOrder[b.priority];
+                        aVal = priorityOrder[a.priority] || 0;
+                        bVal = priorityOrder[b.priority] || 0;
                         break;
                     case 'status':
                         const statusOrder = { pending: 1, in_progress: 2, completed: 3 };
@@ -81,12 +85,26 @@ const SalesTasks = () => {
                 if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
                 return 0;
             });
-    }, [tasks, searchTerm, selectedStatus, selectedPriority, sortBy, sortOrder, salesRep?.id]);
+    }, [tasks, searchTerm, selectedStatus, selectedPriority, sortBy, sortOrder, salesRep?.id, user?.id]);
 
-    // Get recent sales activities
+    // Get recent sales activities (mapped from CRM followUps)
     const recentActivities = useMemo(() => {
-        return getRecentActivities(10);
-    }, [getRecentActivities]);
+        const sortedFollowUps = [...followUps].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        return sortedFollowUps.slice(0, 10).map(fup => {
+            const lead = leads.find(l => l.id === fup.leadId);
+            return {
+                id: fup.id,
+                type: fup.type?.toLowerCase() || 'call',
+                title: fup.type ? `${fup.type} with ${lead?.name || 'Unknown Client'}` : 'Follow-up',
+                description: fup.notes || 'No notes',
+                date: fup.scheduledAt || fup.createdAt,
+                duration: fup.duration,
+                outcome: fup.outcome || 'Pending',
+                leadName: lead?.name
+            };
+        });
+    }, [followUps, leads]);
 
     // Calculate task statistics
     const taskStats = useMemo(() => {
@@ -115,8 +133,23 @@ const SalesTasks = () => {
     };
 
     const handleAddTask = () => {
-        // Navigate to add task page or open modal
-        alert('Add new task functionality would open here');
+        const title = window.prompt("Enter Task Title:");
+        if (!title) return;
+
+        const priority = window.prompt("Priority (low, medium, high):", "medium");
+        const deadline = window.prompt("Deadline (YYYY-MM-DD):", new Date().toISOString().split('T')[0]);
+
+        const newTask = {
+            title,
+            priority: priority || 'medium',
+            deadline: deadline ? new Date(deadline).toISOString() : new Date().toISOString(),
+            status: 'pending',
+            assignedTo: [user?.id],
+            description: 'Created via Sales Tasks',
+            createdBy: user?.id
+        };
+        addTask(newTask);
+        alert('Task added successfully');
     };
 
     const handleTaskStatusChange = (taskId, newStatus) => {
@@ -215,7 +248,7 @@ const SalesTasks = () => {
                     <TabsTrigger value="tasks">Tasks</TabsTrigger>
                     <TabsTrigger value="activities">Activities</TabsTrigger>
                 </TabsList>
-                
+
                 <TabsContent value="tasks">
                     <Card className="border-none shadow-sm">
                         <CardHeader className="flex flex-row items-center justify-between">
@@ -223,8 +256,8 @@ const SalesTasks = () => {
                             <div className="flex flex-wrap items-center gap-2">
                                 <div className="relative">
                                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-400" />
-                                    <Input 
-                                        placeholder="Search tasks..." 
+                                    <Input
+                                        placeholder="Search tasks..."
                                         className="pl-8 w-[200px]"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -306,15 +339,15 @@ const SalesTasks = () => {
                                                 <TableCell>
                                                     <Badge variant={
                                                         task.status === 'completed' ? 'default' :
-                                                        task.status === 'in_progress' ? 'secondary' : 'outline'
+                                                            task.status === 'in_progress' ? 'secondary' : 'outline'
                                                     }>
                                                         {task.status}
                                                     </Badge>
                                                 </TableCell>
                                                 <TableCell className="text-right">
                                                     <div className="flex justify-end gap-2">
-                                                        <Button 
-                                                            variant="ghost" 
+                                                        <Button
+                                                            variant="ghost"
                                                             size="sm"
                                                             onClick={() => handleTaskStatusChange(task.id, task.status === 'completed' ? 'pending' : 'completed')}
                                                         >

@@ -62,10 +62,28 @@ const useAuthStore = create(
                 });
             },
 
-            updateUser: (updatedData) => {
+            updateProfile: async (updatedData) => {
+                set({ loading: true });
+                // Simulate API delay
+                await new Promise((resolve) => setTimeout(resolve, 800));
+
                 set((state) => ({
-                    user: { ...state.user, ...updatedData }
+                    user: { ...state.user, ...updatedData },
+                    loading: false
                 }));
+                return true;
+            },
+
+            changePassword: async (currentPassword, newPassword) => {
+                set({ loading: true });
+                // Simulate API delay
+                await new Promise((resolve) => setTimeout(resolve, 800));
+
+                // In a real app, we would verify currentPassword here.
+                // For this mock, we'll just assume success.
+
+                set({ loading: false });
+                return true;
             },
 
             clearError: () => set({ error: null }),
