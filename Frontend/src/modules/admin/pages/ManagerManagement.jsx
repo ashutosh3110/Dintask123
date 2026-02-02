@@ -12,7 +12,10 @@ import {
     Briefcase,
     CheckCircle2,
     XCircle,
-    Download
+    Download,
+    ChevronDown,
+    ChevronUp,
+    ExternalLink
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
@@ -38,6 +41,7 @@ const ManagerManagement = () => {
     const { employees } = useEmployeeStore();
     const [searchTerm, setSearchTerm] = useState('');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [expandedManager, setExpandedManager] = useState(null);
     const [newManager, setNewManager] = useState({ name: '', email: '', department: '' });
     const [parent] = useAutoAnimate();
 
@@ -125,6 +129,7 @@ const ManagerManagement = () => {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="border-b border-slate-50 dark:border-slate-800">
+                                <th className="p-5 w-10"></th>
                                 <th className="p-5 text-xs font-bold text-slate-400 uppercase tracking-widest">Manager</th>
                                 <th className="p-5 text-xs font-bold text-slate-400 uppercase tracking-widest">Department</th>
                                 <th className="p-5 text-xs font-bold text-slate-400 uppercase tracking-widest">Team Size</th>
@@ -134,62 +139,115 @@ const ManagerManagement = () => {
                         </thead>
                         <tbody ref={parent}>
                             {filteredManagers.map((mgr) => {
-                                const teamCount = employees.filter(e => e.managerId === mgr.id).length;
+                                const teamMembers = employees.filter(e => e.managerId === mgr.id);
+                                const teamCount = teamMembers.length;
+                                const isExpanded = expandedManager === mgr.id;
+
                                 return (
-                                    <tr key={mgr.id} className="border-b border-slate-50 dark:border-slate-800 last:border-0 hover:bg-slate-50/50 transition-colors group">
-                                        <td className="p-5">
-                                            <div className="flex items-center gap-3">
-                                                <Avatar className="h-10 w-10 border-2 border-white dark:border-slate-800 shadow-sm">
-                                                    <AvatarImage src={mgr.avatar} />
-                                                    <AvatarFallback className="bg-primary-50 text-primary-600 font-bold">{mgr.name.charAt(0)}</AvatarFallback>
-                                                </Avatar>
-                                                <div>
-                                                    <p className="font-bold text-slate-900 dark:text-white leading-none">{mgr.name}</p>
-                                                    <p className="text-xs text-slate-500 mt-1">{mgr.email}</p>
+                                    <React.Fragment key={mgr.id}>
+                                        <tr
+                                            className={cn(
+                                                "border-b border-slate-50 dark:border-slate-800 last:border-0 hover:bg-slate-50/50 transition-colors group cursor-pointer",
+                                                isExpanded && "bg-slate-50/80 dark:bg-slate-800/80"
+                                            )}
+                                            onClick={() => setExpandedManager(isExpanded ? null : mgr.id)}
+                                        >
+                                            <td className="p-5">
+                                                {isExpanded ? <ChevronUp size={16} className="text-primary-600" /> : <ChevronDown size={16} className="text-slate-400" />}
+                                            </td>
+                                            <td className="p-5">
+                                                <div className="flex items-center gap-3">
+                                                    <Avatar className="h-10 w-10 border-2 border-white dark:border-slate-800 shadow-sm">
+                                                        <AvatarImage src={mgr.avatar} />
+                                                        <AvatarFallback className="bg-primary-50 text-primary-600 font-bold">{mgr.name.charAt(0)}</AvatarFallback>
+                                                    </Avatar>
+                                                    <div>
+                                                        <p className="font-bold text-slate-900 dark:text-white leading-none">{mgr.name}</p>
+                                                        <p className="text-xs text-slate-500 mt-1">{mgr.email}</p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td className="p-5">
-                                            <Badge variant="outline" className="rounded-lg font-bold text-[10px] bg-slate-50 text-slate-600 tracking-wider">
-                                                {mgr.department}
-                                            </Badge>
-                                        </td>
-                                        <td className="p-5">
-                                            <div className="flex items-center gap-2">
-                                                <Users size={14} className="text-slate-400" />
-                                                <span className="text-sm font-bold text-slate-700">{teamCount} Members</span>
-                                            </div>
-                                        </td>
-                                        <td className="p-5">
-                                            <div className="flex items-center gap-2">
-                                                <div className={cn(
-                                                    "h-1.5 w-1.5 rounded-full",
-                                                    mgr.status === 'active' ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-slate-300"
-                                                )} />
-                                                <span className={cn(
-                                                    "text-xs font-bold uppercase tracking-widest",
-                                                    mgr.status === 'active' ? "text-emerald-600" : "text-slate-400"
-                                                )}>
-                                                    {mgr.status}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="p-5 text-right">
-                                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg">
-                                                    <Edit2 size={14} />
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
-                                                    onClick={() => deleteManager(mgr.id)}
-                                                >
-                                                    <Trash2 size={14} />
-                                                </Button>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                            </td>
+                                            <td className="p-5">
+                                                <Badge variant="outline" className="rounded-lg font-bold text-[10px] bg-slate-50 text-slate-600 tracking-wider">
+                                                    {mgr.department}
+                                                </Badge>
+                                            </td>
+                                            <td className="p-5">
+                                                <div className="flex items-center gap-2">
+                                                    <Users size={14} className="text-slate-400" />
+                                                    <span className="text-sm font-bold text-slate-700">{teamCount} Members</span>
+                                                </div>
+                                            </td>
+                                            <td className="p-5">
+                                                <div className="flex items-center gap-2">
+                                                    <div className={cn(
+                                                        "h-1.5 w-1.5 rounded-full",
+                                                        mgr.status === 'active' ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-slate-300"
+                                                    )} />
+                                                    <span className={cn(
+                                                        "text-xs font-bold uppercase tracking-widest",
+                                                        mgr.status === 'active' ? "text-emerald-600" : "text-slate-400"
+                                                    )}>
+                                                        {mgr.status}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="p-5 text-right">
+                                                <div className="flex justify-end gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg">
+                                                        <Edit2 size={14} />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                                                        onClick={() => deleteManager(mgr.id)}
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </Button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {isExpanded && (
+                                            <tr className="bg-slate-50/30 dark:bg-slate-800/20">
+                                                <td colSpan={6} className="p-0">
+                                                    <div className="px-16 py-6 animate-in slide-in-from-top-2 duration-300">
+                                                        <div className="flex items-center justify-between mb-4">
+                                                            <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                                                                Team Members
+                                                                <Badge className="bg-primary-50 text-primary-700 hover:bg-primary-50 border-none px-2 py-0.5 text-[9px]">{teamCount} Total</Badge>
+                                                            </h4>
+                                                        </div>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                            {teamMembers.length > 0 ? (
+                                                                teamMembers.map(emp => (
+                                                                    <div key={emp.id} className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm group/employee">
+                                                                        <div className="flex items-center gap-3">
+                                                                            <Avatar className="h-10 w-10 border border-slate-100 shadow-sm">
+                                                                                <AvatarImage src={emp.avatar} />
+                                                                                <AvatarFallback className="bg-slate-50 text-slate-600 text-[10px] font-bold">{emp.name.charAt(0)}</AvatarFallback>
+                                                                            </Avatar>
+                                                                            <div>
+                                                                                <p className="text-sm font-bold text-slate-900 dark:text-white leading-none">{emp.name}</p>
+                                                                                <p className="text-[10px] text-slate-500 mt-1">{emp.role}</p>
+                                                                            </div>
+                                                                        </div>
+                                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 hover:text-primary-600 rounded-lg">
+                                                                            <ExternalLink size={14} />
+                                                                        </Button>
+                                                                    </div>
+                                                                ))
+                                                            ) : (
+                                                                <div className="col-span-3 py-8 text-center border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-2xl">
+                                                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No team members assigned</p>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </React.Fragment>
                                 );
                             })}
                         </tbody>

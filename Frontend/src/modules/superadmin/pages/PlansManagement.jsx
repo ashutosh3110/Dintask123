@@ -1,290 +1,299 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-    CreditCard,
     Plus,
-    Edit3,
     Trash2,
+    Edit2,
     Check,
     X,
-    Users,
+    CreditCard,
     Zap,
-    TrendingUp,
-    Settings2,
-    MoreVertical,
-    ShieldCheck
+    Users,
+    ShieldCheck,
+    Search,
+    IndianRupee,
+    Briefcase
 } from 'lucide-react';
-import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'framer-motion';
-
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-    CardFooter
-} from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
 import { Input } from '@/shared/components/ui/input';
-import { Badge } from '@/shared/components/ui/badge';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow
-} from '@/shared/components/ui/table';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/shared/components/ui/dialog";
 import { Label } from '@/shared/components/ui/label';
-import { Switch } from '@/shared/components/ui/switch';
-
+import { Badge } from '@/shared/components/ui/badge';
+import { toast } from 'sonner';
 import useSuperAdminStore from '@/store/superAdminStore';
 import { cn } from '@/shared/utils/cn';
-import { fadeInUp, staggerContainer, scaleOnTap } from '@/shared/utils/animations';
 
 const PlansManagement = () => {
-    const { plans, updatePlan, addPlan } = useSuperAdminStore();
-    const [selectedPlan, setSelectedPlan] = useState(null);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const { plans, addPlan, deletePlan, updatePlan } = useSuperAdminStore();
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [newPlan, setNewPlan] = useState({
+        name: '',
+        price: '',
+        limit: '',
+        isActive: true,
+        trialDays: 0
+    });
 
-    const handleCreatePlan = () => {
-        const newPlan = {
-            name: 'New Tier',
-            price: 1999,
-            limit: 10,
-            isActive: false,
-            trialDays: 0
-        };
-        addPlan(newPlan);
-        toast.success('New plan tier created');
-    };
+    const filteredPlans = plans.filter(plan =>
+        plan.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-    const handleEditClick = (plan) => {
-        setSelectedPlan({ ...plan });
-        setIsEditModalOpen(true);
-    };
-
-    const handleSavePlan = (e) => {
+    const handleAddPlan = (e) => {
         e.preventDefault();
-        updatePlan(selectedPlan.id, selectedPlan);
-        toast.success('Subscription plan updated');
-        setIsEditModalOpen(false);
+        if (!newPlan.name || !newPlan.price || !newPlan.limit) {
+            toast.error("Please fill in all required fields");
+            return;
+        }
+
+        addPlan({
+            ...newPlan,
+            price: Number(newPlan.price),
+            limit: Number(newPlan.limit),
+            trialDays: Number(newPlan.trialDays)
+        });
+
+        toast.success("Plan added successfully!");
+        setIsAddModalOpen(false);
+        setNewPlan({
+            name: '',
+            price: '',
+            limit: '',
+            isActive: true,
+            trialDays: 0
+        });
+    };
+
+    const handleDeletePlan = (id, name) => {
+        if (window.confirm(`Are you sure you want to delete the ${name} plan?`)) {
+            deletePlan(id);
+            toast.success(`${name} plan deleted successfully`);
+        }
+    };
+
+    const togglePlanStatus = (id, currentStatus) => {
+        updatePlan(id, { isActive: !currentStatus });
+        toast.success(`Plan ${!currentStatus ? 'activated' : 'deactivated'} successfully`);
     };
 
     return (
-        <motion.div
-            initial="initial"
-            animate="animate"
-            variants={staggerContainer}
-            className="space-y-6 pb-12"
-        >
-            <motion.div variants={fadeInUp} className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-black text-slate-900 dark:text-white">Subscription Plans</h1>
-                    <p className="text-slate-500 dark:text-slate-400 mt-1 font-medium">
-                        Define pricing tiers and team seat limitations.
+        <div className="space-y-8 pb-12">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-1">
+                    <h1 className="text-3xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                        Subscription Plans <CreditCard className="text-primary-600" size={28} />
+                    </h1>
+                    <p className="text-slate-500 dark:text-slate-400 font-medium">
+                        Manage and scale your platform's subscription tiers.
                     </p>
                 </div>
+                <Button
+                    onClick={() => setIsAddModalOpen(true)}
+                    className="bg-primary-600 hover:bg-primary-700 h-12 px-6 rounded-2xl font-bold shadow-lg shadow-primary-500/20 gap-2"
+                >
+                    <Plus size={20} /> Create New Plan
+                </Button>
+            </div>
 
-                <motion.div {...scaleOnTap}>
-                    <Button onClick={handleCreatePlan} className="flex items-center gap-2 shadow-lg shadow-primary-200 dark:shadow-none bg-emerald-600 hover:bg-emerald-700 h-11 px-6 rounded-xl">
-                        <Plus size={18} />
-                        <span className="font-bold">Create New Tier</span>
-                    </Button>
-                </motion.div>
-            </motion.div>
+            {/* Toolbar */}
+            <div className="bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-4 items-center">
+                <div className="relative flex-1">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                    <Input
+                        placeholder="Search plans by name..."
+                        className="h-12 pl-12 rounded-2xl bg-slate-50 dark:bg-slate-800 border-none focus-visible:ring-primary-500/30"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                <div className="flex items-center gap-2">
+                    <Badge className="bg-primary-100 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400 px-4 py-1.5 rounded-full border-none h-auto">
+                        {plans.length} Total Plans
+                    </Badge>
+                </div>
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <AnimatePresence mode='popLayout'>
-                    {plans.map((plan) => (
-                        <motion.div key={plan.id} variants={fadeInUp} layout>
+            {/* Plans Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <AnimatePresence>
+                    {filteredPlans.map((plan, index) => (
+                        <motion.div
+                            key={plan.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{ duration: 0.2, delay: index * 0.1 }}
+                        >
                             <Card className={cn(
-                                "h-full border-none shadow-md shadow-slate-200/50 dark:shadow-none hover:shadow-xl transition-shadow duration-300 rounded-[2rem] overflow-hidden flex flex-col group relative",
-                                plan.isActive ? "bg-white dark:bg-slate-900" : "bg-slate-50 dark:bg-slate-800 opacity-75 grayscale-[0.5]"
+                                "overflow-hidden border-2 transition-all duration-300 rounded-[2.5rem]",
+                                plan.isActive
+                                    ? "border-slate-200 dark:border-slate-800 hover:border-primary-500/50"
+                                    : "border-slate-100 dark:border-slate-900 opacity-70 grayscale"
                             )}>
-                                <div className={cn(
-                                    "absolute top-0 left-0 w-full h-1.5 transition-colors duration-300",
-                                    plan.name === 'Business' ? "bg-purple-500" : plan.name === 'Pro Team' ? "bg-primary-500" : "bg-slate-300"
-                                )} />
-                                <CardHeader className="pb-2 pt-8 px-8">
+                                <CardHeader className="p-8 pb-4">
                                     <div className="flex justify-between items-start mb-4">
-                                        <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest border-slate-100 bg-slate-50 dark:bg-slate-800 text-slate-400 px-2 py-1 rounded-lg">
-                                            ID: {plan.id}
-                                        </Badge>
-                                        <Switch checked={plan.isActive} onCheckedChange={(val) => updatePlan(plan.id, { isActive: !!val })} />
-                                    </div>
-                                    <CardTitle className="text-2xl font-black flex items-center gap-2">
-                                        {plan.name}
-                                        {plan.trialDays > 0 && (
-                                            <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-none text-[8px] uppercase tracking-widest">
-                                                {plan.trialDays} Day Free Trial
-                                            </Badge>
-                                        )}
-                                    </CardTitle>
-                                    <CardDescription className="text-4xl font-black text-slate-900 dark:text-white mt-2 tracking-tighter flex items-end gap-1">
-                                        ₹{plan.price}
-                                        <span className="text-xs font-bold text-slate-400 mb-1 tracking-normal uppercase">
-                                            {plan.trialDays > 0 ? '/ Month after trial' : '/ Month'}
-                                        </span>
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="flex-1 space-y-6 pt-4 px-8">
-                                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 flex items-center justify-between group-hover:bg-slate-100 dark:group-hover:bg-slate-800 transition-colors">
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-2 bg-white dark:bg-slate-700 rounded-xl shadow-sm">
-                                                <Users size={18} className="text-primary-500" />
-                                            </div>
-                                            <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Team Limit</span>
+                                        <div className="p-4 rounded-3xl bg-slate-50 dark:bg-slate-800 text-primary-600 shadow-inner">
+                                            {plan.name === 'Enterprise' ? <ShieldCheck size={32} /> : plan.limit > 10 ? <Zap size={32} /> : <Briefcase size={32} />}
                                         </div>
-                                        <span className="text-sm font-black text-slate-900 dark:text-white">{plan.limit} Seats</span>
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => togglePlanStatus(plan.id, plan.isActive)}
+                                                className={cn(
+                                                    "w-10 h-10 rounded-full transition-colors",
+                                                    plan.isActive ? "text-emerald-500 hover:bg-emerald-50" : "text-amber-500 hover:bg-amber-50"
+                                                )}
+                                                title={plan.isActive ? "Deactivate" : "Activate"}
+                                            >
+                                                {plan.isActive ? <Check size={20} /> : <X size={20} />}
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => handleDeletePlan(plan.id, plan.name)}
+                                                className="w-10 h-10 rounded-full text-red-500 hover:bg-red-50"
+                                                title="Delete Plan"
+                                            >
+                                                <Trash2 size={20} />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                    <CardTitle className="text-2xl font-black text-slate-900 dark:text-white">{plan.name}</CardTitle>
+                                    <CardDescription className="text-slate-500 dark:text-slate-400 font-medium">Standard License Package</CardDescription>
+                                </CardHeader>
+                                <CardContent className="p-8 pt-4 space-y-8">
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-4xl font-black text-slate-900 dark:text-white">₹{plan.price.toLocaleString('en-IN')}</span>
+                                        <span className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">/ month</span>
                                     </div>
 
-                                    <ul className="space-y-3">
-                                        <li className="flex items-center gap-3 text-xs font-medium text-slate-500">
-                                            <div className="p-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600">
-                                                <Check size={10} strokeWidth={4} />
-                                            </div>
-                                            Full Access to Dashboard
-                                        </li>
-                                        <li className="flex items-center gap-3 text-xs font-medium text-slate-500">
-                                            <div className="p-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600">
-                                                <Check size={10} strokeWidth={4} />
-                                            </div>
-                                            Mobile Employee App
-                                        </li>
-                                    </ul>
+                                    <div className="space-y-4">
+                                        <div className="flex items-center gap-3 text-sm font-bold text-slate-600 dark:text-slate-300">
+                                            <Users size={18} className="text-primary-500" />
+                                            Up to {plan.limit} Team Members
+                                        </div>
+                                        <div className="flex items-center gap-3 text-sm font-bold text-slate-600 dark:text-slate-300">
+                                            <ShieldCheck size={18} className="text-primary-500" />
+                                            {plan.trialDays > 0 ? `${plan.trialDays} Day Free Trial` : 'Full Access'}
+                                        </div>
+                                        <div className="flex items-center gap-3 text-sm font-bold text-slate-600 dark:text-slate-300">
+                                            <Zap size={18} className="text-emerald-500" />
+                                            Unlimited CRM Access
+                                        </div>
+                                    </div>
+
+                                    <Button
+                                        variant="outline"
+                                        className="w-full h-12 rounded-2xl border-slate-200 dark:border-slate-800 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-800"
+                                    >
+                                        Edit Bundle Details
+                                    </Button>
                                 </CardContent>
-                                <CardFooter className="pt-4 pb-8 px-8">
-                                    <motion.div className="w-full" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                                        <Button variant="outline" className="w-full h-12 rounded-xl font-bold gap-2 border-slate-200 hover:border-primary-200 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all" onClick={() => handleEditClick(plan)}>
-                                            <Edit3 size={16} />
-                                            Edit Configuration
-                                        </Button>
-                                    </motion.div>
-                                </CardFooter>
                             </Card>
                         </motion.div>
                     ))}
                 </AnimatePresence>
             </div>
 
-            {/* Plans Table for Bulk View */}
-            <motion.div variants={fadeInUp}>
-                <Card className="border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden rounded-[2rem]">
-                    <CardHeader className="px-8 pt-8">
-                        <CardTitle className="text-lg font-bold">Comprehensive Plan List</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                        <div className="overflow-x-auto">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow className="hover:bg-transparent border-slate-50 dark:border-slate-800">
-                                        <TableHead className="pl-8 text-[10px] font-black uppercase tracking-widest text-slate-400 min-w-[120px]">Tier Name</TableHead>
-                                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 min-w-[100px]">Monthly Fee</TableHead>
-                                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 min-w-[100px]">User Cap</TableHead>
-                                        <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 min-w-[100px]">Status</TableHead>
-                                        <TableHead className="text-right pr-8 text-[10px] font-black uppercase tracking-widest text-slate-400 min-w-[120px]">Last Modified</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {plans.map((plan) => (
-                                        <TableRow key={plan.id} className="border-slate-50 dark:border-slate-800 transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
-                                            <TableCell className="pl-8 font-black text-slate-900 dark:text-white text-sm">{plan.name}</TableCell>
-                                            <TableCell className="text-sm font-bold text-primary-600">₹{plan.price}/mo</TableCell>
-                                            <TableCell className="text-xs font-bold text-slate-500">{plan.limit} Employees</TableCell>
-                                            <TableCell>
-                                                <Badge className={cn("text-[8px] h-5 font-black tracking-widest px-2", plan.isActive ? "bg-emerald-500" : "bg-slate-400")}>
-                                                    {plan.isActive ? 'VISIBLE' : 'HIDDEN'}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell className="text-right pr-8 text-[10px] text-slate-400 font-bold uppercase tracking-widest">TODAY, 14:15</TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </div>
-                    </CardContent>
-                </Card>
-            </motion.div>
+            {/* Add Plan Modal */}
+            <AnimatePresence>
+                {isAddModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsAddModalOpen(false)}
+                            className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl overflow-hidden"
+                        >
+                            <div className="p-8 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                                <div>
+                                    <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Create New Plan</h2>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Define price and limitations.</p>
+                                </div>
+                                <Button variant="ghost" size="icon" onClick={() => setIsAddModalOpen(false)} className="rounded-full">
+                                    <X size={20} />
+                                </Button>
+                            </div>
 
-            {/* Edit Modal */}
-            <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-                <DialogContent className="sm:max-w-[400px] rounded-[2rem] p-0 overflow-hidden border-none gap-0">
-                    <div className="p-6 pb-0">
-                        <DialogHeader>
-                            <DialogTitle className="text-2xl font-black">Edit Pricing Tier</DialogTitle>
-                            <DialogDescription className="font-medium text-slate-500">
-                                Adjust pricing and limitations for the <span className="text-slate-900 dark:text-white font-bold">{selectedPlan?.name}</span> plan.
-                            </DialogDescription>
-                        </DialogHeader>
+                            <form onSubmit={handleAddPlan} className="p-8 space-y-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="name" className="font-bold">Plan Name</Label>
+                                    <Input
+                                        id="name"
+                                        placeholder="e.g. Starter, Pro, Enterprise"
+                                        className="h-12 rounded-2xl"
+                                        value={newPlan.name}
+                                        onChange={(e) => setNewPlan({ ...newPlan, name: e.target.value })}
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="price" className="font-bold">Monthly Price (₹)</Label>
+                                        <Input
+                                            id="price"
+                                            type="number"
+                                            placeholder="999"
+                                            className="h-12 rounded-2xl"
+                                            value={newPlan.price}
+                                            onChange={(e) => setNewPlan({ ...newPlan, price: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="limit" className="font-bold">Member Limit</Label>
+                                        <Input
+                                            id="limit"
+                                            type="number"
+                                            placeholder="5"
+                                            className="h-12 rounded-2xl"
+                                            value={newPlan.limit}
+                                            onChange={(e) => setNewPlan({ ...newPlan, limit: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="trial" className="font-bold">Trial Days</Label>
+                                    <Input
+                                        id="trial"
+                                        type="number"
+                                        placeholder="7"
+                                        className="h-12 rounded-2xl"
+                                        value={newPlan.trialDays}
+                                        onChange={(e) => setNewPlan({ ...newPlan, trialDays: e.target.value })}
+                                    />
+                                </div>
+
+                                <div className="pt-4 flex gap-4">
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        className="flex-1 h-12 rounded-2xl text-slate-500 font-bold"
+                                        onClick={() => setIsAddModalOpen(false)}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        className="flex-1 h-12 rounded-2xl bg-primary-600 hover:bg-primary-700 font-bold shadow-lg shadow-primary-500/20"
+                                    >
+                                        Create Plan
+                                    </Button>
+                                </div>
+                            </form>
+                        </motion.div>
                     </div>
-                    {selectedPlan && (
-                        <form onSubmit={handleSavePlan} className="grid gap-6 p-6">
-                            <div className="grid gap-2">
-                                <Label htmlFor="plan-name" className="text-xs font-bold uppercase text-slate-500 tracking-wide">Plan Name</Label>
-                                <Input
-                                    id="plan-name"
-                                    value={selectedPlan.name}
-                                    onChange={(e) => setSelectedPlan({ ...selectedPlan, name: e.target.value })}
-                                    className="bg-slate-50 dark:bg-slate-800 border-none rounded-xl h-12 font-bold focus-visible:ring-primary-500"
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="grid gap-2">
-                                    <Label className="text-xs font-bold uppercase text-slate-500 tracking-wide">Monthly Price (₹)</Label>
-                                    <Input
-                                        type="number"
-                                        value={selectedPlan.price}
-                                        onChange={(e) => setSelectedPlan({ ...selectedPlan, price: parseInt(e.target.value) })}
-                                        className="bg-slate-50 dark:bg-slate-800 border-none rounded-xl h-12 font-bold focus-visible:ring-primary-500"
-                                    />
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label className="text-xs font-bold uppercase text-slate-500 tracking-wide">Employee Limit</Label>
-                                    <Input
-                                        type="number"
-                                        value={selectedPlan.limit}
-                                        onChange={(e) => setSelectedPlan({ ...selectedPlan, limit: parseInt(e.target.value) })}
-                                        className="bg-slate-50 dark:bg-slate-800 border-none rounded-xl h-12 font-bold focus-visible:ring-primary-500"
-                                    />
-                                </div>
-                            </div>
-                            <div className="grid gap-2">
-                                <Label className="text-xs font-bold uppercase text-slate-500 tracking-wide">Trial Period (Days)</Label>
-                                <Input
-                                    type="number"
-                                    value={selectedPlan.trialDays || 0}
-                                    onChange={(e) => setSelectedPlan({ ...selectedPlan, trialDays: parseInt(e.target.value) })}
-                                    className="bg-slate-50 dark:bg-slate-800 border-none rounded-xl h-12 font-bold focus-visible:ring-primary-500"
-                                />
-                            </div>
-                            <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50">
-                                <div className="space-y-0.5">
-                                    <Label className="text-sm font-bold">Active Status</Label>
-                                    <p className="text-[10px] text-slate-400 font-medium">Available for new registrations</p>
-                                </div>
-                                <Switch
-                                    checked={selectedPlan.isActive}
-                                    onCheckedChange={(val) => setSelectedPlan({ ...selectedPlan, isActive: !!val })}
-                                />
-                            </div>
-                            <DialogFooter className="mt-2">
-                                <Button onClick={handleSavePlan} className="w-full h-12 rounded-xl font-black text-sm shadow-lg shadow-primary-200/50 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-transform">Update Plan Details</Button>
-                            </DialogFooter>
-                        </form>
-                    )}
-                </DialogContent>
-            </Dialog>
-        </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
     );
 };
 

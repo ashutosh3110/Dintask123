@@ -16,7 +16,12 @@ const Subscription = () => {
     const handlePlanClick = (plan) => {
         if (plan.name === 'Free') return;
         setSelectedPlan(plan.name);
-        setIsModalOpen(true);
+
+        if (plan.name === 'Enterprise') {
+            setIsModalOpen(true);
+        } else {
+            navigate('/employee/checkout');
+        }
     };
 
     const plans = [

@@ -27,11 +27,14 @@ import {
 import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/components/ui/button';
 import useAuthStore from '@/store/authStore';
+import useSuperAdminStore from '@/store/superAdminStore';
 
 const Sidebar = ({ role, isOpen, setIsOpen, isCollapsed, setIsCollapsed }) => {
     const logout = useAuthStore(state => state.logout);
     const navigate = useNavigate();
     const location = useLocation();
+    const inquiries = useSuperAdminStore(state => state.inquiries);
+    const newInquiriesCount = inquiries.filter(inq => inq.status === 'new').length;
     const isManager = role === 'manager';
     const isAdmin = role === 'admin';
     const [isSettingsOpen, setIsSettingsOpen] = useState(
@@ -57,7 +60,6 @@ const Sidebar = ({ role, isOpen, setIsOpen, isCollapsed, setIsCollapsed }) => {
                 { name: 'My Tasks', path: '/manager/my-tasks', icon: ListChecks },
                 { name: 'Delegation', path: '/manager/delegation', icon: Users },
                 { name: 'Team', path: '/manager/team', icon: Users },
-                { name: 'CRM', path: '/manager/crm', icon: Briefcase },
                 { name: 'Progress', path: '/manager/progress', icon: BarChart3 },
                 { name: 'Schedule', path: '/manager/schedule', icon: CalendarIcon },
                 { name: 'Settings', path: '/manager/settings', icon: Settings },
@@ -239,6 +241,11 @@ const Sidebar = ({ role, isOpen, setIsOpen, isCollapsed, setIsCollapsed }) => {
                                     isCollapsed ? "mx-auto" : ""
                                 )} />
                                 {!isCollapsed && <span className="truncate">{item.name}</span>}
+                                {!isCollapsed && item.name === 'Inquiries' && newInquiriesCount > 0 && (
+                                    <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-slate-900">
+                                        {newInquiriesCount}
+                                    </span>
+                                )}
                                 {isCollapsed && (
                                     <div className="absolute left-full ml-2 px-2 py-1 bg-slate-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50">
                                         {item.name}

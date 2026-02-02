@@ -104,6 +104,7 @@ import SystemStatus from '@/modules/user/pages/SystemStatus';
 import EmployeeSubscription from '@/modules/user/pages/Subscription';
 import SuccessJoin from '@/modules/user/pages/SuccessJoin';
 import JoinWorkspace from '@/modules/user/pages/JoinWorkspace';
+import Checkout from '@/modules/user/pages/Checkout';
 
 // Super Admin Pages
 import SuperAdminDashboard from '@/modules/superadmin/pages/Dashboard';
@@ -176,6 +177,7 @@ const AppRouter = () => {
                 <Route path="profile/preferences" element={<Preferences />} />
                 <Route path="subscription" element={<EmployeeSubscription />} />
                 <Route path="join" element={<JoinWorkspace />} />
+                <Route path="checkout" element={<Checkout />} />
                 <Route path="profile/help" element={<HelpLegal />} />
                 <Route path="profile/help/privacy" element={<PrivacyPolicy />} />
                 <Route path="profile/help/terms" element={<TermsOfService />} />
@@ -233,15 +235,6 @@ const AppRouter = () => {
                 <Route path="settings/security" element={<ManagerSettings />} />
                 <Route path="settings/customization" element={<ManagerSettings />} />
                 <Route path="settings/language" element={<ManagerSettings />} />
-            </Route>
-
-            {/* Manager CRM Panel */}
-            <Route path="/manager/crm" element={<ProtectedRoute allowedRoles={['manager']}><CRMLayout role="manager" /></ProtectedRoute>}>
-                <Route index element={<EmployeeCRM />} />
-                <Route path="leads" element={<LeadsManagement />} />
-                <Route path="pipeline" element={<SalesPipeline />} />
-                <Route path="follow-ups" element={<FollowUps />} />
-                <Route path="contacts" element={<Contacts />} />
             </Route>
 
             {/* --- SALES ROUTES --- */}

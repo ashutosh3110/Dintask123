@@ -95,7 +95,50 @@ const useSuperAdminStore = create(
                     ),
                 }));
             },
-            inquiries: [],
+
+            deletePlan: (id) => {
+                set((state) => ({
+                    plans: state.plans.filter((p) => p.id !== id),
+                }));
+            },
+            inquiries: [
+                {
+                    id: 'inq-1',
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    workEmail: 'john@example.com',
+                    phone: '+1 234 567 8900',
+                    company: 'Tech Corp',
+                    planSelected: 'Enterprise',
+                    questions: 'We need custom SSO integration and 500+ seats.',
+                    date: new Date(Date.now() - 86400000).toISOString(),
+                    status: 'new'
+                },
+                {
+                    id: 'inq-2',
+                    firstName: 'Sarah',
+                    lastName: 'Smith',
+                    workEmail: 'sarah@design.co',
+                    phone: '+1 987 654 3210',
+                    company: 'Design Studio',
+                    planSelected: 'Pro',
+                    questions: 'What is the limit for file storage on the Pro plan?',
+                    date: new Date(Date.now() - 172800000).toISOString(),
+                    status: 'replied'
+                },
+                {
+                    id: 'inq-3',
+                    firstName: 'Michael',
+                    lastName: 'Brown',
+                    workEmail: 'm.brown@global.com',
+                    phone: '+44 20 7123 4567',
+                    company: 'Global Inc',
+                    planSelected: 'Enterprise',
+                    questions: 'Looking for multi-region data residency options.',
+                    date: new Date(Date.now() - 3600000).toISOString(),
+                    status: 'new'
+                }
+            ],
 
             addInquiry: (inquiry) => {
                 set((state) => ({
@@ -115,7 +158,7 @@ const useSuperAdminStore = create(
             },
         }),
         {
-            name: 'dintask-superadmin-storage',
+            name: 'dintask-superadmin-storage-v2',
             storage: createJSONStorage(() => sessionStorage),
         }
     )

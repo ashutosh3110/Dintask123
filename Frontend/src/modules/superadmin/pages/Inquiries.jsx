@@ -28,12 +28,18 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
+import {
+    Dialog,
+    DialogContent,
+} from "@/shared/components/ui/dialog";
 import { format } from 'date-fns';
+import { cn } from '@/shared/utils/cn';
 
 const Inquiries = () => {
     const { inquiries, updateInquiryStatus } = useSuperAdminStore();
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
+    const [selectedInquiry, setSelectedInquiry] = useState(null);
 
     const filteredInquiries = inquiries.filter(inq => {
         const matchesSearch =
@@ -111,7 +117,10 @@ const Inquiries = () => {
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 transition={{ duration: 0.2, delay: index * 0.05 }}
                             >
-                                <Card className="overflow-hidden border-slate-200 dark:border-slate-800 hover:shadow-xl hover:shadow-slate-200/20 dark:hover:shadow-none transition-all duration-300">
+                                <Card
+                                    className="overflow-hidden border-slate-200 dark:border-slate-800 hover:shadow-xl hover:shadow-slate-200/20 dark:hover:shadow-none transition-all duration-300 cursor-pointer"
+                                    onClick={() => setSelectedInquiry(inq)}
+                                >
                                     <div className={`h-1.5 w-full ${inq.status === 'new' ? 'bg-primary-500' : inq.status === 'replied' ? 'bg-green-500' : 'bg-slate-400'}`} />
                                     <CardContent className="p-0">
                                         <div className="flex flex-col lg:flex-row lg:items-center p-6 gap-6">
@@ -194,6 +203,13 @@ const Inquiries = () => {
                     )}
                 </AnimatePresence>
             </div>
+
+            <InquiryDetailModal
+                isOpen={!!selectedInquiry}
+                onOpenChange={(open) => !open && setSelectedInquiry(null)}
+                inquiry={selectedInquiry}
+                updateStatus={updateInquiryStatus}
+            />
         </div>
     );
 };
@@ -231,6 +247,91 @@ const InquiryActions = ({ inq, updateStatus, fullWidth = false }) => (
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
+    </div>
+);
+
+const InquiryDetailModal = ({ isOpen, onOpenChange, inquiry, updateStatus }) => {
+    if (!inquiry) return null;
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+            <DialogContent className="sm:max-w-[600px] rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl font-sans">
+                <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-8 text-white relative">
+                    <div className="absolute top-4 right-4 flex gap-2">
+                        {/* Badge */}
+                        <Badge className={cn(
+                            "border-none px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest",
+                            inquiry.status === 'new' ? "bg-primary-500" : inquiry.status === 'replied' ? "bg-emerald-500" : "bg-slate-500"
+                        )}>
+                            {inquiry.status}
+                        </Badge>
+                    </div>
+
+                    <div className="flex items-center gap-6">
+                        <div className="w-20 h-20 rounded-[2rem] bg-white/10 backdrop-blur-md flex items-center justify-center text-3xl font-black border border-white/20 shadow-xl">
+                            {inquiry.firstName[0]}{inquiry.lastName[0]}
+                        </div>
+                        <div className="space-y-1">
+                            <h2 className="text-3xl font-black tracking-tight">{inquiry.firstName} {inquiry.lastName}</h2>
+                            <p className="text-primary-400 font-bold flex items-center gap-2">
+                                <Building2 size={18} /> {inquiry.company}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="p-8 space-y-8 bg-white dark:bg-slate-900">
+                    <div className="grid grid-cols-2 gap-8">
+                        <DetailItem icon={Mail} label="Work Email" value={inquiry.workEmail} />
+                        <DetailItem icon={Phone} label="Phone Number" value={inquiry.phone} />
+                        <DetailItem icon={Calendar} label="Plan Interested" value={inquiry.planSelected} />
+                        <DetailItem icon={Clock} label="Received Date" value={format(new Date(inquiry.date), 'MMM dd, yyyy HH:mm')} />
+                    </div>
+
+                    <div className="space-y-3">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Message / Questions</p>
+                        <div className="p-6 rounded-3xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 relative">
+                            <MessageSquare className="absolute -top-3 -left-3 p-1.5 w-8 h-8 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl text-primary-500 shadow-lg" />
+                            <p className="text-slate-600 dark:text-slate-300 font-medium italic leading-relaxed">
+                                "{inquiry.questions || 'No specific questions provided.'}"
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-4 pt-4">
+                        <Button
+                            className="flex-1 h-14 rounded-2xl bg-primary-600 hover:bg-primary-700 font-black text-lg gap-3"
+                            onClick={() => window.open(`mailto:${inquiry.workEmail}?subject=DinTask Inquiry`)}
+                        >
+                            <Mail size={20} /> Reply via Email
+                        </Button>
+                        {inquiry.status === 'new' && (
+                            <Button
+                                variant="outline"
+                                className="h-14 rounded-2xl border-slate-200 dark:border-slate-700 font-bold px-6"
+                                onClick={() => {
+                                    updateStatus(inquiry.id, 'replied');
+                                    onOpenChange(false);
+                                }}
+                            >
+                                Mark as Replied
+                            </Button>
+                        )}
+                    </div>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+const DetailItem = ({ icon: Icon, label, value }) => (
+    <div className="space-y-1.5 group">
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+            <Icon size={12} className="text-primary-500" /> {label}
+        </p>
+        <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+            {value}
+        </p>
     </div>
 );
 
