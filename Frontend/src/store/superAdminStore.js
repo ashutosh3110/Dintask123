@@ -51,8 +51,21 @@ const useSuperAdminStore = create(
             stats: {
                 totalRevenue: 485000,
                 activeCompanies: 12,
-                totalStaff: 84,
                 avgCompletionRate: 92
+            },
+
+            systemSettings: {
+                platformName: 'DinTask CRM',
+                supportEmail: 'support@dintask.com',
+                maintenanceMode: false,
+                force2FA: true,
+                sessionTimeout: 24 // hours
+            },
+
+            updateSystemSettings: (settings) => {
+                set((state) => ({
+                    systemSettings: { ...state.systemSettings, ...settings }
+                }));
             },
 
             updateAdminStatus: (id, status) => {

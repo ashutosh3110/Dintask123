@@ -14,6 +14,8 @@ import { Plus, Calendar as CalendarIcon, Clock, CheckCircle2, XCircle } from 'lu
 import { format } from 'date-fns';
 import useCRMStore from '@/store/crmStore';
 
+import { cn } from '@/shared/utils/cn';
+
 const FollowUps = () => {
   const {
     leads,
@@ -36,13 +38,26 @@ const FollowUps = () => {
     status: 'Scheduled',
   });
 
+  // Lead Search Autocomplete State
+  const [leadSearch, setLeadSearch] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
   const followUpTypes = ['Call', 'Meeting', 'Email', 'WhatsApp'];
   const followUpStatuses = ['Scheduled', 'Completed', 'Missed', 'Cancelled'];
+
+  const suggestedLeads = useMemo(() => {
+    if (!leadSearch) return [];
+    const searchLower = leadSearch.toLowerCase();
+    return leads.filter(lead =>
+      lead.name.toLowerCase().includes(searchLower) ||
+      lead.company.toLowerCase().includes(searchLower)
+    );
+  }, [leads, leadSearch]);
 
   const filteredFollowUps = useMemo(() => {
     return followUps.filter((followUp) => {
       const lead = leads.find(l => l.id === followUp.leadId);
-      const matchesSearch = 
+      const matchesSearch =
         lead?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         lead?.company.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = filterStatus === 'all' || followUp.status === filterStatus;
@@ -52,6 +67,13 @@ const FollowUps = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Validate lead selection
+    if (!formData.leadId) {
+      alert("Please select a valid lead from the suggestions.");
+      return;
+    }
+
     const scheduledAt = new Date(selectedDate);
     const [hours, minutes] = time.split(':').map(Number);
     scheduledAt.setHours(hours, minutes, 0, 0);
@@ -77,6 +99,11 @@ const FollowUps = () => {
     setFormData(followUp);
     setSelectedDate(new Date(followUp.scheduledAt));
     setTime(format(new Date(followUp.scheduledAt), 'HH:mm'));
+
+    // Set lead search input
+    const lead = leads.find(l => l.id === followUp.leadId);
+    if (lead) setLeadSearch(lead.name);
+
     setOpen(true);
   };
 
@@ -100,6 +127,7 @@ const FollowUps = () => {
       notes: '',
       status: 'Scheduled',
     });
+    setLeadSearch(''); // Reset search
     setSelectedDate(new Date());
     setTime('12:00');
   };
@@ -126,24 +154,61 @@ const FollowUps = () => {
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
+              <div className="space-y-2 relative">
                 <Label htmlFor="leadId">Lead</Label>
-                <Select
-                  value={formData.leadId}
-                  onValueChange={(value) => setFormData({ ...formData, leadId: value })}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select lead" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {leads.map((lead) => (
-                      <SelectItem key={lead.id} value={lead.id}>
-                        {lead.name} ({lead.company})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="relative">
+                  <Input
+                    placeholder="Search for a lead..."
+                    value={leadSearch}
+                    onChange={(e) => {
+                      setLeadSearch(e.target.value);
+                      setShowSuggestions(true);
+                      // Clear leadId if user changes input, forcing them to re-select
+                      if (formData.leadId) setFormData({ ...formData, leadId: '' });
+                    }}
+                    onFocus={() => setShowSuggestions(true)}
+                    // Delay hiding suggestions to allow clicking on an item
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    className={cn(
+                      "w-full",
+                      !formData.leadId && leadSearch && "border-amber-500 focus-visible:ring-amber-500" // Highlight if searching but not selected
+                    )}
+                  />
+                  {formData.leadId && (
+                    <div className="absolute right-3 top-2.5 text-green-500">
+                      <CheckCircle2 size={16} />
+                    </div>
+                  )}
+                </div>
+
+                {showSuggestions && leadSearch && !formData.leadId && (
+                  <div className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {suggestedLeads.length > 0 ? (
+                      suggestedLeads.map((lead) => (
+                        <div
+                          key={lead.id}
+                          className="px-4 py-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors flex flex-col gap-0.5"
+                          onMouseDown={(e) => {
+                            // Prevent default to ensure input doesn't blur immediately if we want to keep focus,
+                            // but here we actually likely want to allow the selection and then close.
+                            // The key is onMouseDown fires before onBlur.
+                            e.preventDefault();
+                            setFormData({ ...formData, leadId: lead.id });
+                            setLeadSearch(`${lead.name} (${lead.company})`); // Set full descriptive name
+                            setShowSuggestions(false);
+                          }}
+                        >
+                          <span className="text-sm font-medium text-slate-900 dark:text-white">{lead.name}</span>
+                          <span className="text-xs text-slate-500">{lead.company}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="px-4 py-3 text-sm text-slate-500 text-center">
+                        No leads found matching "{leadSearch}"
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="type">Type</Label>
@@ -302,9 +367,9 @@ const FollowUps = () => {
                         <Badge
                           variant={
                             followUp.status === 'Completed' ? 'success' :
-                            followUp.status === 'Missed' ? 'destructive' :
-                            followUp.status === 'Cancelled' ? 'secondary' :
-                            'primary'
+                              followUp.status === 'Missed' ? 'destructive' :
+                                followUp.status === 'Cancelled' ? 'secondary' :
+                                  'primary'
                           }
                         >
                           {followUp.status}

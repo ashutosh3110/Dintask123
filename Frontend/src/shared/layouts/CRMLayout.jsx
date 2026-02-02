@@ -24,33 +24,37 @@ const CRMLayout = ({ role }) => {
         { icon: <LayoutDashboard size={20} />, label: 'Overview', path: `/${role}/crm` },
         { icon: <Users size={20} />, label: 'Leads', path: `/${role}/crm/leads` },
         { icon: <TrendingUp size={20} />, label: 'Pipeline', path: `/${role}/crm/pipeline` },
-        { icon: <PhoneCall size={20} />, label: 'Follow Ups', path: `/${role}/crm/follow-ups` },
+        ...(role !== 'manager' ? [{ icon: <PhoneCall size={20} />, label: 'Follow Ups', path: `/${role}/crm/follow-ups` }] : []),
         { icon: <Contact size={20} />, label: 'Contacts', path: `/${role}/crm/contacts` },
     ];
 
     const SidebarContent = () => (
-        <div className="h-full flex flex-col bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800">
+        <div className="h-full flex flex-col bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
             <div className="p-6">
-                <div className="flex items-center gap-3 mb-8">
-                    <div className="h-10 w-10 bg-primary-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/30">
-                        <TrendingUp className="text-white" size={24} />
+                <div className="flex items-center gap-3.5 mb-8 px-2">
+                    <div className="h-10 w-10 bg-gradient-to-br from-primary-600 to-primary-700 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/30 text-white">
+                        <TrendingUp size={22} className="stroke-[2.5px]" />
                     </div>
                     <div>
-                        <h1 className="text-xl font-black text-slate-900 dark:text-white leading-none">DinTask</h1>
-                        <p className="text-xs font-bold text-primary-600 tracking-widest uppercase mt-1">CRM Suite</p>
+                        <h1 className="text-xl font-black text-slate-900 dark:text-white leading-none tracking-tight">DinTask</h1>
+                        <p className="text-[11px] font-bold text-primary-600 tracking-[0.2em] uppercase mt-1.5 opacity-90">CRM Suite</p>
                     </div>
                 </div>
 
-                <Button
-                    variant="outline"
-                    className="w-full justify-start gap-2 mb-6 font-bold border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-slate-800"
-                    onClick={() => navigate(`/${role}`)}
-                >
-                    <ArrowLeft size={16} />
-                    Back to {role === 'superadmin' ? 'Super Admin' : role.charAt(0).toUpperCase() + role.slice(1)} Header
-                </Button>
+                <div className="mb-6 px-1">
+                    <Button
+                        variant="ghost"
+                        className="w-full justify-start gap-3 h-10 font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all duration-200 group border border-dashed border-slate-200 dark:border-slate-700"
+                        onClick={() => navigate(`/${role}`)}
+                    >
+                        <div className="bg-slate-200 dark:bg-slate-700 rounded-md p-1 group-hover:scale-90 transition-transform">
+                            <ArrowLeft size={14} className="text-slate-600 dark:text-slate-300" />
+                        </div>
+                        <span className="truncate text-xs">Back to {role === 'superadmin' ? 'Admin Panel' : 'Main Dashboard'}</span>
+                    </Button>
+                </div>
 
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                     {sidebarItems.map((item) => {
                         const isActive = location.pathname === item.path;
                         return (
@@ -61,21 +65,33 @@ const CRMLayout = ({ role }) => {
                                     setIsMobileOpen(false);
                                 }}
                                 className={cn(
-                                    "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden",
+                                    "w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all duration-300 group relative overflow-hidden",
                                     isActive
-                                        ? "bg-primary-600 text-white shadow-md shadow-primary-500/20"
-                                        : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+                                        ? "bg-primary-600 text-white shadow-lg shadow-primary-500/25 translate-x-1"
+                                        : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white hover:pl-5"
                                 )}
                             >
                                 {isActive && (
                                     <motion.div
                                         layoutId="activeTab"
-                                        className="absolute inset-0 bg-primary-600 z-0"
+                                        className="absolute inset-0 bg-gradient-to-r from-primary-600 to-primary-500 z-0"
                                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                     />
                                 )}
-                                <span className="relative z-10">{item.icon}</span>
-                                <span className="relative z-10 text-sm font-bold">{item.label}</span>
+                                <span className="relative z-10 transition-transform duration-300 group-hover:scale-110">{item.icon}</span>
+                                <span className={cn(
+                                    "relative z-10 text-sm font-bold tracking-wide transition-all duration-300",
+                                    isActive ? "opacity-100" : "opacity-90 group-hover:opacity-100"
+                                )}>
+                                    {item.label}
+                                </span>
+                                {isActive && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        className="absolute right-3 w-1.5 h-1.5 rounded-full bg-white/40 z-10"
+                                    />
+                                )}
                             </button>
                         );
                     })}
@@ -83,10 +99,14 @@ const CRMLayout = ({ role }) => {
             </div>
 
             <div className="mt-auto p-6 border-t border-slate-100 dark:border-slate-800">
-                <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4">
-                    <p className="text-xs font-bold text-slate-900 dark:text-white mb-1">Need Help?</p>
-                    <p className="text-[10px] text-slate-500 mb-3">Check our CRM documentation for advanced features.</p>
-                    <Button size="sm" variant="secondary" className="w-full text-xs font-bold bg-white dark:bg-slate-700 shadow-sm h-8">View Docs</Button>
+                <div className="bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-700/50 shadow-sm relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-16 h-16 bg-primary-50 dark:bg-primary-900/10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-125 duration-500" />
+
+                    <p className="text-xs font-black text-slate-900 dark:text-white mb-1 relative z-10">Need Assistance?</p>
+                    <p className="text-[10px] text-slate-500 mb-3 relative z-10 leading-relaxed">Check our CRM documentation for advanced features and guides.</p>
+                    <Button size="sm" variant="secondary" className="w-full text-[10px] font-bold bg-white dark:bg-slate-700 shadow-sm h-8 relative z-10 hover:shadow-md transition-shadow">
+                        View Documentation
+                    </Button>
                 </div>
             </div>
         </div>

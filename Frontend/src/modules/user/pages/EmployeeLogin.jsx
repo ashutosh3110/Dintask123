@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import useAuthStore from '@/store/authStore';
 import { User, LogIn } from 'lucide-react';
 import { toast } from 'sonner';
@@ -99,7 +99,7 @@ const EmployeeLogin = () => {
                 <CardFooter className="flex flex-col space-y-4 pb-6 border-t border-slate-100 dark:border-slate-800 pt-6 bg-slate-50/50 dark:bg-slate-900/50">
                     <div className="text-center">
                         <p className="text-xs text-slate-500">
-                            Don't have an account? <span className="font-bold text-slate-900 dark:text-white">Contact HR</span>
+                            Don't have an account? <Link to="/employee/register" className="font-bold text-slate-900 dark:text-white hover:underline">Create Account</Link>
                         </p>
                     </div>
                     <div className="w-full p-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center">
@@ -108,7 +108,7 @@ const EmployeeLogin = () => {
                     </div>
                 </CardFooter>
             </Card>
-        </div>
+        </div >
     );
 };
 

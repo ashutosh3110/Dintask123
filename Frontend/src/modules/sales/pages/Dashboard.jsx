@@ -229,7 +229,7 @@ const SalesDashboard = () => {
                             </span>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            {['revenue', 'deals', 'clients'].map((metric) => (
+                            {['deals', 'clients'].map((metric) => (
                                 <div key={metric} className="space-y-2">
                                     <div className="flex items-center justify-between">
                                         <span className="text-sm font-medium text-slate-900 dark:text-white capitalize">
@@ -266,7 +266,7 @@ const SalesDashboard = () => {
                             </span>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            {['revenue', 'deals', 'clients'].map((metric) => (
+                            {['deals', 'clients'].map((metric) => (
                                 <div key={metric} className="space-y-2">
                                     <div className="flex items-center justify-between">
                                         <span className="text-sm font-medium text-slate-900 dark:text-white capitalize">

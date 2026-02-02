@@ -29,6 +29,7 @@ import ManagerLayout from '@/shared/layouts/ManagerLayout';
 // Auth Pages
 // Auth Pages
 import EmployeeLogin from '@/modules/user/pages/EmployeeLogin';
+import EmployeeRegister from '@/modules/user/pages/EmployeeRegister';
 import ForgotPassword from '@/modules/user/pages/ForgotPassword';
 import AdminLogin from '@/modules/admin/pages/AdminLogin';
 import SuperAdminLogin from '@/modules/superadmin/pages/SuperAdminLogin';
@@ -111,6 +112,7 @@ const AppRouter = () => {
         <Routes>
             {/* Public Routes */}
             <Route path="/employee/login" element={<EmployeeLogin />} />
+            <Route path="/employee/register" element={<EmployeeRegister />} />
             <Route path="/employee/forgot-password" element={<ForgotPassword returnPath="/employee/login" />} />
             <Route path="/manager/login" element={<ManagerLogin />} />
             <Route path="/manager/forgot-password" element={<ForgotPassword returnPath="/manager/login" />} />
