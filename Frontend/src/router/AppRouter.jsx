@@ -6,7 +6,7 @@ import useAuthStore from '@/store/authStore';
 const NotFoundRedirect = () => {
     const { isAuthenticated, role } = useAuthStore();
 
-    if (!isAuthenticated) return <Navigate to="/employee/login" replace />;
+    if (!isAuthenticated) return <Navigate to="/employee/splash" replace />;
 
     const defaultRoute = role === 'superadmin'
         ? '/superadmin'
@@ -28,6 +28,7 @@ import ManagerLayout from '@/shared/layouts/ManagerLayout';
 
 // Auth Pages
 // Auth Pages
+import SplashScreen from '@/modules/user/pages/SplashScreen';
 import EmployeeLogin from '@/modules/user/pages/EmployeeLogin';
 import EmployeeRegister from '@/modules/user/pages/EmployeeRegister';
 import ForgotPassword from '@/modules/user/pages/ForgotPassword';
@@ -42,11 +43,13 @@ import TaskManagement from '@/modules/admin/pages/TaskManagement';
 import TaskCompletion from '@/modules/admin/pages/TaskCompletion';
 import Reports from '@/modules/admin/pages/Reports';
 import AdminCalendar from '@/modules/admin/pages/Calendar';
-import Subscription from '@/modules/admin/pages/Subscription';
+import AdminSubscription from '@/modules/admin/pages/Subscription';
 import Settings from '@/modules/admin/pages/Settings';
+import JoinRequests from '@/modules/admin/pages/JoinRequests';
 import SalesManagement from '@/modules/admin/pages/SalesManagement';
 
 import ManagerLogin from '@/modules/manager/pages/ManagerLogin';
+import ManagerRegister from '@/modules/manager/pages/ManagerRegister';
 
 // Manager Pages
 import ManagerDashboard from '@/modules/manager/pages/Dashboard';
@@ -61,6 +64,7 @@ import ManagerSettings from '@/modules/manager/pages/Settings';
 
 // Sales Pages
 import SalesLogin from '@/modules/sales/pages/SalesLogin';
+import SalesRegister from '@/modules/sales/pages/SalesRegister';
 import SalesDashboard from '@/modules/sales/pages/Dashboard';
 import Deals from '@/modules/sales/pages/Deals';
 import Clients from '@/modules/sales/pages/Clients';
@@ -97,12 +101,16 @@ import ApiDocs from '@/modules/user/pages/ApiDocs';
 import PrivacyPolicy from '@/modules/user/pages/PrivacyPolicy';
 import TermsOfService from '@/modules/user/pages/TermsOfService';
 import SystemStatus from '@/modules/user/pages/SystemStatus';
+import EmployeeSubscription from '@/modules/user/pages/Subscription';
+import SuccessJoin from '@/modules/user/pages/SuccessJoin';
+import JoinWorkspace from '@/modules/user/pages/JoinWorkspace';
 
 // Super Admin Pages
 import SuperAdminDashboard from '@/modules/superadmin/pages/Dashboard';
 import AdminAccounts from '@/modules/superadmin/pages/AdminAccounts';
 import PlansManagement from '@/modules/superadmin/pages/PlansManagement';
 import SuperAdminSettings from '@/modules/superadmin/pages/Settings';
+import Inquiries from '@/modules/superadmin/pages/Inquiries';
 
 // Layouts
 import CRMLayout from '@/shared/layouts/CRMLayout';
@@ -111,16 +119,20 @@ const AppRouter = () => {
     return (
         <Routes>
             {/* Public Routes */}
+            <Route path="/employee/splash" element={<SplashScreen />} />
+            <Route path="/employee/success-join" element={<SuccessJoin />} />
             <Route path="/employee/login" element={<EmployeeLogin />} />
             <Route path="/employee/register" element={<EmployeeRegister />} />
             <Route path="/employee/forgot-password" element={<ForgotPassword returnPath="/employee/login" />} />
             <Route path="/manager/login" element={<ManagerLogin />} />
+            <Route path="/manager/register" element={<ManagerRegister />} />
             <Route path="/manager/forgot-password" element={<ForgotPassword returnPath="/manager/login" />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/forgot-password" element={<ForgotPassword returnPath="/admin/login" />} />
             <Route path="/superadmin/login" element={<SuperAdminLogin />} />
             <Route path="/superadmin/forgot-password" element={<ForgotPassword returnPath="/superadmin/login" />} />
             <Route path="/sales/login" element={<SalesLogin />} />
+            <Route path="/sales/register" element={<SalesRegister />} />
             <Route path="/sales/forgot-password" element={<ForgotPassword returnPath="/sales/login" />} />
 
             {/* --- ADMIN ROUTES --- */}
@@ -134,8 +146,9 @@ const AppRouter = () => {
                 <Route path="tasks/:id" element={<TaskCompletion />} />
                 <Route path="reports" element={<Reports />} />
                 <Route path="calendar" element={<AdminCalendar />} />
-                <Route path="subscription" element={<Subscription />} />
+                <Route path="subscription" element={<AdminSubscription />} />
                 <Route path="settings" element={<Settings />} />
+                <Route path="requests" element={<JoinRequests />} />
             </Route>
 
             {/* Admin CRM Panel */}
@@ -161,6 +174,8 @@ const AppRouter = () => {
                 <Route path="profile/notifications" element={<Notifications />} />
                 <Route path="profile/security" element={<Security />} />
                 <Route path="profile/preferences" element={<Preferences />} />
+                <Route path="subscription" element={<EmployeeSubscription />} />
+                <Route path="join" element={<JoinWorkspace />} />
                 <Route path="profile/help" element={<HelpLegal />} />
                 <Route path="profile/help/privacy" element={<PrivacyPolicy />} />
                 <Route path="profile/help/terms" element={<TermsOfService />} />
@@ -186,6 +201,7 @@ const AppRouter = () => {
                 <Route index element={<SuperAdminDashboard />} />
                 <Route path="admins" element={<AdminAccounts />} />
                 <Route path="plans" element={<PlansManagement />} />
+                <Route path="inquiries" element={<Inquiries />} />
                 <Route path="settings" element={<SuperAdminSettings />} />
                 <Route path="reports" element={<div>System Reports (Coming Soon)</div>} />
                 <Route path="calendar" element={<div>System Calendar (Coming Soon)</div>} />

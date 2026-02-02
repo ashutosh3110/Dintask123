@@ -12,6 +12,7 @@ import {
     Download
 } from 'lucide-react';
 
+import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
 import { Badge } from '@/shared/components/ui/badge';
@@ -60,6 +61,13 @@ const Subscription = () => {
             current: false
         }
     ];
+
+    const [selectedRole, setSelectedRole] = React.useState('employee');
+    const referralLinks = {
+        employee: 'https://dintask.com/employee/register?ref=ADM-99X2',
+        manager: 'https://dintask.com/manager/register?ref=ADM-99X2',
+        sales: 'https://dintask.com/sales/register?ref=ADM-99X2'
+    };
 
     return (
         <div className="space-y-6 pb-12">
@@ -142,6 +150,65 @@ const Subscription = () => {
                             <Button variant="outline" size="sm" className="text-xs h-8 border-slate-200 dark:border-slate-800">Update Payment</Button>
                         </div>
                     </CardFooter>
+                </Card>
+
+                {/* Invitation Link Section */}
+                <Card className="lg:col-span-3 border-dashed border-2 border-primary-500/30 bg-primary-50/5 dark:bg-primary-900/5 overflow-hidden">
+                    <CardContent className="p-6 md:p-8">
+                        <div className="flex flex-col md:flex-row items-center gap-6">
+                            <div className="p-4 rounded-3xl bg-primary-100 dark:bg-primary-900/30 text-primary-600">
+                                <Users size={40} />
+                            </div>
+                            <div className="flex-1 space-y-4 text-center md:text-left">
+                                <div className="space-y-1">
+                                    <h3 className="text-2xl font-black text-slate-900 dark:text-white leading-tight">Invite Your Team Members</h3>
+                                    <p className="text-slate-500 dark:text-slate-400 max-w-xl text-sm font-medium">
+                                        Select a role to generate a unique registration link. Share it with your team to give them access to their respective dashboards.
+                                    </p>
+                                </div>
+                                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-2">
+                                    {['employee', 'manager', 'sales'].map((role) => (
+                                        <Button
+                                            key={role}
+                                            variant={selectedRole === role ? 'default' : 'outline'}
+                                            size="sm"
+                                            onClick={() => setSelectedRole(role)}
+                                            className={cn(
+                                                "h-8 px-4 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all duration-300",
+                                                selectedRole === role
+                                                    ? "bg-slate-900 dark:bg-white dark:text-slate-900 shadow-md translate-y-[-1px]"
+                                                    : "border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                            )}
+                                        >
+                                            {role} Link
+                                        </Button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="w-full md:w-auto space-y-3">
+                                <div className="flex bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-1 pl-4 items-center ring-4 ring-primary-500/5 shadow-inner">
+                                    <span className="text-xs font-mono text-slate-400 truncate max-w-[180px]">
+                                        {referralLinks[selectedRole].replace('https://', '')}
+                                    </span>
+                                    <Button
+                                        variant="default"
+                                        size="sm"
+                                        className="ml-4 h-9 font-bold bg-primary-600 hover:bg-primary-700 shadow-md shadow-primary-500/20 px-6"
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(referralLinks[selectedRole]);
+                                            toast.success(`${selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)} invitation link copied!`);
+                                        }}
+                                    >
+                                        Copy
+                                    </Button>
+                                </div>
+                                <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1 pt-1">
+                                    <span>Remaining Seats</span>
+                                    <span className="text-primary-600">{subscriptionLimit - employees.length} slots</span>
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
                 </Card>
 
                 {/* Quick Billing Stats / Actions */}

@@ -8,11 +8,61 @@ const useEmployeeStore = create(
             employees: mockEmployees,
             subscriptionLimit: 5,
             loading: false,
+            workspace: null,
+
+            setWorkspace: (workspaceId) => set({ workspace: workspaceId }),
 
             fetchEmployees: async () => {
                 set({ loading: true });
                 await new Promise((resolve) => setTimeout(resolve, 500));
                 set({ loading: false });
+            },
+
+            pendingRequests: [],
+
+            addPendingRequest: (request) => {
+                set((state) => ({
+                    pendingRequests: [
+                        ...state.pendingRequests,
+                        {
+                            ...request,
+                            id: Date.now().toString(),
+                            status: 'pending',
+                            requestedDate: new Date().toISOString()
+                        }
+                    ]
+                }));
+            },
+
+            approveRequest: (id) => {
+                const { pendingRequests, addEmployee, setWorkspace } = get();
+                const request = pendingRequests.find(r => r.id === id);
+                if (request) {
+                    try {
+                        addEmployee({
+                            name: request.fullName,
+                            email: request.email,
+                            role: request.role || 'Employee',
+                            status: 'active'
+                        });
+                        // Simulate setting the workspace for the app context
+                        setWorkspace(request.workspaceId || 'ADM-WORK-001');
+
+                        set((state) => ({
+                            pendingRequests: state.pendingRequests.filter(r => r.id !== id)
+                        }));
+                        return true;
+                    } catch (error) {
+                        return false;
+                    }
+                }
+                return false;
+            },
+
+            rejectRequest: (id) => {
+                set((state) => ({
+                    pendingRequests: state.pendingRequests.filter(r => r.id !== id)
+                }));
             },
 
             addEmployee: (employee) => {
@@ -26,7 +76,7 @@ const useEmployeeStore = create(
                         ...state.employees,
                         {
                             ...employee,
-                            id: Date.now().toString(),
+                            id: employee.id || Date.now().toString(),
                             status: 'active',
                             joinedDate: new Date().toISOString().split('T')[0],
                             avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${employee.name}`,

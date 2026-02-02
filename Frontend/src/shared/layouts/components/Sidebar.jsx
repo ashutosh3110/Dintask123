@@ -21,7 +21,8 @@ import {
     ChevronDown,
     Briefcase,
     ListChecks,
-    TrendingUp
+    TrendingUp,
+    UserPlus
 } from 'lucide-react';
 import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/components/ui/button';
@@ -82,6 +83,7 @@ const Sidebar = ({ role, isOpen, setIsOpen, isCollapsed, setIsCollapsed }) => {
                 { name: 'CRM', path: '/admin/crm', icon: Briefcase },
                 { name: 'Managers', path: '/admin/managers', icon: ShieldCheck },
                 { name: 'Employees', path: '/admin/employees', icon: Users },
+                { name: 'Join Requests', path: '/admin/requests', icon: UserPlus },
                 { name: 'Sales', path: '/admin/sales', icon: TrendingUp },
                 { name: 'Reports', path: `/${role}/reports`, icon: BarChart3 },
                 { name: 'Calendar', path: `/${role}/calendar`, icon: CalendarIcon },
@@ -93,6 +95,7 @@ const Sidebar = ({ role, isOpen, setIsOpen, isCollapsed, setIsCollapsed }) => {
             ? [
                 { name: 'Dashboard', path: '/superadmin', icon: LayoutDashboard },
                 { name: 'CRM', path: '/superadmin/crm', icon: Briefcase },
+                { name: 'Inquiries', path: '/superadmin/inquiries', icon: ListChecks },
                 { name: 'Admins', path: '/superadmin/admins', icon: Users },
                 { name: 'Plans', path: '/superadmin/plans', icon: CreditCard },
                 { name: 'Settings', path: `/${role}/settings`, icon: Settings },

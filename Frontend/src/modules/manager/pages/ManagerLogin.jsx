@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import useAuthStore from '@/store/authStore';
 import { ShieldCheck, LogIn, Lock } from 'lucide-react';
 import { toast } from 'sonner';
@@ -98,6 +98,9 @@ const ManagerLogin = () => {
                 </CardContent>
                 <CardFooter className="flex flex-col space-y-4 pb-6 border-t border-slate-100 dark:border-slate-800 pt-6 bg-slate-50/50 dark:bg-slate-900/50">
                     <div className="w-full p-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center">
+                        <p className="text-xs text-slate-500 mb-2">
+                            Don't have an account? <Link to="/manager/register" className="font-bold text-primary-600 dark:text-primary-400 hover:underline">Register</Link>
+                        </p>
                         <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Demo Manager</span>
                         <span className="text-xs font-mono text-slate-600 dark:text-slate-300">manager@dintask.com / manager123</span>
                     </div>

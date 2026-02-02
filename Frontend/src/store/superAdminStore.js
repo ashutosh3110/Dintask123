@@ -94,7 +94,25 @@ const useSuperAdminStore = create(
                         p.id === id ? { ...p, ...updatedPlan } : p
                     ),
                 }));
-            }
+            },
+            inquiries: [],
+
+            addInquiry: (inquiry) => {
+                set((state) => ({
+                    inquiries: [
+                        { ...inquiry, id: `inq-${Date.now()}`, date: new Date().toISOString(), status: 'new' },
+                        ...state.inquiries
+                    ]
+                }));
+            },
+
+            updateInquiryStatus: (id, status) => {
+                set((state) => ({
+                    inquiries: state.inquiries.map((inq) =>
+                        inq.id === id ? { ...inq, status } : inq
+                    ),
+                }));
+            },
         }),
         {
             name: 'dintask-superadmin-storage',
