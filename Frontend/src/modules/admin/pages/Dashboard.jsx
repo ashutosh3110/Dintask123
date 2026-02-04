@@ -107,15 +107,30 @@ const AdminDashboard = () => {
             variants={staggerContainer}
             className="space-y-6"
         >
+            {/* Header */}
             <motion.div variants={fadeInUp} className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Admin Dashboard</h1>
-                    <p className="text-slate-500 dark:text-slate-400 mt-1">
-                        Welcome back, <span className="font-semibold text-primary-600">{user?.name}</span>. Here's what's happening today.
-                    </p>
+                <div className="flex items-center justify-between w-full md:w-auto">
+                    <div className="flex items-center gap-3">
+                        <div className="lg:hidden w-10 h-10 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 shrink-0">
+                            <img src="/src/assets/logo.png" alt="DinTask" className="h-full w-full object-cover" />
+                        </div>
+                        <div>
+                            <h1 className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Admin Dashboard</h1>
+                            <p className="text-[10px] sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
+                                Welcome back, <span className="font-bold text-primary-600">{user?.name}</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div className="md:hidden">
+                        <motion.div {...scaleOnTap}>
+                            <Button size="sm" className="h-9 w-9 p-0 rounded-xl bg-primary-600 hover:bg-primary-700 shadow-lg shadow-primary-500/20">
+                                <Plus size={18} />
+                            </Button>
+                        </motion.div>
+                    </div>
                 </div>
-                <motion.div {...scaleOnTap}>
-                    <Button className="flex items-center gap-2 shadow-lg shadow-primary-200 dark:shadow-none bg-primary-600 hover:bg-primary-700">
+                <motion.div {...scaleOnTap} className="hidden md:block">
+                    <Button className="h-11 sm:h-12 px-6 rounded-xl sm:rounded-2xl flex items-center gap-2 shadow-lg shadow-primary-200 dark:shadow-none bg-primary-600 hover:bg-primary-700 font-black text-xs uppercase tracking-widest">
                         <Plus size={18} />
                         <span>Create New Task</span>
                     </Button>
@@ -123,22 +138,22 @@ const AdminDashboard = () => {
             </motion.div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                 {stats.map((stat, i) => (
                     <motion.div key={i} variants={fadeInUp}>
-                        <Card className="border-none shadow-md shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-900 overflow-hidden group hover:shadow-lg transition-shadow duration-300">
-                            <CardContent className="p-6">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className={`p-2.5 rounded-xl ${stat.bg} ${stat.color} transition-transform group-hover:scale-110 duration-300`}>
-                                        <stat.icon size={24} />
+                        <Card className="border-none shadow-sm shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-900 overflow-hidden group hover:shadow-md transition-shadow duration-300 rounded-2xl sm:rounded-3xl">
+                            <CardContent className="p-3 sm:p-6">
+                                <div className="flex items-center justify-between mb-2 sm:mb-4">
+                                    <div className={`p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl ${stat.bg} ${stat.color} transition-transform group-hover:scale-110 duration-300`}>
+                                        <stat.icon size={16} className="sm:w-6 sm:h-6" />
                                     </div>
-                                    <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800 text-[10px] font-bold">
-                                        {stat.description}
+                                    <Badge variant="secondary" className="bg-slate-50 dark:bg-slate-800 text-[7px] sm:text-[10px] font-black uppercase tracking-tighter px-1.5 h-4 sm:h-auto sm:px-2">
+                                        {stat.description.split(' ')[0]}
                                     </Badge>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{stat.title}</p>
-                                    <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{stat.value}</p>
+                                    <p className="text-[10px] sm:text-sm font-black text-slate-400 uppercase tracking-widest">{stat.title}</p>
+                                    <h4 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white mt-0.5 sm:mt-1 tracking-tighter">{stat.value}</h4>
                                 </div>
                             </CardContent>
                         </Card>
@@ -149,17 +164,17 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Main Chart */}
                 <motion.div variants={fadeInUp} className="lg:col-span-2">
-                    <Card className="h-full border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900 overflow-hidden">
-                        <CardHeader className="flex flex-row items-center justify-between">
+                    <Card className="h-full border-none shadow-sm shadow-slate-200/50 bg-white dark:bg-slate-900 overflow-hidden rounded-2xl sm:rounded-[2rem]">
+                        <CardHeader className="flex flex-row items-center justify-between px-5 py-4 sm:p-6 sm:pb-0">
                             <div>
-                                <CardTitle className="text-lg font-bold">Task Completion Trend</CardTitle>
-                                <CardDescription>Weekly overview of task performance</CardDescription>
+                                <CardTitle className="text-sm sm:text-lg font-black uppercase tracking-widest text-slate-900 dark:text-white">Completion Trend</CardTitle>
+                                <CardDescription className="text-[10px] sm:text-sm font-bold">Weekly Overview</CardDescription>
                             </div>
-                            <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
-                                <TrendingUp className="text-emerald-500" size={20} />
+                            <div className="p-2 sm:p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
+                                <TrendingUp size={16} className="text-emerald-500 sm:w-5 sm:h-5" />
                             </div>
                         </CardHeader>
-                        <CardContent className="h-[300px] mt-4">
+                        <CardContent className="h-[200px] sm:h-[300px] mt-2 sm:mt-6 px-2 sm:px-6 pb-2">
                             <ResponsiveContainer width="100%" height="100%" debounce={50}>
                                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                                     <defs>
@@ -208,45 +223,45 @@ const AdminDashboard = () => {
 
                 {/* Daily Progress */}
                 <motion.div variants={fadeInUp}>
-                    <Card className="h-full border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900">
-                        <CardHeader>
-                            <CardTitle className="text-lg font-bold">Daily Progress</CardTitle>
-                            <CardDescription>Today's completion targets</CardDescription>
+                    <Card className="h-full border-none shadow-sm shadow-slate-200/50 bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2rem]">
+                        <CardHeader className="p-5 sm:p-6">
+                            <CardTitle className="text-sm sm:text-lg font-black uppercase tracking-widest">Daily Progress</CardTitle>
+                            <CardDescription className="text-[10px] sm:text-sm font-bold">Target Tracking</CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-6">
-                            <div className="space-y-2">
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-slate-500 font-medium">Overall Completion</span>
-                                    <span className="font-bold text-slate-900 dark:text-white">68%</span>
+                        <CardContent className="px-5 sm:px-6 pb-6 space-y-4 sm:space-y-6">
+                            <div className="space-y-1 sm:space-y-2">
+                                <div className="flex justify-between text-xs">
+                                    <span className="text-slate-500 font-black uppercase tracking-widest text-[9px] sm:text-xs">Overall</span>
+                                    <span className="font-black text-primary-600">68%</span>
                                 </div>
-                                <Progress value={68} className="h-2.5 bg-slate-100 dark:bg-slate-800" />
+                                <Progress value={68} className="h-1.5 sm:h-2.5 bg-slate-100 dark:bg-slate-800" />
                             </div>
 
-                            <div className="space-y-4 mt-8">
-                                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Quick Actions</h4>
+                            <div className="space-y-3 sm:space-y-4 mt-6">
+                                <h4 className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Quick Actions</h4>
                                 <div className="grid grid-cols-1 gap-2">
                                     <motion.div {...scaleOnTap}>
-                                        <Button variant="outline" className="w-full justify-start gap-3 h-12 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors rounded-xl">
-                                            <div className="p-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 rounded-lg">
-                                                <Users size={16} />
+                                        <Button variant="outline" className="w-full justify-start gap-2.5 h-10 sm:h-12 border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors rounded-xl font-black text-[10px] sm:text-xs">
+                                            <div className="p-1 sm:p-1.5 bg-blue-50 dark:bg-blue-900/40 text-blue-600 rounded-lg shrink-0">
+                                                <Users size={14} className="sm:w-4 sm:h-4" />
                                             </div>
-                                            <span className="text-sm font-semibold">Assign Pending Tasks</span>
+                                            <span className="truncate">Assign Pending Tasks</span>
                                         </Button>
                                     </motion.div>
                                     <motion.div {...scaleOnTap}>
-                                        <Button variant="outline" className="w-full justify-start gap-3 h-12 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors rounded-xl">
-                                            <div className="p-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 rounded-lg">
-                                                <BarChart3 size={16} />
+                                        <Button variant="outline" className="w-full justify-start gap-2.5 h-10 sm:h-12 border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors rounded-xl font-black text-[10px] sm:text-xs">
+                                            <div className="p-1 sm:p-1.5 bg-emerald-50 dark:bg-emerald-900/40 text-emerald-600 rounded-lg shrink-0">
+                                                <BarChart3 size={14} className="sm:w-4 sm:h-4" />
                                             </div>
-                                            <span className="text-sm font-semibold">Generate Report</span>
+                                            <span className="truncate">Generate Report</span>
                                         </Button>
                                     </motion.div>
                                     <motion.div {...scaleOnTap}>
-                                        <Button variant="outline" className="w-full justify-start gap-3 h-12 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors rounded-xl">
-                                            <div className="p-1.5 bg-purple-50 dark:bg-purple-900/20 text-purple-600 rounded-lg">
-                                                <CalendarIcon size={16} />
+                                        <Button variant="outline" className="w-full justify-start gap-2.5 h-10 sm:h-12 border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors rounded-xl font-black text-[10px] sm:text-xs">
+                                            <div className="p-1 sm:p-1.5 bg-purple-50 dark:bg-purple-900/40 text-purple-600 rounded-lg shrink-0">
+                                                <CalendarIcon size={14} className="sm:w-4 sm:h-4" />
                                             </div>
-                                            <span className="text-sm font-semibold">Schedule Sync Meeting</span>
+                                            <span className="truncate">Schedule Meeting</span>
                                         </Button>
                                     </motion.div>
                                 </div>
@@ -257,27 +272,27 @@ const AdminDashboard = () => {
 
                 {/* Admin Follow-ups / Meetings */}
                 <motion.div variants={fadeInUp} className="lg:col-span-3">
-                    <Card className="border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden rounded-2xl">
-                        <CardHeader className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
+                    <Card className="border-none shadow-sm shadow-slate-200/50 bg-white dark:bg-slate-900 overflow-hidden rounded-2xl sm:rounded-[2rem]">
+                        <CardHeader className="bg-slate-50/50 dark:bg-slate-800/40 border-b border-slate-100 dark:border-slate-800 px-5 py-4 sm:p-6">
                             <div className="flex items-center justify-between">
-                                <CardTitle className="text-lg font-bold flex items-center gap-2">
-                                    <Clock className="text-primary-600" size={20} />
-                                    Admin Meetings & Follow-ups
+                                <CardTitle className="text-sm sm:text-lg font-black uppercase tracking-widest flex items-center gap-2">
+                                    <Clock size={16} className="text-primary-600 shrink-0 sm:w-5 sm:h-5" />
+                                    Meetings & Follow-ups
                                 </CardTitle>
-                                <Badge variant="outline" className="text-[10px] font-black">{adminMeetings.length} Scheduled</Badge>
+                                <Badge variant="outline" className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest h-5 sm:h-6">{adminMeetings.length} Scheduled</Badge>
                             </div>
                         </CardHeader>
                         <CardContent className="p-0">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 p-4 sm:p-6">
                                 {adminMeetings.length > 0 ? adminMeetings.slice(0, 6).map(meeting => (
-                                    <div key={meeting.id} className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-primary-100 dark:hover:border-primary-900 transition-all group">
-                                        <div className="flex items-start justify-between mb-3">
-                                            <div className="p-2 rounded-lg bg-primary-50 dark:bg-primary-900/20 text-primary-600">
-                                                <CalendarIcon size={18} />
+                                    <div key={meeting.id} className="p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-primary-100 dark:hover:border-primary-900 transition-all group bg-slate-50/30 dark:bg-slate-800/20">
+                                        <div className="flex items-start justify-between mb-2 sm:mb-3">
+                                            <div className="p-1.5 sm:p-2 rounded-lg bg-primary-50 dark:bg-primary-900/30 text-primary-600 shrink-0">
+                                                <CalendarIcon size={14} className="sm:w-[18px] sm:h-[18px]" />
                                             </div>
-                                            <Badge className="text-[9px] bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-none capitalize">{meeting.type}</Badge>
+                                            <Badge className="text-[7px] sm:text-[9px] bg-white text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-100 dark:border-slate-700 font-black uppercase tracking-tighter px-1.5 h-4 sm:h-auto">{meeting.type}</Badge>
                                         </div>
-                                        <h4 className="font-bold text-slate-900 dark:text-white mb-1 truncate">{meeting.title}</h4>
+                                        <h4 className="font-black text-xs sm:text-sm text-slate-900 dark:text-white mb-0.5 sm:mb-1 truncate">{meeting.title}</h4>
                                         <div className="flex items-center gap-4 text-xs text-slate-500 font-medium">
                                             <div className="flex items-center gap-1">
                                                 <Clock size={12} />

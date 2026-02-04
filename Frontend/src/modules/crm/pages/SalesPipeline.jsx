@@ -214,76 +214,80 @@ const SalesPipeline = () => {
   };
 
   return (
-    <div className="h-[calc(100vh-120px)] flex flex-col space-y-4">
+    <div className="h-[calc(100vh-100px)] flex flex-col space-y-3">
       {/* Header Toolbar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 shrink-0">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Sales Pipeline</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm">Manage and track your deal flow.</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 shrink-0">
+        <div className="flex items-center gap-3 px-1">
+          <div className="lg:hidden w-8 h-8 rounded-lg overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 shrink-0">
+            <img src="/src/assets/logo.png" alt="DinTask" className="h-full w-full object-cover" />
+          </div>
+          <div>
+            <h1 className="text-lg sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white uppercase">Sales <span className="text-primary-600">Pipeline</span></h1>
+            <p className="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-widest leading-none mt-1">Status Overview</p>
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+          <div className="relative flex-1 sm:flex-none">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
             <Input
-              placeholder="Search deals..."
-              className="pl-9 h-10 w-[200px] lg:w-[300px]"
+              placeholder="Search..."
+              className="pl-9 h-9 sm:h-10 w-full sm:w-[150px] lg:w-[250px] bg-slate-50 border-none dark:bg-slate-800 rounded-xl text-xs font-bold"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <Select value={filterPriority} onValueChange={setFilterPriority}>
-            <SelectTrigger className="w-[140px] h-10">
-              <Filter className="mr-2 h-4 w-4" />
+            <SelectTrigger className="w-[100px] sm:w-[120px] h-9 sm:h-10 bg-slate-50 border-none dark:bg-slate-800 rounded-xl text-[10px] font-black uppercase">
               <SelectValue placeholder="Priority" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Priorities</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="low">Low</SelectItem>
+            <SelectContent className="rounded-xl border-slate-100 dark:border-slate-800">
+              <SelectItem value="all" className="text-[10px] font-black uppercase">All</SelectItem>
+              <SelectItem value="high" className="text-[10px] font-black uppercase">High</SelectItem>
+              <SelectItem value="medium" className="text-[10px] font-black uppercase">Medium</SelectItem>
+              <SelectItem value="low" className="text-[10px] font-black uppercase">Low</SelectItem>
             </SelectContent>
           </Select>
-          <Button onClick={() => setIsAddOpen(true)} className="gap-2 h-10 bg-primary-600 hover:bg-primary-700">
-            <Plus size={18} />
-            Add Deal
+          <Button onClick={() => setIsAddOpen(true)} className="gap-2 h-9 sm:h-10 bg-primary-600 hover:bg-primary-700 rounded-xl shadow-lg shadow-primary-500/20 px-3 sm:px-5">
+            <Plus size={16} />
+            <span className="text-[10px] font-black uppercase tracking-widest">Deal</span>
           </Button>
         </div>
       </div>
 
       {/* Kanban Board Area */}
-      <div className="flex-1 overflow-x-auto overflow-y-hidden pb-4">
-        <div className="flex h-full gap-6 min-w-max px-1">
+      <div className="flex-1 overflow-x-auto overflow-y-hidden pb-4 custom-scrollbar">
+        <div className="flex h-full gap-4 min-w-max px-1">
           {processedPipeline.map(({ stage, leads: stageLeads, totalValue }) => (
             <div
               key={stage}
-              className="flex flex-col w-[320px] bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-800 h-full max-h-full"
+              className="flex flex-col w-[260px] sm:w-[280px] bg-slate-50/50 dark:bg-slate-800/20 rounded-2xl border border-slate-100/50 dark:border-slate-800 h-full max-h-full transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/30"
               onDragOver={handleDragOver}
               onDrop={() => handleDrop(stage)}
             >
               {/* Column Header */}
-              <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-t-xl sticky top-0 z-10">
+              <div className="p-3 border-b border-slate-100 dark:border-slate-800/50 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-t-2xl sticky top-0 z-10">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-bold text-slate-700 dark:text-slate-200">{stage}</h3>
-                  <Badge variant="secondary" className="bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100">
+                  <h3 className="font-black text-[11px] uppercase tracking-[0.15em] text-slate-700 dark:text-slate-300">{stage}</h3>
+                  <Badge variant="outline" className="h-5 text-[10px] bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 font-black">
                     {stageLeads.length}
                   </Badge>
                 </div>
                 <div className="h-1 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                  <div className={cn("h-full bg-primary-500 rounded-full",
+                  <div className={cn("h-full transition-all duration-500",
                     stage === 'Won' ? 'bg-emerald-500' :
                       stage === 'Lost' ? 'bg-red-500' : 'bg-primary-500'
                   )} style={{ width: '100%' }} />
                 </div>
-                <div className="mt-2 text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                  Total: <span className="font-bold text-slate-900 dark:text-white">₹{totalValue.toLocaleString()}</span>
+                <div className="mt-2 text-[10px] font-black text-slate-400 flex items-center gap-1 uppercase tracking-widest">
+                  Val: <span className="text-slate-900 dark:text-white">₹{totalValue.toLocaleString()}</span>
                 </div>
               </div>
 
               {/* Column Content (Scrollable) */}
-              <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
+              <div className="flex-1 overflow-y-auto p-2.5 space-y-2.5 custom-scrollbar">
                 {stageLeads.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-32 text-slate-400 dark:text-slate-500 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50/50">
-                    <p className="text-sm">No deals</p>
+                  <div className="flex flex-col items-center justify-center h-24 text-slate-400 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-xl bg-white/30 dark:bg-slate-900/10">
+                    <p className="text-[9px] font-black uppercase tracking-widest opacity-50">Empty</p>
                   </div>
                 ) : (
                   stageLeads.map((lead) => (
@@ -291,47 +295,49 @@ const SalesPipeline = () => {
                       key={lead.id}
                       draggable
                       onDragStart={(e) => handleDragStart(e, lead.id, stage)}
-                      className="group bg-white dark:bg-slate-900 p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 cursor-grab active:cursor-grabbing hover:shadow-md hover:border-primary-200 transition-all relative"
+                      className="group bg-white dark:bg-slate-900 p-3 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 cursor-grab active:cursor-grabbing hover:shadow-md hover:border-primary-100 dark:hover:border-primary-900/50 transition-all relative overflow-hidden"
                     >
-                      <div className="flex justify-between items-start mb-2">
+                      <div className="absolute top-0 right-0 w-12 h-12 bg-slate-50 dark:bg-slate-800/30 rounded-bl-full -mr-6 -mt-6 group-hover:scale-110 transition-transform" />
+
+                      <div className="flex justify-between items-start mb-2 relative z-10">
                         <Badge
                           variant="outline"
-                          className={cn("text-[10px] uppercase font-bold px-1.5 py-0.5 border", getPriorityColor(lead.priority))}
+                          className={cn("text-[8px] uppercase font-black px-1.5 py-0 border shadow-none", getPriorityColor(lead.priority))}
                         >
                           {lead.priority}
                         </Badge>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-6 w-6 text-slate-400 hover:text-slate-600">
-                              <MoreHorizontal size={14} />
+                            <Button variant="ghost" size="icon" className="h-6 w-6 text-slate-400 hover:text-slate-600 rounded-lg">
+                              <MoreHorizontal size={12} />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleEditClick(lead)}>
-                              <Edit2 className="mr-2 h-4 w-4" /> Edit
+                          <DropdownMenuContent align="end" className="rounded-xl">
+                            <DropdownMenuItem onClick={() => handleEditClick(lead)} className="text-xs font-bold">
+                              <Edit2 className="mr-2 h-3 w-3" /> Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => handleDeleteDeal(lead.id)}>
-                              <Trash2 className="mr-2 h-4 w-4" /> Delete
+                            <DropdownMenuItem className="text-red-500 focus:text-red-500 text-xs font-bold" onClick={() => handleDeleteDeal(lead.id)}>
+                              <Trash2 className="mr-2 h-3 w-3" /> Delete
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
 
-                      <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-1 line-clamp-2">{lead.name}</h4>
+                      <h4 className="font-black text-slate-900 dark:text-white text-[11px] mb-1 line-clamp-1 relative z-10 leading-tight tracking-tight uppercase">{lead.name}</h4>
 
-                      <div className="flex items-center gap-1 text-xs text-slate-500 mb-3">
-                        <Building2 size={12} />
-                        <span className="truncate max-w-[150px]">{lead.company}</span>
+                      <div className="flex items-center gap-1.5 text-[9px] text-slate-400 mb-3 relative z-10 font-bold uppercase tracking-wider">
+                        <Building2 size={10} className="text-slate-300" />
+                        <span className="truncate">{lead.company}</span>
                       </div>
 
-                      <div className="flex items-center justify-between pt-3 border-t border-slate-50 dark:border-slate-800">
-                        <div className="flex items-center gap-1 text-emerald-600 font-bold text-sm">
-                          <IndianRupee size={12} />
+                      <div className="flex items-center justify-between pt-2.5 border-t border-slate-50 dark:border-slate-800 relative z-10">
+                        <div className="flex items-center gap-0.5 text-primary-600 font-black text-[11px] tracking-tight">
+                          <IndianRupee size={10} className="stroke-[3px]" />
                           {Number(lead.amount || 0).toLocaleString()}
                         </div>
-                        <div className="flex items-center gap-1 text-[10px] text-slate-400">
-                          <Calendar size={10} />
-                          {lead.deadline ? format(new Date(lead.deadline), 'MMM d') : 'No date'}
+                        <div className="flex items-center gap-1 text-[8px] text-slate-300 font-black uppercase tracking-widest">
+                          <Calendar size={9} />
+                          {lead.deadline ? format(new Date(lead.deadline), 'MMM d') : '—'}
                         </div>
                       </div>
                     </div>

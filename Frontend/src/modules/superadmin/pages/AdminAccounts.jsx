@@ -104,13 +104,6 @@ const AdminAccounts = () => {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
-
-                        <div className="flex items-center gap-2 w-full sm:w-auto">
-                            <Button variant="outline" className="h-9 text-[10px] font-black uppercase tracking-widest gap-2 flex-1 sm:flex-none rounded-xl border-slate-100 dark:border-slate-800">
-                                <Filter size={14} />
-                                Filters
-                            </Button>
-                        </div>
                     </div>
 
                     <CardContent className="p-0">

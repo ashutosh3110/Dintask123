@@ -9,6 +9,7 @@ import { Badge } from '@/shared/components/ui/badge';
 import { Label } from '@/shared/components/ui/label';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import useCRMStore from '@/store/crmStore';
+import { cn } from '@/shared/utils/cn';
 
 const LeadsManagement = () => {
   const {
@@ -39,7 +40,7 @@ const LeadsManagement = () => {
 
   const filteredLeads = useMemo(() => {
     return leads.filter((lead) => {
-      const matchesSearch = 
+      const matchesSearch =
         lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         lead.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         lead.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -87,17 +88,22 @@ const LeadsManagement = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Leads Management</h1>
-          <p className="text-muted-foreground">Add, edit, and manage your leads</p>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3 px-1 sm:px-0">
+          <div className="lg:hidden w-10 h-10 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 shrink-0">
+            <img src="/src/assets/logo.png" alt="DinTask" className="h-full w-full object-cover" />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Leads <span className="text-primary-600">Management</span></h1>
+            <p className="text-[10px] sm:text-sm text-slate-500 dark:text-slate-400 font-medium tracking-wide">Manage and track your customer acquisition pipeline</p>
+          </div>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button onClick={resetForm}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Lead
+            <Button onClick={resetForm} className="h-9 sm:h-11 px-4 sm:px-6 shadow-lg shadow-primary-500/20 bg-primary-600 hover:bg-primary-700 rounded-xl font-black text-[10px] sm:text-xs uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98]">
+              <Plus className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span>Add New Lead</span>
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[600px]">
@@ -223,99 +229,163 @@ const LeadsManagement = () => {
         </Dialog>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Leads List</CardTitle>
-          <CardDescription>Manage your leads with advanced search and filtering</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
+      <Card className="border-none shadow-sm shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl overflow-hidden">
+        <CardContent className="p-3 sm:p-5">
+          <div className="flex flex-col md:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
             <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
-                placeholder="Search leads by name, email, company, or mobile..."
-                className="pl-8"
+                placeholder="Search leads..."
+                className="pl-10 h-10 sm:h-11 bg-slate-50 border-none dark:bg-slate-800 rounded-xl sm:rounded-2xl font-bold text-[11px] sm:text-xs"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                {leadStatuses.map((status) => (
-                  <SelectItem key={status} value={status}>
-                    {status}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex gap-2">
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger className="w-full md:w-[160px] h-10 sm:h-11 bg-slate-50 border-none dark:bg-slate-800 rounded-xl sm:rounded-2xl font-bold text-[11px] sm:text-xs">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-slate-100 dark:border-slate-800">
+                  <SelectItem value="all" className="text-xs font-bold">All Statuses</SelectItem>
+                  {leadStatuses.map((status) => (
+                    <SelectItem key={status} value={status} className="text-xs font-bold">
+                      {status}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto hidden lg:block">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Lead ID</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Mobile</TableHead>
-                  <TableHead>Source</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Owner</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
+                <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                  <th className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Lead ID</th>
+                  <th className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Name</th>
+                  <th className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Company</th>
+                  <th className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Contact</th>
+                  <th className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Source</th>
+                  <th className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                  <th className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                </tr>
               </TableHeader>
               <TableBody>
                 {filteredLeads.map((lead) => (
-                  <TableRow key={lead.id}>
-                    <TableCell className="font-medium">{lead.id}</TableCell>
-                    <TableCell>{lead.name}</TableCell>
-                    <TableCell>{lead.company}</TableCell>
-                    <TableCell>{lead.email}</TableCell>
-                    <TableCell>{lead.mobile}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{lead.source}</Badge>
+                  <TableRow key={lead.id} className="hover:bg-slate-50/30 dark:hover:bg-slate-800/20 border-slate-100 dark:border-slate-800 transition-colors">
+                    <TableCell className="p-4 font-black text-xs text-slate-400 tracking-tighter">{lead.id}</TableCell>
+                    <TableCell className="p-4 font-bold text-slate-900 dark:text-white text-xs">{lead.name}</TableCell>
+                    <TableCell className="p-4 text-xs font-bold text-slate-500">{lead.company}</TableCell>
+                    <TableCell className="p-4">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[11px] font-black text-slate-700 dark:text-slate-300">{lead.mobile}</span>
+                        <span className="text-[10px] text-slate-400 font-medium">{lead.email}</span>
+                      </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="p-4">
+                      <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">{lead.source}</Badge>
+                    </TableCell>
+                    <TableCell className="p-4">
                       <Badge
-                        variant={
-                          lead.status === 'Won' ? 'success' :
-                          lead.status === 'Lost' ? 'destructive' :
-                          lead.status === 'Interested' ? 'warning' :
-                          'primary'
-                        }
+                        className={cn(
+                          "text-[9px] font-black uppercase tracking-widest h-5 px-2",
+                          lead.status === 'Won' ? 'bg-emerald-50 text-emerald-600 shadow-none border-none' :
+                            lead.status === 'Lost' ? 'bg-red-50 text-red-600 shadow-none border-none' :
+                              lead.status === 'Interested' ? 'bg-amber-50 text-amber-600 shadow-none border-none' :
+                                'bg-primary-50 text-primary-600 shadow-none border-none'
+                        )}
                       >
                         {lead.status}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      {lead.owner === 'EMP-001' ? 'John Doe' : 'Jane Smith'}
-                    </TableCell>
-                    <TableCell className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(lead)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-500 hover:text-red-600"
-                        onClick={() => handleDelete(lead.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                    <TableCell className="p-4 text-right">
+                      <div className="flex justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg"
+                          onClick={() => handleEdit(lead)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg"
+                          onClick={() => handleDelete(lead.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
+          </div>
+
+          {/* Mobile Card List */}
+          <div className="lg:hidden space-y-3">
+            {filteredLeads.map((lead) => (
+              <div key={lead.id} className="p-4 rounded-2xl bg-slate-50/30 dark:bg-slate-800/20 border border-slate-100 dark:border-slate-800 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-primary-50 dark:bg-primary-950/30 text-primary-600 flex items-center justify-center text-[10px] font-black uppercase">
+                      {lead.name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="text-[13px] font-black text-slate-900 dark:text-white leading-tight">{lead.name}</p>
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{lead.company}</p>
+                    </div>
+                  </div>
+                  <Badge
+                    className={cn(
+                      "text-[8px] font-black uppercase tracking-widest h-5 px-2",
+                      lead.status === 'Won' ? 'bg-emerald-100/50 text-emerald-600' :
+                        lead.status === 'Lost' ? 'bg-red-100/50 text-red-600' :
+                          'bg-slate-100/80 dark:bg-slate-800 text-slate-500'
+                    )}
+                  >
+                    {lead.status}
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 p-3 bg-white dark:bg-slate-900/50 rounded-xl shadow-sm">
+                  <div>
+                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Contact Details</p>
+                    <p className="text-[10px] font-bold text-slate-700 dark:text-slate-300 truncate">{lead.mobile}</p>
+                    <p className="text-[9px] text-slate-500 truncate">{lead.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Lead Source</p>
+                    <Badge variant="outline" className="text-[8px] font-black h-5 border-slate-100 dark:border-slate-800">{lead.source}</Badge>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-[10px] font-black text-slate-300">#{lead.id}</span>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-slate-400 border border-slate-100 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 shadow-sm"
+                      onClick={() => handleEdit(lead)}
+                    >
+                      <Edit size={12} />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-slate-400 border border-slate-100 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 shadow-sm"
+                      onClick={() => handleDelete(lead.id)}
+                    >
+                      <Trash2 size={12} className="text-red-400" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
           {filteredLeads.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">

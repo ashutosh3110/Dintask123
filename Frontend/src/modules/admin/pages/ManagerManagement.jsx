@@ -70,41 +70,48 @@ const ManagerManagement = () => {
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Manager Management</h1>
-                    <p className="text-slate-500 dark:text-slate-400 mt-1">Manage department heads and their team hierarchies.</p>
+                <div className="flex items-center justify-between w-full md:w-auto">
+                    <div className="flex items-center gap-3 px-1 sm:px-0">
+                        <div className="lg:hidden w-10 h-10 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 shrink-0">
+                            <img src="/src/assets/logo.png" alt="DinTask" className="h-full w-full object-cover" />
+                        </div>
+                        <div>
+                            <h1 className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Manager <span className="text-primary-600">Management</span></h1>
+                            <p className="text-[10px] sm:text-sm text-slate-500 dark:text-slate-400 font-medium">Department heads and team hierarchies</p>
+                        </div>
+                    </div>
                 </div>
-                <div className="flex gap-2">
-                    <Button variant="outline" className="gap-2 border-slate-200 dark:border-slate-800">
-                        <Download size={18} />
-                        <span>Export CSV</span>
+                <div className="flex gap-2 w-full md:w-auto overflow-x-auto no-scrollbar pb-1">
+                    <Button variant="outline" className="flex-1 md:flex-none h-9 sm:h-11 px-3 sm:px-4 gap-2 border-slate-100 dark:border-slate-800 rounded-xl font-black text-[10px] sm:text-xs uppercase tracking-widest whitespace-nowrap">
+                        <Download size={14} className="sm:w-[18px] sm:h-[18px]" />
+                        <span>Export</span>
                     </Button>
                     <Button
                         onClick={() => setIsAddModalOpen(true)}
-                        className="gap-2 shadow-lg shadow-primary-200 dark:shadow-none bg-primary-600 hover:bg-primary-700"
+                        className="flex-1 md:flex-none h-9 sm:h-11 px-3 sm:px-4 gap-2 shadow-lg shadow-primary-500/20 bg-primary-600 hover:bg-primary-700 rounded-xl font-black text-[10px] sm:text-xs uppercase tracking-widest whitespace-nowrap"
                     >
-                        <Plus size={18} />
-                        <span>Add New Manager</span>
+                        <Plus size={14} className="sm:w-[18px] sm:h-[18px]" />
+                        <span>Add New</span>
                     </Button>
                 </div>
             </div>
 
             {/* Stats Overview */}
-            <div className="grid gap-6 md:grid-cols-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
                 {[
-                    { label: 'Total Managers', value: managers.length, icon: Shield, color: 'text-blue-600', bg: 'bg-blue-50' },
-                    { label: 'Active Teams', value: managers.filter(m => m.status === 'active').length, icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-                    { label: 'Total Team Size', value: employees.length, icon: Briefcase, color: 'text-purple-600', bg: 'bg-purple-50' },
-                    { label: 'Pending Apps', value: '0', icon: CheckCircle2, color: 'text-amber-600', bg: 'bg-amber-50' }
+                    { label: 'Managers', value: managers.length, icon: Shield, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/10' },
+                    { label: 'Active', value: managers.filter(m => m.status === 'active').length, icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-950/20' },
+                    { label: 'Team Size', value: employees.length, icon: Briefcase, color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-900/10' },
+                    { label: 'Pending', value: '0', icon: CheckCircle2, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/10' }
                 ].map((stat, i) => (
-                    <Card key={i} className="border-none shadow-sm">
-                        <CardContent className="p-4 flex items-center gap-4">
-                            <div className={cn("p-3 rounded-2xl", stat.bg)}>
-                                <stat.icon size={20} className={stat.color} />
+                    <Card key={i} className="border-none shadow-sm bg-white dark:bg-slate-900 rounded-2xl">
+                        <CardContent className="p-3 sm:p-4 flex items-center gap-3 sm:gap-4">
+                            <div className={cn("p-2 sm:p-3 rounded-xl sm:rounded-2xl shrink-0", stat.bg)}>
+                                <stat.icon size={16} className={cn("sm:w-5 sm:h-5", stat.color)} />
                             </div>
-                            <div className="text-left">
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p>
-                                <p className="text-xl font-bold text-slate-900 dark:text-white">{stat.value}</p>
+                            <div className="text-left min-w-0">
+                                <p className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">{stat.label}</p>
+                                <p className="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight">{stat.value}</p>
                             </div>
                         </CardContent>
                     </Card>
@@ -112,13 +119,13 @@ const ManagerManagement = () => {
             </div>
 
             {/* Toolbar */}
-            <Card className="border-none shadow-sm bg-white dark:bg-slate-900 rounded-3xl">
-                <CardContent className="p-4 flex flex-col md:flex-row gap-4">
+            <Card className="border-none shadow-sm shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl overflow-hidden">
+                <CardContent className="p-2 sm:p-4">
                     <div className="relative flex-1">
-                        <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                         <Input
-                            placeholder="Search by name or email..."
-                            className="pl-9 h-11 border-slate-100 dark:border-slate-800 rounded-xl"
+                            placeholder="Quick search managers..."
+                            className="h-10 sm:h-11 pl-10 bg-slate-50 border-none dark:bg-slate-800 rounded-xl sm:rounded-2xl font-bold text-xs"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -126,18 +133,18 @@ const ManagerManagement = () => {
                 </CardContent>
             </Card>
 
-            {/* Manager Table */}
-            <Card className="border-none shadow-lg shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-900 rounded-3xl overflow-hidden">
-                <div className="overflow-x-auto">
+            {/* Manager Table/List */}
+            <Card className="border-none shadow-xl shadow-slate-200/30 dark:shadow-none bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2.5rem] overflow-hidden">
+                <div className="overflow-x-auto hidden lg:block">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="border-b border-slate-50 dark:border-slate-800">
+                            <tr className="border-b border-slate-50 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
                                 <th className="p-5 w-10"></th>
-                                <th className="p-5 text-xs font-bold text-slate-400 uppercase tracking-widest">Manager</th>
-                                <th className="p-5 text-xs font-bold text-slate-400 uppercase tracking-widest">Department</th>
-                                <th className="p-5 text-xs font-bold text-slate-400 uppercase tracking-widest">Team Size</th>
-                                <th className="p-5 text-xs font-bold text-slate-400 uppercase tracking-widest">Status</th>
-                                <th className="p-5 text-xs font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                                <th className="p-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Manager</th>
+                                <th className="p-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Department</th>
+                                <th className="p-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Team Size</th>
+                                <th className="p-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                                <th className="p-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody ref={parent}>
@@ -258,11 +265,68 @@ const ManagerManagement = () => {
                             })}
                         </tbody>
                     </table>
+                </div>
+
+                {/* Mobile Card List */}
+                <div className="lg:hidden divide-y divide-slate-50 dark:divide-slate-800">
+                    {filteredManagers.map((mgr) => {
+                        const teamCount = employees.filter(e => e.managerId === mgr.id).length;
+                        return (
+                            <div key={mgr.id} className="p-4 space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <Avatar className="h-10 w-10 border-2 border-slate-100 dark:border-slate-800">
+                                            <AvatarImage src={mgr.avatar} />
+                                            <AvatarFallback className="bg-primary-50 text-primary-600 font-black">{mgr.name.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <p className="font-black text-slate-900 dark:text-white text-sm leading-tight">{mgr.name}</p>
+                                            <p className="text-[10px] text-slate-500 font-medium">{mgr.email}</p>
+                                        </div>
+                                    </div>
+                                    <Badge className={cn(
+                                        "text-[8px] font-black uppercase tracking-widest bg-slate-50 dark:bg-slate-800 text-slate-500",
+                                        mgr.status === 'active' && "text-emerald-500 bg-emerald-50 dark:bg-emerald-950/20"
+                                    )}>
+                                        {mgr.status}
+                                    </Badge>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50/50 dark:bg-slate-800/30 rounded-xl">
+                                    <div>
+                                        <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Department</p>
+                                        <p className="text-[10px] font-bold text-slate-700 dark:text-slate-300">{mgr.department}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Team Size</p>
+                                        <div className="flex items-center gap-1.5">
+                                            <Users size={10} className="text-slate-400" />
+                                            <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">{teamCount} Members</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between pt-1">
+                                    <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest h-5">Manager</Badge>
+                                    <div className="flex gap-1">
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary-600 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                                            <Edit2 size={12} />
+                                        </Button>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary-600 rounded-lg bg-slate-50 dark:bg-slate-800/50" onClick={() => navigate('/admin/chat')}>
+                                            <MessageSquare size={12} />
+                                        </Button>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-500 rounded-lg bg-slate-50 dark:bg-slate-800/50" onClick={() => deleteManager(mgr.id)}>
+                                            <Trash2 size={12} />
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+
                     {filteredManagers.length === 0 && (
-                        <div className="p-20 text-center">
-                            <Shield className="mx-auto h-12 w-12 text-slate-200 mb-4" />
-                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">No managers found</h3>
-                            <p className="text-slate-500 dark:text-slate-400 mt-1">Try adjusting your search or filters.</p>
+                        <div className="p-10 text-center">
+                            <Shield className="mx-auto h-10 w-10 text-slate-200 mb-3" />
+                            <h3 className="text-sm font-black text-slate-900 dark:text-white">Empty State</h3>
+                            <p className="text-[10px] text-slate-500 font-medium">No managers match your criteria.</p>
                         </div>
                     )}
                 </div>

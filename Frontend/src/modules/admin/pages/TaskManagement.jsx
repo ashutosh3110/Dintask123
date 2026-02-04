@@ -207,19 +207,24 @@ const TaskManagement = () => {
             className="space-y-6"
         >
             <motion.div variants={fadeInUp} className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white leading-tight">Task Management</h1>
-                    <p className="text-slate-500 dark:text-slate-400 mt-1 font-medium">
-                        Create, assign, and track progress across your team.
-                    </p>
+                <div className="flex items-center justify-between w-full md:w-auto">
+                    <div className="flex items-center gap-3 px-1 sm:px-0">
+                        <div className="lg:hidden w-10 h-10 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 shrink-0">
+                            <img src="/src/assets/logo.png" alt="DinTask" className="h-full w-full object-cover" />
+                        </div>
+                        <div>
+                            <h1 className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white leading-tight">Task <span className="text-primary-600">Management</span></h1>
+                            <p className="text-[10px] sm:text-sm text-slate-500 dark:text-slate-400 font-medium">Assign and track team progress</p>
+                        </div>
+                    </div>
                 </div>
 
                 <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
                     <DialogTrigger asChild>
-                        <motion.div {...scaleOnTap}>
-                            <Button className="flex items-center gap-2 shadow-lg shadow-primary-200 dark:shadow-none bg-primary-600 hover:bg-primary-700 h-11 px-6 rounded-xl">
-                                <Plus size={18} />
-                                <span className="font-bold">Create Task</span>
+                        <motion.div {...scaleOnTap} className="w-full md:w-auto px-1 sm:px-0">
+                            <Button className="w-full md:w-auto flex items-center justify-center gap-2 shadow-lg shadow-primary-500/20 bg-primary-600 hover:bg-primary-700 h-10 sm:h-11 px-6 rounded-xl font-black text-[10px] sm:text-xs uppercase tracking-widest">
+                                <Plus size={16} className="sm:w-[18px] sm:h-[18px]" />
+                                <span>Create Task</span>
                             </Button>
                         </motion.div>
                     </DialogTrigger>
@@ -447,18 +452,18 @@ const TaskManagement = () => {
 
             <div className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 p-2 ">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <div className="flex flex-col sm:flex-row items-center justify-between p-3 gap-4">
-                        <TabsList className="bg-slate-100 dark:bg-slate-800 h-11 rounded-2xl p-1 w-full sm:w-auto">
-                            <TabsTrigger value="all" className="rounded-xl px-6 font-bold text-xs data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-sm">All Tasks</TabsTrigger>
-                            <TabsTrigger value="pending" className="rounded-xl px-6 font-bold text-xs data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-sm">Pending</TabsTrigger>
-                            <TabsTrigger value="completed" className="rounded-xl px-6 font-bold text-xs data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-sm">Completed</TabsTrigger>
+                    <div className="flex flex-col sm:flex-row items-center justify-between p-2 sm:p-3 gap-3">
+                        <TabsList className="bg-slate-100 dark:bg-slate-800/50 h-10 sm:h-11 rounded-xl sm:rounded-2xl p-1 w-full sm:w-auto">
+                            <TabsTrigger value="all" className="flex-1 sm:flex-none rounded-lg sm:rounded-xl px-4 sm:px-6 font-black text-[10px] sm:text-xs uppercase tracking-widest data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-sm">All</TabsTrigger>
+                            <TabsTrigger value="pending" className="flex-1 sm:flex-none rounded-lg sm:rounded-xl px-4 sm:px-6 font-black text-[10px] sm:text-xs uppercase tracking-widest data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-sm">Pending</TabsTrigger>
+                            <TabsTrigger value="completed" className="flex-1 sm:flex-none rounded-lg sm:rounded-xl px-4 sm:px-6 font-black text-[10px] sm:text-xs uppercase tracking-widest data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-sm">Done</TabsTrigger>
                         </TabsList>
 
-                        <div className="relative w-full sm:w-72">
-                            <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
+                        <div className="relative w-full sm:w-64">
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
                             <Input
-                                placeholder="Search tasks by title..."
-                                className="pl-10 h-11 bg-slate-50 border-none dark:bg-slate-800 rounded-2xl font-medium focus:ring-2 focus:ring-primary-500/10 transition-all text-xs"
+                                placeholder="Filter tasks..."
+                                className="pl-10 h-10 sm:h-11 bg-slate-50 border-none dark:bg-slate-800/50 rounded-xl sm:rounded-2xl font-bold focus:ring-2 focus:ring-primary-500/10 transition-all text-xs"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />

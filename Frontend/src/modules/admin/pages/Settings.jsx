@@ -97,27 +97,33 @@ const Settings = () => {
             variants={staggerContainer}
             className="space-y-8 pb-20 max-w-5xl mx-auto"
         >
-            <motion.div variants={fadeInUp}>
-                <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">Admin <span className="text-primary-600">Settings</span></h1>
-                <p className="text-slate-500 dark:text-slate-400 mt-1 font-medium">Manage your workspace identity and security credentials.</p>
+            {/* Header */}
+            <motion.div variants={fadeInUp} className="flex items-center gap-3 px-1 sm:px-0">
+                <div className="lg:hidden w-10 h-10 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 shrink-0">
+                    <img src="/src/assets/logo.png" alt="DinTask" className="h-full w-full object-cover" />
+                </div>
+                <div>
+                    <h1 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">Admin <span className="text-primary-600">Settings</span></h1>
+                    <p className="text-[10px] sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 font-medium">Manage your workspace identity and security credentials.</p>
+                </div>
             </motion.div>
 
             {/* Tab Navigation */}
-            <motion.div variants={fadeInUp} className="flex gap-2 overflow-x-auto no-scrollbar bg-white dark:bg-slate-900 p-2 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800">
+            <motion.div variants={fadeInUp} className="flex gap-1 sm:gap-2 overflow-x-auto no-scrollbar bg-white dark:bg-slate-900 p-1.5 sm:p-2 rounded-2xl sm:rounded-[2rem] shadow-sm border border-slate-50 dark:border-slate-800/50">
                 {tabs.map((tab) => (
                     <Button
                         key={tab.id}
                         variant={activeTab === tab.id ? 'default' : 'ghost'}
                         onClick={() => setSearchParams({ tab: tab.id })}
                         className={cn(
-                            "flex-1 h-12 rounded-2xl gap-2 font-bold transition-all",
+                            "flex-1 h-10 sm:h-12 rounded-xl sm:rounded-2xl gap-2 font-black transition-all text-[10px] sm:text-sm uppercase tracking-widest",
                             activeTab === tab.id
                                 ? "bg-primary-600 shadow-lg shadow-primary-500/20 text-white"
                                 : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800"
                         )}
                     >
-                        <tab.icon size={18} />
-                        {tab.label}
+                        <tab.icon size={16} className="sm:w-[18px] sm:h-[18px]" />
+                        <span className="hidden sm:inline">{tab.label}</span>
                     </Button>
                 ))}
             </motion.div>
@@ -131,57 +137,57 @@ const Settings = () => {
                     transition={{ duration: 0.2 }}
                 >
                     {activeTab === 'profile' && (
-                        <Card className="border-none shadow-xl shadow-slate-200/30 dark:shadow-none bg-white dark:bg-slate-900 rounded-[2.5rem] overflow-hidden">
-                            <CardHeader className="p-8 pb-0">
-                                <CardTitle className="text-2xl font-black">Public Profile</CardTitle>
-                                <CardDescription className="font-bold text-slate-400">Basic information about your admin account</CardDescription>
+                        <Card className="border-none shadow-xl shadow-slate-200/30 dark:shadow-none bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2.5rem] overflow-hidden">
+                            <CardHeader className="p-5 sm:p-8 pb-0">
+                                <CardTitle className="text-lg sm:text-2xl font-black uppercase tracking-tight">Public Profile</CardTitle>
+                                <CardDescription className="text-[10px] sm:text-sm font-bold text-slate-400">Basic information about your admin account</CardDescription>
                             </CardHeader>
-                            <CardContent className="p-8 space-y-8">
-                                <div className="flex items-center gap-6">
+                            <CardContent className="p-5 sm:p-8 space-y-6 sm:space-y-8">
+                                <div className="flex items-center gap-4 sm:gap-6">
                                     <div className="relative group">
-                                        <div className="w-20 h-20 rounded-3xl bg-primary-100 dark:bg-slate-800 flex items-center justify-center text-2xl font-black text-primary-600">
+                                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-primary-100 dark:bg-slate-800 flex items-center justify-center text-xl sm:text-2xl font-black text-primary-600">
                                             {user?.name?.charAt(0)}
                                         </div>
-                                        <button className="absolute -bottom-1 -right-1 p-1.5 bg-white dark:bg-slate-700 rounded-lg shadow-md border border-slate-100 dark:border-slate-600">
-                                            <Camera size={14} />
+                                        <button className="absolute -bottom-1 -right-1 p-1 sm:p-1.5 bg-white dark:bg-slate-700 rounded-lg shadow-md border border-slate-100 dark:border-slate-600">
+                                            <Camera size={12} className="sm:w-3.5 sm:h-3.5" />
                                         </button>
                                     </div>
-                                    <div className="space-y-1">
-                                        <h3 className="text-lg font-black text-slate-900 dark:text-white capitalize">{user?.name}</h3>
-                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Admin Owner</p>
+                                    <div className="space-y-0.5 sm:space-y-1">
+                                        <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white capitalize">{user?.name}</h3>
+                                        <p className="text-[8px] sm:text-xs font-black text-slate-400 uppercase tracking-widest">Admin Owner</p>
                                     </div>
                                 </div>
 
                                 <Separator />
 
-                                <form onSubmit={handleProfileSubmit} className="space-y-6">
-                                    <div className="grid gap-6 md:grid-cols-2">
-                                        <div className="space-y-2">
-                                            <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Full Name</Label>
+                                <form onSubmit={handleProfileSubmit} className="space-y-4 sm:space-y-6">
+                                    <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
+                                        <div className="space-y-1.5 sm:space-y-2">
+                                            <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Full Name</Label>
                                             <div className="relative">
-                                                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                                <User size={16} className="absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 text-slate-400 sm:w-[18px] sm:h-[18px]" />
                                                 <Input
                                                     value={profileForm.name}
                                                     onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
-                                                    className="pl-12 h-14 rounded-2xl bg-slate-50 border-none dark:bg-slate-800 font-bold focus:ring-primary-500/20"
+                                                    className="pl-10 sm:pl-12 h-11 sm:h-14 rounded-xl sm:rounded-2xl bg-slate-50 border-none dark:bg-slate-800 font-bold focus:ring-primary-500/20 text-xs sm:text-sm"
                                                 />
                                             </div>
                                         </div>
-                                        <div className="space-y-2">
-                                            <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Email Address</Label>
+                                        <div className="space-y-1.5 sm:space-y-2">
+                                            <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Email Address</Label>
                                             <div className="relative">
-                                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                                <Mail size={16} className="absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 text-slate-400 sm:w-[18px] sm:h-[18px]" />
                                                 <Input
                                                     value={profileForm.email}
                                                     onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
-                                                    className="pl-12 h-14 rounded-2xl bg-slate-50 border-none dark:bg-slate-800 font-bold"
+                                                    className="pl-10 sm:pl-12 h-11 sm:h-14 rounded-xl sm:rounded-2xl bg-slate-50 border-none dark:bg-slate-800 font-bold text-xs sm:text-sm"
                                                 />
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex justify-end">
-                                        <Button type="submit" disabled={isSaving} className="h-14 px-8 rounded-2xl font-black bg-primary-600 hover:bg-primary-700 shadow-xl shadow-primary-500/20">
-                                            {isSaving ? <RefreshCw className="animate-spin mr-2" size={18} /> : <Save className="mr-2" size={18} />}
+                                    <div className="flex justify-end pt-2">
+                                        <Button type="submit" disabled={isSaving} className="w-full sm:w-auto h-11 sm:h-14 px-8 rounded-xl sm:rounded-2xl font-black bg-primary-600 hover:bg-primary-700 shadow-xl shadow-primary-500/20 text-[10px] sm:text-xs uppercase tracking-widest">
+                                            {isSaving ? <RefreshCw className="animate-spin mr-2" size={14} /> : <Save className="mr-2" size={14} />}
                                             Update Profile
                                         </Button>
                                     </div>
@@ -191,65 +197,65 @@ const Settings = () => {
                     )}
 
                     {activeTab === 'security' && (
-                        <Card className="border-none shadow-xl shadow-slate-200/30 dark:shadow-none bg-white dark:bg-slate-900 rounded-[2.5rem]">
-                            <CardHeader className="p-8 pb-0">
-                                <CardTitle className="text-2xl font-black">Password & Security</CardTitle>
-                                <CardDescription className="font-bold text-slate-400">Secure your account with a strong password</CardDescription>
+                        <Card className="border-none shadow-xl shadow-slate-200/30 dark:shadow-none bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2.5rem]">
+                            <CardHeader className="p-5 sm:p-8 pb-0">
+                                <CardTitle className="text-lg sm:text-2xl font-black uppercase tracking-tight">Security</CardTitle>
+                                <CardDescription className="text-[10px] sm:text-sm font-bold text-slate-400">Secure your account with a strong password</CardDescription>
                             </CardHeader>
-                            <CardContent className="p-8">
-                                <form onSubmit={handlePasswordSubmit} className="space-y-6 max-w-2xl">
-                                    <div className="space-y-2">
-                                        <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Current Password</Label>
+                            <CardContent className="p-5 sm:p-8">
+                                <form onSubmit={handlePasswordSubmit} className="space-y-4 sm:space-y-6 max-w-2xl">
+                                    <div className="space-y-1.5 sm:space-y-2">
+                                        <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Current Password</Label>
                                         <div className="relative">
-                                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                            <Lock size={16} className="absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 text-slate-400 sm:w-[18px] sm:h-[18px]" />
                                             <Input
                                                 type={showPasswords.current ? "text" : "password"}
                                                 value={passwordForm.current}
                                                 onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })}
-                                                className="pl-12 pr-12 h-14 rounded-2xl bg-slate-50 border-none dark:bg-slate-800 font-bold"
+                                                className="pl-10 sm:pl-12 pr-10 sm:pr-12 h-11 sm:h-14 rounded-xl sm:rounded-2xl bg-slate-50 border-none dark:bg-slate-800 font-bold text-xs sm:text-sm"
                                             />
-                                            <button type="button" onClick={() => setShowPasswords({ ...showPasswords, current: !showPasswords.current })} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
-                                                {showPasswords.current ? <EyeOff size={18} /> : <Eye size={18} />}
+                                            <button type="button" onClick={() => setShowPasswords({ ...showPasswords, current: !showPasswords.current })} className="absolute right-3.5 sm:right-4 top-1/2 -translate-y-1/2 text-slate-400">
+                                                {showPasswords.current ? <EyeOff size={16} /> : <Eye size={16} />}
                                             </button>
                                         </div>
                                     </div>
 
-                                    <div className="grid gap-6 md:grid-cols-2">
-                                        <div className="space-y-2">
-                                            <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">New Password</Label>
+                                    <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
+                                        <div className="space-y-1.5 sm:space-y-2">
+                                            <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">New Password</Label>
                                             <div className="relative">
-                                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                                <Lock size={16} className="absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 text-slate-400 sm:w-[18px] sm:h-[18px]" />
                                                 <Input
                                                     type={showPasswords.new ? "text" : "password"}
                                                     value={passwordForm.new}
                                                     onChange={(e) => setPasswordForm({ ...passwordForm, new: e.target.value })}
-                                                    className="pl-12 h-14 rounded-2xl bg-slate-50 border-none dark:bg-slate-800 font-bold"
+                                                    className="pl-10 sm:pl-12 h-11 sm:h-14 rounded-xl sm:rounded-2xl bg-slate-50 border-none dark:bg-slate-800 font-bold text-xs sm:text-sm"
                                                 />
-                                                <button type="button" onClick={() => setShowPasswords({ ...showPasswords, new: !showPasswords.new })} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
-                                                    {showPasswords.new ? <EyeOff size={18} /> : <Eye size={18} />}
+                                                <button type="button" onClick={() => setShowPasswords({ ...showPasswords, new: !showPasswords.new })} className="absolute right-3.5 sm:right-4 top-1/2 -translate-y-1/2 text-slate-400">
+                                                    {showPasswords.new ? <EyeOff size={16} /> : <Eye size={16} />}
                                                 </button>
                                             </div>
                                         </div>
-                                        <div className="space-y-2">
-                                            <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Confirm New Password</Label>
+                                        <div className="space-y-1.5 sm:space-y-2">
+                                            <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Confirm New Password</Label>
                                             <div className="relative">
-                                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                                <Lock size={16} className="absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 text-slate-400 sm:w-[18px] sm:h-[18px]" />
                                                 <Input
                                                     type={showPasswords.confirm ? "text" : "password"}
                                                     value={passwordForm.confirm}
                                                     onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
-                                                    className="pl-12 h-14 rounded-2xl bg-slate-50 border-none dark:bg-slate-800 font-bold"
+                                                    className="pl-10 sm:pl-12 h-11 sm:h-14 rounded-xl sm:rounded-2xl bg-slate-50 border-none dark:bg-slate-800 font-bold text-xs sm:text-sm"
                                                 />
-                                                <button type="button" onClick={() => setShowPasswords({ ...showPasswords, confirm: !showPasswords.confirm })} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
-                                                    {showPasswords.confirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                                                <button type="button" onClick={() => setShowPasswords({ ...showPasswords, confirm: !showPasswords.confirm })} className="absolute right-3.5 sm:right-4 top-1/2 -translate-y-1/2 text-slate-400">
+                                                    {showPasswords.confirm ? <EyeOff size={16} /> : <Eye size={16} />}
                                                 </button>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="flex justify-end pt-4">
-                                        <Button type="submit" disabled={isSaving} className="h-14 px-10 rounded-2xl font-black bg-slate-900 dark:bg-white dark:text-slate-900 shadow-xl transition-all">
-                                            {isSaving ? <RefreshCw className="animate-spin mr-2" size={18} /> : <Shield className="mr-2" size={18} />}
+                                    <div className="flex justify-end pt-2">
+                                        <Button type="submit" disabled={isSaving} className="w-full sm:w-auto h-11 sm:h-14 px-10 rounded-xl sm:rounded-2xl font-black bg-slate-900 dark:bg-white dark:text-slate-900 shadow-xl transition-all text-[10px] sm:text-xs uppercase tracking-widest">
+                                            {isSaving ? <RefreshCw className="animate-spin mr-2" size={14} /> : <Shield className="mr-2" size={14} />}
                                             Update Password
                                         </Button>
                                     </div>
