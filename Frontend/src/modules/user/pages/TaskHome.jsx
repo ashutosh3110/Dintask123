@@ -177,30 +177,9 @@ const TaskHome = () => {
                             >
                                 <TaskCardNew
                                     task={task}
+                                    managers={managers}
                                     onClick={() => navigate(`/employee/tasks/${task.id}`)}
                                 />
-                                <div className="px-5 pb-3 -mt-3 flex items-center justify-between">
-                                    <div className="flex items-center gap-1.5">
-                                        <div className={cn(
-                                            "h-1.5 w-1.5 rounded-full",
-                                            task.assignedBy === 'self' ? "bg-emerald-500" :
-                                                task.delegatedBy ? "bg-primary-500" : "bg-amber-500"
-                                        )} />
-                                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
-                                            {task.assignedBy === 'self'
-                                                ? "Self Task"
-                                                : task.delegatedBy
-                                                    ? `From: ${managers.find(m => m.id === task.delegatedBy)?.name}`
-                                                    : "From: Admin"}
-                                        </span>
-                                    </div>
-                                    {task.delegatedBy && (
-                                        <Avatar className="h-4 w-4 border border-white dark:border-slate-700">
-                                            <AvatarImage src={managers.find(m => m.id === task.delegatedBy)?.avatar} />
-                                            <AvatarFallback className="text-[6px]">{managers.find(m => m.id === task.delegatedBy)?.name.charAt(0)}</AvatarFallback>
-                                        </Avatar>
-                                    )}
-                                </div>
                             </motion.div>
                         ))
                     )}

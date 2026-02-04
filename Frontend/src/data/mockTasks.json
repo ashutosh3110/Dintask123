@@ -310,5 +310,154 @@
             "Executive"
         ],
         "activity": []
+    },
+    {
+        "id": "4001",
+        "title": "Team Performance Review",
+        "description": "Analyze the productivity metrics for all team members and prepare feedback for one-on-ones.",
+        "deadline": "2026-02-10T11:00:00",
+        "priority": "high",
+        "status": "pending",
+        "assignedTo": [
+            "M001"
+        ],
+        "assignedBy": "admin",
+        "assignedToManager": "M001",
+        "createdAt": "2026-02-01T09:00:00",
+        "progress": 10,
+        "labels": [
+            "Management",
+            "Reporting"
+        ],
+        "activity": []
+    },
+    {
+        "id": "4002",
+        "title": "New Project Roadmap",
+        "description": "Outline the milestones and resource requirements for the upcoming Q3 Expansion project.",
+        "deadline": "2026-02-15T17:00:00",
+        "priority": "medium",
+        "status": "pending",
+        "assignedTo": [
+            "M001"
+        ],
+        "assignedBy": "admin",
+        "assignedToManager": "M001",
+        "createdAt": "2026-02-02T11:00:00",
+        "progress": 0,
+        "labels": [
+            "Planning",
+            "Strategy"
+        ],
+        "activity": []
+    },
+    {
+        "id": "4003",
+        "title": "Quarterly Budget Approval",
+        "description": "Review and sign off on the final budget proposal from the finance department.",
+        "deadline": "2026-02-03T18:00:00",
+        "priority": "urgent",
+        "status": "pending",
+        "assignedTo": [
+            "M001"
+        ],
+        "assignedBy": "admin",
+        "assignedToManager": "M001",
+        "createdAt": "2026-02-02T14:00:00",
+        "progress": 75,
+        "labels": [
+            "Finance",
+            "Urgent"
+        ],
+        "activity": []
+    },
+    {
+        "id": "3001",
+        "title": "Website Performance Audit",
+        "description": "Run a full lighthouse audit on the production site and identify bottlenecks in the checkout flow.",
+        "deadline": "2026-02-04T18:00:00",
+        "priority": "high",
+        "status": "pending",
+        "assignedTo": [
+            "103"
+        ],
+        "assignedBy": "admin",
+        "assignedToManager": "M001",
+        "delegatedBy": "M001",
+        "createdAt": "2026-02-01T10:00:00",
+        "progress": 15,
+        "labels": [
+            "Engineering",
+            "Performance"
+        ],
+        "activity": []
+    },
+    {
+        "id": "3002",
+        "title": "User Feedback Analysis",
+        "description": "Analyze the last 50 support tickets to identify the most requested feature for the next sprint.",
+        "deadline": "2026-02-05T12:00:00",
+        "priority": "medium",
+        "status": "pending",
+        "assignedTo": [
+            "103",
+            "102"
+        ],
+        "assignedBy": "admin",
+        "assignedToManager": "M002",
+        "delegatedBy": "M002",
+        "createdAt": "2026-02-01T14:30:00",
+        "progress": 0,
+        "labels": [
+            "Product",
+            "Support"
+        ],
+        "activity": []
+    },
+    {
+        "id": "3003",
+        "title": "Emergency Security Patch",
+        "description": "Critical vulnerability found in the auth middleware. Patch immediately and rotate secrets.",
+        "deadline": "2026-02-03T23:59:00",
+        "priority": "urgent",
+        "status": "pending",
+        "assignedTo": [
+            "103",
+            "105"
+        ],
+        "assignedBy": "admin",
+        "createdAt": "2026-02-03T09:15:00",
+        "progress": 45,
+        "labels": [
+            "Security",
+            "Urgent"
+        ],
+        "activity": [
+            {
+                "type": "system",
+                "user": "Admin",
+                "content": "assigned this urgent task to you",
+                "time": "1 hour ago"
+            }
+        ]
+    },
+    {
+        "id": "3004",
+        "title": "Client Presentation Prep",
+        "description": "Draft the technical architecture slides for the upcoming meeting with Fortune 500 prospect.",
+        "deadline": "2026-02-04T09:00:00",
+        "priority": "high",
+        "status": "pending",
+        "assignedTo": [
+            "103"
+        ],
+        "delegatedBy": "M001",
+        "createdAt": "2026-02-02T16:00:00",
+        "progress": 60,
+        "labels": [
+            "Sales",
+            "Design"
+        ],
+        "activity": []
     }
 ]

@@ -25,7 +25,7 @@ const CRMLayout = ({ role }) => {
         { icon: <Users size={20} />, label: 'Leads', path: `/${role}/crm/leads` },
         { icon: <TrendingUp size={20} />, label: 'Pipeline', path: `/${role}/crm/pipeline` },
         ...(role !== 'manager' ? [{ icon: <PhoneCall size={20} />, label: 'Follow Ups', path: `/${role}/crm/follow-ups` }] : []),
-        { icon: <Contact size={20} />, label: 'Contacts', path: `/${role}/crm/contacts` },
+        ...(role !== 'admin' ? [{ icon: <Contact size={20} />, label: 'Contacts', path: `/${role}/crm/contacts` }] : []),
     ];
 
     const SidebarContent = () => (

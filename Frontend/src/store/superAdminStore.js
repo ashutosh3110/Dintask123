@@ -41,11 +41,11 @@ const useSuperAdminStore = create(
             ],
 
             plans: [
-                { id: 'p1', name: 'Starter', price: 999, limit: 2, isActive: true },
-                { id: 'p2', name: 'Pro Team', price: 2499, limit: 5, isActive: true },
-                { id: 'p3', name: 'Business', price: 4999, limit: 20, isActive: true },
-                { id: 'p4', name: 'Trial Plan', price: 2499, limit: 5, isActive: true, trialDays: 7 },
-                { id: 'p5', name: 'Enterprise', price: 9999, limit: 100, isActive: true, trialDays: 7 }
+                { id: 'p1', name: 'Starter', price: 999, limit: 2, isActive: true, features: ['2 Team Members', 'Basic Support', 'CRM Access'] },
+                { id: 'p2', name: 'Pro Team', price: 2499, limit: 5, isActive: true, features: ['5 Team Members', 'Priority Support', 'Full CRM', 'Reporting'] },
+                { id: 'p3', name: 'Business', price: 4999, limit: 20, isActive: true, features: ['20 Team Members', '24/7 Support', 'Advanced Analytics', 'Custom Labels'] },
+                { id: 'p4', name: 'Trial Plan', price: 2499, limit: 5, isActive: true, trialDays: 7, features: ['7 Days Trial', 'Pro Features'] },
+                { id: 'p5', name: 'Enterprise', price: 9999, limit: 100, isActive: true, trialDays: 7, features: ['Unlimited Members', 'Custom SSO', '99.9% Uptime'] }
             ],
 
             stats: {

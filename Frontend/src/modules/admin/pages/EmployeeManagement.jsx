@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Plus,
     Search,
@@ -16,7 +17,8 @@ import {
     Users,
     ChevronDown,
     ChevronUp,
-    Check
+    Check,
+    MessageSquare
 } from 'lucide-react';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 
@@ -47,6 +49,7 @@ import { cn } from '@/shared/utils/cn';
 import { Progress } from '@/shared/components/ui/progress';
 
 const EmployeeManagement = () => {
+    const navigate = useNavigate();
     const { employees, deleteEmployee, addEmployee, updateEmployee } = useEmployeeStore();
     const { tasks } = useTaskStore();
     const { managers } = useManagerStore();
@@ -279,6 +282,9 @@ const EmployeeManagement = () => {
                                                             </Button>
                                                         </DropdownMenuTrigger>
                                                         <DropdownMenuContent align="end" className="rounded-xl">
+                                                            <DropdownMenuItem className="gap-2 text-xs font-medium rounded-lg" onClick={() => navigate('/admin/chat')}>
+                                                                <MessageSquare size={14} /> Direct Message
+                                                            </DropdownMenuItem>
                                                             <DropdownMenuItem className="gap-2 text-xs font-medium rounded-lg">
                                                                 <Mail size={14} /> Send Email
                                                             </DropdownMenuItem>

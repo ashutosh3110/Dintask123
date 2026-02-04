@@ -110,14 +110,6 @@ const SalesDashboard = () => {
                 trend: '3 high priority' // Placeholder
             },
             {
-                title: 'Conversion Rate',
-                value: `${realStats.conversionRate}%`,
-                icon: TrendingUp,
-                color: 'text-emerald-600',
-                bg: 'bg-emerald-50 dark:bg-emerald-900/10',
-                trend: 'Up by 5%' // Placeholder
-            },
-            {
                 title: 'Clients',
                 value: realStats.clientsCount.toString(),
                 icon: Users,

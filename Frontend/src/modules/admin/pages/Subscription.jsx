@@ -213,30 +213,6 @@ const Subscription = () => {
 
                 {/* Quick Billing Stats / Actions */}
                 <div className="space-y-6">
-                    <Card className="border-none shadow-sm bg-white dark:bg-slate-900">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-400">Invoices</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            {[1, 2].map(i => (
-                                <div key={i} className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer group">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 group-hover:bg-primary-50 group-hover:text-primary-600 transition-colors">
-                                            <History size={16} />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs font-bold text-slate-900 dark:text-white">Jan 15, 2026</p>
-                                            <p className="text-[10px] text-slate-400">Inv-2026-00{i}</p>
-                                        </div>
-                                    </div>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 group-hover:text-primary-600">
-                                        <Download size={14} />
-                                    </Button>
-                                </div>
-                            ))}
-                            <Button variant="link" className="w-full text-xs text-slate-500">View All History</Button>
-                        </CardContent>
-                    </Card>
 
                     <Card className="border-none shadow-sm bg-slate-900 text-white overflow-hidden relative">
                         <CardContent className="p-6">

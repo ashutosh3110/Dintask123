@@ -7,7 +7,7 @@ import {
     BarChart3,
     Calendar as CalendarIcon,
     CreditCard,
-    Settings,
+    Settings as SettingsIcon,
     LogOut,
     ChevronLeft,
     ChevronRight,
@@ -22,7 +22,9 @@ import {
     Briefcase,
     ListChecks,
     TrendingUp,
-    UserPlus
+    UserPlus,
+    MessageSquare,
+    Lock
 } from 'lucide-react';
 import { cn } from '@/shared/utils/cn';
 import { Button } from '@/shared/components/ui/button';
@@ -35,14 +37,19 @@ const Sidebar = ({ role, isOpen, setIsOpen, isCollapsed, setIsCollapsed }) => {
     const location = useLocation();
     const inquiries = useSuperAdminStore(state => state.inquiries);
     const newInquiriesCount = inquiries.filter(inq => inq.status === 'new').length;
+
+    const isSuperAdmin = role === 'superadmin';
     const isManager = role === 'manager';
     const isAdmin = role === 'admin';
+
     const [isSettingsOpen, setIsSettingsOpen] = useState(
+        (isSuperAdmin && location.pathname.startsWith('/superadmin/settings')) ||
         (isManager && location.pathname.startsWith('/manager/settings')) ||
         (isAdmin && location.pathname.startsWith('/admin/settings'))
     );
-    const adminSearchParams = isAdmin ? new URLSearchParams(location.search) : null;
-    const adminActiveTab = isAdmin ? (adminSearchParams.get('tab') || 'profile') : null;
+
+    const sidebarSearchParams = new URLSearchParams(location.search);
+    const activeTab = sidebarSearchParams.get('tab') || 'profile';
 
     const handleLogout = () => {
         logout();
@@ -61,8 +68,9 @@ const Sidebar = ({ role, isOpen, setIsOpen, isCollapsed, setIsCollapsed }) => {
                 { name: 'Delegation', path: '/manager/delegation', icon: Users },
                 { name: 'Team', path: '/manager/team', icon: Users },
                 { name: 'Progress', path: '/manager/progress', icon: BarChart3 },
+                { name: 'Chat', path: '/manager/chat', icon: MessageSquare },
                 { name: 'Schedule', path: '/manager/schedule', icon: CalendarIcon },
-                { name: 'Settings', path: '/manager/settings', icon: Settings },
+                { name: 'Settings', path: '/manager/settings', icon: SettingsIcon },
                 { name: 'Reports', path: '/manager/reports', icon: BarChart3 },
             ]
             : []),
@@ -75,7 +83,7 @@ const Sidebar = ({ role, isOpen, setIsOpen, isCollapsed, setIsCollapsed }) => {
                 { name: 'Clients', path: '/sales/clients', icon: Users },
                 { name: 'Reports', path: '/sales/reports', icon: BarChart3 },
                 { name: 'Schedule', path: '/sales/schedule', icon: CalendarIcon },
-                { name: 'Settings', path: '/sales/settings', icon: Settings },
+                { name: 'Settings', path: '/sales/settings', icon: SettingsIcon },
             ]
             : []),
         ...(role === 'admin'
@@ -88,19 +96,19 @@ const Sidebar = ({ role, isOpen, setIsOpen, isCollapsed, setIsCollapsed }) => {
                 { name: 'Join Requests', path: '/admin/requests', icon: UserPlus },
                 { name: 'Sales', path: '/admin/sales', icon: TrendingUp },
                 { name: 'Reports', path: `/${role}/reports`, icon: BarChart3 },
+                { name: 'Chat', path: '/admin/chat', icon: MessageSquare },
                 { name: 'Calendar', path: `/${role}/calendar`, icon: CalendarIcon },
                 { name: 'Subscription', path: '/admin/subscription', icon: CreditCard },
-                { name: 'Settings', path: `/${role}/settings`, icon: Settings },
+                { name: 'Settings', path: `/${role}/settings`, icon: SettingsIcon },
             ]
             : []),
         ...(role === 'superadmin'
             ? [
                 { name: 'Dashboard', path: '/superadmin', icon: LayoutDashboard },
-                { name: 'CRM', path: '/superadmin/crm', icon: Briefcase },
                 { name: 'Inquiries', path: '/superadmin/inquiries', icon: ListChecks },
                 { name: 'Admins', path: '/superadmin/admins', icon: Users },
                 { name: 'Plans', path: '/superadmin/plans', icon: CreditCard },
-                { name: 'Settings', path: `/${role}/settings`, icon: Settings },
+                { name: 'Settings', path: `/${role}/settings`, icon: SettingsIcon },
             ]
             : []),
     ];
@@ -115,58 +123,79 @@ const Sidebar = ({ role, isOpen, setIsOpen, isCollapsed, setIsCollapsed }) => {
     const adminSettingsSubItems = isAdmin
         ? [
             { name: 'Profile', path: '/admin/settings?tab=profile', icon: User, tab: 'profile' },
-            { name: 'Notifications', path: '/admin/settings?tab=notifications', icon: Bell, tab: 'notifications' },
             { name: 'Security', path: '/admin/settings?tab=security', icon: Shield, tab: 'security' },
             { name: 'Appearance', path: '/admin/settings?tab=appearance', icon: Palette, tab: 'appearance' },
+        ]
+        : [];
+
+    const superAdminSettingsSubItems = isSuperAdmin
+        ? [
+            { name: 'Account', path: '/superadmin/settings?tab=profile', icon: User, tab: 'profile' },
+            { name: 'Security', path: '/superadmin/settings?tab=security', icon: Lock, tab: 'security' },
+            { name: 'Platform', path: '/superadmin/settings?tab=platform', icon: SettingsIcon, tab: 'platform' },
         ]
         : [];
 
     return (
         <aside
             className={cn(
-                "fixed left-0 top-0 h-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-300 z-50 overflow-hidden",
+                "fixed left-0 top-0 h-full bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-slate-900 transition-all duration-300 z-50 overflow-hidden",
                 isCollapsed ? "w-20" : "w-64",
-                // Mobile responsiveness: slide in/out
                 isOpen ? "translate-x-0" : "-translate-x-full",
-                // Desktop: always visible (reset translation)
                 "lg:translate-x-0"
             )}
         >
             <div className="flex flex-col h-full">
-                <div className="flex items-center justify-between p-4 mb-6 border-b border-slate-100 dark:border-slate-800 h-16">
+                <div className="flex items-center justify-between p-4 mb-4 border-b border-slate-100 dark:border-slate-900 h-16 shrink-0">
                     {!isCollapsed && (
-                        <div className="flex items-center gap-2 font-bold text-xl text-primary-600">
-                            <ShieldCheck className="w-8 h-8" />
+                        <div className="flex items-center gap-3 font-black text-xl text-slate-900 dark:text-white tracking-tighter">
+                            <div className="h-9 w-9 rounded-xl overflow-hidden shadow-sm border border-slate-100">
+                                <img src="/src/assets/logo.png" alt="DinTask" className="h-full w-full object-cover" />
+                            </div>
                             <span>DinTask</span>
                         </div>
                     )}
-                    {isCollapsed && <ShieldCheck className="w-8 h-8 text-primary-600 mx-auto" />}
+                    {isCollapsed && (
+                        <div className="h-10 w-10 rounded-xl overflow-hidden mx-auto shadow-sm border border-slate-100">
+                            <img src="/src/assets/logo.png" alt="DinTask" className="h-full w-full object-cover" />
+                        </div>
+                    )}
 
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setIsCollapsed(!isCollapsed)}
-                        className="hidden lg:flex"
-                    >
-                        {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-                    </Button>
+                    {!isCollapsed && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setIsCollapsed(!isCollapsed)}
+                            className="text-slate-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/10 rounded-xl hidden lg:flex"
+                        >
+                            <ChevronLeft size={20} />
+                        </Button>
+                    )}
+                    {isCollapsed && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setIsCollapsed(!isCollapsed)}
+                            className="text-slate-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/10 rounded-xl hidden lg:flex mt-2"
+                        >
+                            <ChevronRight size={20} />
+                        </Button>
+                    )}
                 </div>
 
-                <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
+                <nav className="flex-1 px-3 space-y-1.5 overflow-y-auto no-scrollbar py-2">
                     {navItems.map((item) => {
-                        const isSettingsItem = (isManager || isAdmin) && item.name === 'Settings';
+                        const isSettingsItem = (isManager || isAdmin || isSuperAdmin) && item.name === 'Settings';
 
                         if (isSettingsItem) {
                             return (
                                 <div key={item.path}>
                                     <button
                                         type="button"
-                                        onClick={() => {
-                                            setIsSettingsOpen(prev => !prev);
-                                        }}
+                                        onClick={() => setIsSettingsOpen(prev => !prev)}
                                         className={cn(
-                                            "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all font-medium group",
-                                            "text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800"
+                                            "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-bold group w-full text-left",
+                                            "text-slate-500 hover:bg-slate-50 hover:text-primary-600 dark:text-slate-400 dark:hover:bg-slate-900"
                                         )}
                                     >
                                         <item.icon size={20} className={cn(
@@ -175,9 +204,9 @@ const Sidebar = ({ role, isOpen, setIsOpen, isCollapsed, setIsCollapsed }) => {
                                         )} />
                                         {!isCollapsed && (
                                             <>
-                                                <span className="truncate flex-1">{item.name}</span>
+                                                <span className="truncate flex-1 ml-3 text-xs uppercase tracking-widest">{item.name}</span>
                                                 <ChevronDown
-                                                    size={16}
+                                                    size={14}
                                                     className={cn(
                                                         "transition-transform",
                                                         !isSettingsOpen && "-rotate-90"
@@ -185,34 +214,33 @@ const Sidebar = ({ role, isOpen, setIsOpen, isCollapsed, setIsCollapsed }) => {
                                                 />
                                             </>
                                         )}
-                                        {isCollapsed && (
-                                            <div className="absolute left-full ml-2 px-2 py-1 bg-slate-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50">
-                                                {item.name}
-                                            </div>
-                                        )}
                                     </button>
 
                                     {!isCollapsed && isSettingsOpen && (
-                                        <div className="mt-1 space-y-1">
-                                            {(isManager ? managerSettingsSubItems : adminSettingsSubItems).map((subItem) => {
+                                        <div className="mt-1 ml-4 border-l border-slate-100 dark:border-slate-800 space-y-1">
+                                            {(isManager
+                                                ? managerSettingsSubItems
+                                                : isAdmin
+                                                    ? adminSettingsSubItems
+                                                    : superAdminSettingsSubItems
+                                            ).map((subItem) => {
                                                 const isActiveSub = isManager
                                                     ? location.pathname === subItem.path
-                                                    : adminActiveTab === subItem.tab;
+                                                    : activeTab === subItem.tab;
 
                                                 return (
                                                     <NavLink
                                                         key={subItem.name}
                                                         to={subItem.path}
-                                                        end
                                                         onClick={() => setIsOpen(false)}
-                                                        className={() => cn(
-                                                            "flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-sm font-medium group ml-6",
+                                                        className={cn(
+                                                            "flex items-center gap-3 px-4 py-2 rounded-lg transition-all text-[11px] font-black uppercase tracking-widest group ml-4",
                                                             isActiveSub
-                                                                ? "bg-primary-50 text-primary-600 dark:bg-primary-900/10 dark:text-primary-400"
-                                                                : "text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800"
+                                                                ? "text-primary-600 bg-primary-50 dark:bg-primary-900/20"
+                                                                : "text-slate-500 hover:text-primary-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-900"
                                                         )}
                                                     >
-                                                        <subItem.icon size={16} className="min-w-[16px]" />
+                                                        <subItem.icon size={14} className="min-w-[14px]" />
                                                         <span className="truncate">{subItem.name}</span>
                                                     </NavLink>
                                                 );
@@ -230,26 +258,24 @@ const Sidebar = ({ role, isOpen, setIsOpen, isCollapsed, setIsCollapsed }) => {
                                 end={item.path === `/${role}`}
                                 onClick={() => setIsOpen(false)}
                                 className={({ isActive }) => cn(
-                                    "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all font-medium group",
+                                    "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-bold group border border-transparent",
                                     isActive
-                                        ? "bg-primary-50 text-primary-600 dark:bg-primary-900/10 dark:text-primary-400"
-                                        : "text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800"
+                                        ? "bg-primary-600 text-white shadow-lg shadow-primary-900/30"
+                                        : "text-slate-500 hover:bg-slate-50 hover:text-primary-600 dark:text-slate-400 dark:hover:bg-slate-900"
                                 )}
                             >
                                 <item.icon size={20} className={cn(
                                     "min-w-[20px]",
                                     isCollapsed ? "mx-auto" : ""
                                 )} />
-                                {!isCollapsed && <span className="truncate">{item.name}</span>}
+                                {!isCollapsed && <span className="truncate ml-3 text-xs uppercase tracking-widest">{item.name}</span>}
                                 {!isCollapsed && item.name === 'Inquiries' && newInquiriesCount > 0 && (
-                                    <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-slate-900">
+                                    <span className={cn(
+                                        "ml-auto flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black shadow-sm",
+                                        "bg-primary-600 text-white"
+                                    )}>
                                         {newInquiriesCount}
                                     </span>
-                                )}
-                                {isCollapsed && (
-                                    <div className="absolute left-full ml-2 px-2 py-1 bg-slate-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50">
-                                        {item.name}
-                                    </div>
                                 )}
                             </NavLink>
                         );
@@ -260,13 +286,13 @@ const Sidebar = ({ role, isOpen, setIsOpen, isCollapsed, setIsCollapsed }) => {
                     <Button
                         variant="ghost"
                         className={cn(
-                            "w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10",
+                            "w-full justify-start text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 font-bold",
                             isCollapsed && "justify-center"
                         )}
                         onClick={handleLogout}
                     >
                         <LogOut size={20} />
-                        {!isCollapsed && <span className="ml-3">Logout</span>}
+                        {!isCollapsed && <span className="ml-3 text-xs uppercase tracking-widest">Logout</span>}
                     </Button>
                 </div>
             </div>

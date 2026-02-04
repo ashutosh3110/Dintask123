@@ -37,8 +37,8 @@ const SalesLogin = () => {
                 <div className="h-2 bg-primary-600 w-full" />
                 <CardHeader className="text-center space-y-1 pt-8">
                     <div className="flex justify-center mb-4">
-                        <div className="p-3 rounded-2xl bg-primary-50 dark:bg-primary-900/20 text-primary-600">
-                            <ShieldCheck className="w-8 h-8" />
+                        <div className="p-3 rounded-2xl bg-white dark:bg-slate-800 shadow-xl shadow-primary-500/10 border border-slate-50 dark:border-slate-800">
+                            <img src="/src/assets/logo.png" alt="DinTask" className="h-10 w-10 object-contain" />
                         </div>
                     </div>
                     <CardTitle className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">

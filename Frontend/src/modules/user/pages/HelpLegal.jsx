@@ -14,7 +14,6 @@ const HelpLegal = () => {
             title: 'Support',
             items: [
                 { icon: <HelpCircle className="text-blue-500" />, label: 'Help Center', sub: 'Guides and tutorials', path: '/employee/profile/help/center' },
-                { icon: <BookOpen className="text-purple-500" />, label: 'API Documentation', sub: 'For developers', path: '/employee/profile/help/api' },
             ]
         },
         {
@@ -22,7 +21,6 @@ const HelpLegal = () => {
             items: [
                 { icon: <Shield className="text-amber-500" />, label: 'Privacy Policy', sub: 'How we handle your data', path: '/employee/profile/help/privacy' },
                 { icon: <FileText className="text-slate-500" />, label: 'Terms of Service', sub: 'Rules for using DinTask', path: '/employee/profile/help/terms' },
-                { icon: <Info className="text-indigo-500" />, label: 'System status', sub: 'Current uptime & stability', path: '/employee/profile/help/status' },
             ]
         }
     ];

@@ -81,39 +81,32 @@ const AdminAccounts = () => {
             variants={staggerContainer}
             className="space-y-6 pb-12"
         >
-            <motion.div variants={fadeInUp} className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-black text-slate-900 dark:text-white">Admin Accounts</h1>
-                    <p className="text-slate-500 dark:text-slate-400 mt-1 font-medium">
-                        Manage client companies and their platform access.
+            <motion.div variants={fadeInUp} className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div className="space-y-0.5">
+                    <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                        Admin Accounts <Building2 className="text-primary-600" size={24} />
+                    </h1>
+                    <p className="text-[10px] sm:text-xs text-slate-400 font-bold uppercase tracking-widest">
+                        Manage client companies & access
                     </p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                    <motion.div {...scaleOnTap}>
-                        <Button className="flex items-center gap-2 shadow-lg shadow-primary-200 dark:shadow-none bg-primary-600 hover:bg-primary-700 h-11 px-6 rounded-xl">
-                            <UserPlus size={18} />
-                            <span className="font-bold">Onboard Company</span>
-                        </Button>
-                    </motion.div>
                 </div>
             </motion.div>
 
             <motion.div variants={fadeInUp}>
-                <Card className="border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden rounded-[2rem]">
-                    <div className="p-4 border-b border-slate-50 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <div className="relative w-full sm:w-80">
-                            <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
+                <Card className="border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden rounded-2xl sm:rounded-[2rem]">
+                    <div className="p-3 sm:p-4 border-b border-slate-50 dark:border-slate-800/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <div className="relative w-full sm:w-72">
+                            <Search className="absolute left-3 top-3 h-3.5 w-3.5 text-slate-400" />
                             <Input
-                                placeholder="Search companies or owners..."
-                                className="pl-10 h-11 bg-slate-50 border-none dark:bg-slate-800 rounded-2xl font-medium focus:ring-2 focus:ring-primary-500/10 transition-all text-xs"
+                                placeholder="Search companies..."
+                                className="pl-9 h-9 bg-slate-50 border-none dark:bg-slate-800 rounded-xl font-bold text-[11px] focus:ring-2 focus:ring-primary-500/10"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
 
                         <div className="flex items-center gap-2 w-full sm:w-auto">
-                            <Button variant="outline" className="h-11 text-xs font-bold gap-2 flex-1 sm:flex-none rounded-2xl border-slate-100 dark:border-slate-800">
+                            <Button variant="outline" className="h-9 text-[10px] font-black uppercase tracking-widest gap-2 flex-1 sm:flex-none rounded-xl border-slate-100 dark:border-slate-800">
                                 <Filter size={14} />
                                 Filters
                             </Button>
@@ -121,7 +114,8 @@ const AdminAccounts = () => {
                     </div>
 
                     <CardContent className="p-0">
-                        <div className="overflow-x-auto">
+                        {/* Desktop Table View */}
+                        <div className="hidden md:block overflow-x-auto">
                             <Table>
                                 <TableHeader>
                                     <TableRow className="hover:bg-transparent border-slate-50 dark:border-slate-800">
@@ -156,17 +150,22 @@ const AdminAccounts = () => {
                                                     className="border-slate-50 dark:border-slate-800 group hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors"
                                                 >
                                                     <TableCell className="pl-8">
-                                                        <div className="space-y-1 py-1">
-                                                            <p className="font-black text-slate-900 dark:text-white leading-tight text-sm tracking-tight">{adm.name}</p>
-                                                            <p className="text-[10px] text-slate-400 flex items-center gap-1.5 font-bold">
-                                                                {adm.owner} <span className="text-slate-200 dark:text-slate-700">•</span> {adm.email}
+                                                        <div className="space-y-0.5 py-0.5">
+                                                            <p className="font-black text-slate-900 dark:text-white leading-tight text-[13px] tracking-tight">{adm.name}</p>
+                                                            <p className="text-[9px] text-slate-400 flex items-center gap-1 font-bold">
+                                                                {adm.owner} <span className="text-slate-200 dark:text-slate-700 md:inline hidden">•</span> <span className="hidden md:inline">{adm.email}</span>
                                                             </p>
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
-                                                        <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest border-none bg-slate-100 dark:bg-slate-800 text-slate-500 px-2.5 py-1 rounded-lg">
-                                                            {adm.plan}
-                                                        </Badge>
+                                                        <div className="space-y-1">
+                                                            <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest border-none bg-primary-50 dark:bg-primary-900/10 text-primary-600 px-2.5 py-1 rounded-lg">
+                                                                {adm.plan}
+                                                            </Badge>
+                                                            <p className="text-[10px] text-slate-400 font-bold ml-1">
+                                                                ₹{useSuperAdminStore.getState().plans.find(p => p.name === adm.plan)?.price.toLocaleString('en-IN') || '0'}/mo
+                                                            </p>
+                                                        </div>
                                                     </TableCell>
                                                     <TableCell className="text-xs font-bold text-slate-600 dark:text-slate-400">
                                                         {adm.employees} Members
@@ -191,11 +190,7 @@ const AdminAccounts = () => {
                                                                 </Button>
                                                             </DropdownMenuTrigger>
                                                             <DropdownMenuContent align="end" className="w-52 rounded-2xl p-2">
-                                                                <DropdownMenuLabel className="text-xs font-black uppercase tracking-widest text-slate-400 px-2 py-1.5">Manage Account</DropdownMenuLabel>
-                                                                <DropdownMenuItem className="gap-3 cursor-pointer rounded-xl font-bold text-xs py-2.5">
-                                                                    <Eye size={16} className="text-primary-500" /> View Details
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuSeparator className="my-2" />
+
                                                                 <DropdownMenuLabel className="text-[10px] uppercase font-black tracking-[0.2em] text-slate-400 px-2 py-1.5">Set Status</DropdownMenuLabel>
                                                                 <DropdownMenuItem className="gap-3 cursor-pointer rounded-xl font-bold text-xs py-2.5 text-emerald-600 focus:text-emerald-700 focus:bg-emerald-50 dark:focus:bg-emerald-900/10" onClick={() => handleStatusChange(adm.id, 'active')}>
                                                                     <CheckCircle2 size={16} /> Mark Active
@@ -220,32 +215,91 @@ const AdminAccounts = () => {
                                 </TableBody>
                             </Table>
                         </div>
+
+                        {/* Mobile Card View */}
+                        <div className="md:hidden divide-y divide-slate-50 dark:divide-slate-800">
+                            {filteredAdmins.length === 0 ? (
+                                <div className="p-12 text-center text-slate-400">
+                                    <p className="font-bold">No accounts found.</p>
+                                </div>
+                            ) : (
+                                filteredAdmins.map((adm) => (
+                                    <div key={adm.id} className="p-3 sm:p-4 space-y-3">
+                                        <div className="flex justify-between items-start">
+                                            <div className="space-y-0.5">
+                                                <h4 className="font-black text-slate-900 dark:text-white text-sm">{adm.name}</h4>
+                                                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tight">{adm.owner}</p>
+                                                <p className="text-[9px] text-slate-400 font-medium truncate max-w-[150px]">{adm.email}</p>
+                                            </div>
+                                            <div className="flex flex-col items-end gap-1.5">
+                                                <Badge className={cn(
+                                                    "text-[8px] h-5 px-2 font-black uppercase tracking-widest gap-1 border rounded-full",
+                                                    statusColors[adm.status]
+                                                )}>
+                                                    {adm.status}
+                                                </Badge>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="sm" className="h-7 w-7 rounded-lg border border-slate-100 dark:border-slate-800">
+                                                            <MoreVertical size={12} />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end" className="w-48 rounded-xl">
+                                                        <DropdownMenuItem className="gap-2 font-bold text-xs py-2" onClick={() => handleStatusChange(adm.id, 'active')}>
+                                                            <CheckCircle2 size={14} className="text-emerald-500" /> Active
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem className="gap-2 font-bold text-xs py-2" onClick={() => handleStatusChange(adm.id, 'suspended')}>
+                                                            <XOctagon size={14} className="text-red-500" /> Suspend
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-50 dark:border-slate-800">
+                                            <div className="space-y-0.5">
+                                                <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest">Plan</p>
+                                                <p className="text-[10px] font-black text-primary-600 uppercase tracking-tight">{adm.plan}</p>
+                                            </div>
+                                            <div className="space-y-0.5 text-right">
+                                                <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest">Team Size</p>
+                                                <p className="text-[10px] font-bold text-slate-900 dark:text-white">{adm.employees} Members</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </CardContent>
                 </Card>
             </motion.div>
 
-            {/* Quick Summary Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <motion.div variants={fadeInUp} className="p-8 rounded-[2rem] bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 flex flex-col items-center text-center group hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-500">
-                    <div className="p-3 bg-white dark:bg-emerald-900/20 rounded-2xl shadow-sm mb-4 group-hover:scale-110 transition-transform">
-                        <CheckCircle2 className="text-emerald-500" size={28} />
+            <div className="grid grid-cols-3 gap-2 px-1 md:px-0">
+                <motion.div variants={fadeInUp} className="p-2 md:p-5 rounded-xl md:rounded-[2rem] bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 flex items-center gap-1.5 md:gap-3 transition-all duration-500 min-w-0">
+                    <div className="p-1 md:p-3 bg-white dark:bg-emerald-900/20 rounded-lg md:rounded-2xl shadow-sm shrink-0">
+                        <CheckCircle2 className="text-emerald-500 h-3 w-3 md:h-5 md:w-5" />
                     </div>
-                    <h4 className="text-3xl font-black text-emerald-700 dark:text-emerald-400 tracking-tighter">{admins.filter(a => a.status === 'active').length}</h4>
-                    <p className="text-[10px] font-black text-emerald-600 dark:text-emerald-500/70 uppercase tracking-[0.2em] mt-1">Fully Operational</p>
+                    <div className="min-w-0 overflow-hidden">
+                        <h4 className="text-sm md:text-2xl font-black text-emerald-700 dark:text-emerald-400 tracking-tighter leading-none">{admins.filter(a => a.status === 'active').length}</h4>
+                        <p className="text-[6px] md:text-[8px] font-black text-emerald-600 dark:text-emerald-500/70 uppercase tracking-widest mt-0.5 md:mt-1 truncate">Active</p>
+                    </div>
                 </motion.div>
-                <motion.div variants={fadeInUp} className="p-8 rounded-[2rem] bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 flex flex-col items-center text-center group hover:shadow-lg hover:shadow-amber-500/5 transition-all duration-500">
-                    <div className="p-3 bg-white dark:bg-amber-900/20 rounded-2xl shadow-sm mb-4 group-hover:scale-110 transition-transform">
-                        <Clock className="text-amber-500" size={28} />
+                <motion.div variants={fadeInUp} className="p-2 md:p-5 rounded-xl md:rounded-[2rem] bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 flex items-center gap-1.5 md:gap-3 transition-all duration-500 min-w-0">
+                    <div className="p-1 md:p-3 bg-white dark:bg-amber-900/20 rounded-lg md:rounded-2xl shadow-sm shrink-0">
+                        <Clock className="text-amber-500 h-3 w-3 md:h-5 md:w-5" />
                     </div>
-                    <h4 className="text-3xl font-black text-amber-700 dark:text-amber-400 tracking-tighter">{admins.filter(a => a.status === 'pending').length}</h4>
-                    <p className="text-[10px] font-black text-amber-600 dark:text-amber-500/70 uppercase tracking-[0.2em] mt-1">Pending Onboarding</p>
+                    <div className="min-w-0 overflow-hidden">
+                        <h4 className="text-sm md:text-2xl font-black text-amber-700 dark:text-amber-400 tracking-tighter leading-none">{admins.filter(a => a.status === 'pending').length}</h4>
+                        <p className="text-[6px] md:text-[8px] font-black text-amber-600 dark:text-amber-500/70 uppercase tracking-widest mt-0.5 md:mt-1 truncate">Pending</p>
+                    </div>
                 </motion.div>
-                <motion.div variants={fadeInUp} className="p-8 rounded-[2rem] bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/30 flex flex-col items-center text-center group hover:shadow-lg hover:shadow-red-500/5 transition-all duration-500">
-                    <div className="p-3 bg-white dark:bg-red-900/20 rounded-2xl shadow-sm mb-4 group-hover:scale-110 transition-transform">
-                        <XOctagon className="text-red-500" size={28} />
+                <motion.div variants={fadeInUp} className="p-2 md:p-5 rounded-xl md:rounded-[2rem] bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/30 flex items-center gap-1.5 md:gap-3 transition-all duration-500 min-w-0">
+                    <div className="p-1 md:p-3 bg-white dark:bg-red-900/20 rounded-lg md:rounded-2xl shadow-sm shrink-0">
+                        <XOctagon className="text-red-500 h-3 w-3 md:h-5 md:w-5" />
                     </div>
-                    <h4 className="text-3xl font-black text-red-700 dark:text-red-400 tracking-tighter">{admins.filter(a => a.status === 'suspended').length}</h4>
-                    <p className="text-[10px] font-black text-red-600 dark:text-red-500/70 uppercase tracking-[0.2em] mt-1">Restricted Access</p>
+                    <div className="min-w-0 overflow-hidden">
+                        <h4 className="text-sm md:text-2xl font-black text-red-700 dark:text-red-400 tracking-tighter leading-none">{admins.filter(a => a.status === 'suspended').length}</h4>
+                        <p className="text-[6px] md:text-[8px] font-black text-red-600 dark:text-red-500/70 uppercase tracking-widest mt-0.5 md:mt-1 truncate">Blocked</p>
+                    </div>
                 </motion.div>
             </div>
         </motion.div>

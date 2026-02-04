@@ -33,6 +33,9 @@ import { Label } from '@/shared/components/ui/label';
 import { Checkbox } from '@/shared/components/ui/checkbox';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 import useEmployeeStore from '@/store/employeeStore';
+import useScheduleStore from '@/store/scheduleStore';
+import useAuthStore from '@/store/authStore';
+import { useMemo } from 'react';
 
 const AdminCalendar = () => {
     const { employees } = useEmployeeStore();
@@ -51,25 +54,33 @@ const AdminCalendar = () => {
         location: 'Conference Room A'
     });
 
-    const [events, setEvents] = useState([
-        {
-            id: '1',
-            title: 'Weekly Sync',
-            start: new Date().toISOString().split('T')[0] + 'T10:00:00',
-            end: new Date().toISOString().split('T')[0] + 'T11:00:00',
-            backgroundColor: '#3b82f6',
-            borderColor: '#3b82f6',
-            extendedProps: { type: 'meeting', location: 'Zoom', participants: ['1', '2'] }
-        },
-        {
-            id: '2',
-            title: 'Frontend Review',
-            start: new Date(Date.now() + 86400000).toISOString().split('T')[0] + 'T14:30:00',
-            backgroundColor: '#10b981',
-            borderColor: '#10b981',
-            extendedProps: { type: 'review', location: 'Office', participants: ['3'] }
-        }
-    ]);
+    const { user } = useAuthStore();
+    const { schedules, addScheduleEvent, deleteScheduleEvent } = useScheduleStore();
+
+    // Map store schedules to FullCalendar events
+    const allEvents = useMemo(() => {
+        const storeEvents = schedules.map(s => ({
+            id: s.id,
+            title: s.title,
+            start: s.date.includes('T') ? s.date : `${s.date}T${s.time || '00:00'}:00`,
+            backgroundColor: s.type === 'meeting' ? '#3b82f6' : s.type === 'call' ? '#10b981' : '#6366f1',
+            borderColor: s.type === 'meeting' ? '#3b82f6' : s.type === 'call' ? '#10b981' : '#6366f1',
+            extendedProps: {
+                type: s.type,
+                location: s.location || 'Remote',
+                participants: s.participants,
+                assignedTo: s.assignedTo,
+                description: s.description,
+                source: 'store'
+            }
+        }));
+
+        // Filter events assigned to Admin or where user is participant
+        return storeEvents.filter(e =>
+            e.extendedProps.assignedTo?.toLowerCase().includes('admin') ||
+            e.extendedProps.participants?.includes(user?.id)
+        );
+    }, [schedules, user?.id]);
 
     const handleDateClick = (arg) => {
         setSelectedDate(arg.dateStr);
@@ -86,17 +97,15 @@ const AdminCalendar = () => {
         const start = `${selectedDate}T${newEvent.startTime}:00`;
         const end = `${selectedDate}T${newEvent.endTime}:00`;
 
-        const event = {
-            id: Date.now().toString(),
+        addScheduleEvent({
             title: newEvent.title,
-            start,
-            end,
-            backgroundColor: '#3b82f6',
-            borderColor: '#3b82f6',
-            extendedProps: { ...newEvent }
-        };
-
-        setEvents([...events, event]);
+            date: selectedDate,
+            time: newEvent.startTime,
+            type: newEvent.type,
+            location: newEvent.location,
+            participants: newEvent.participants,
+            assignedTo: 'Admin'
+        });
         toast.success('Meeting scheduled successfully');
         setIsModalOpen(false);
         setNewEvent({
@@ -224,7 +233,7 @@ const AdminCalendar = () => {
                             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
                             initialView="dayGridMonth"
                             headerToolbar={false}
-                            events={events}
+                            events={allEvents}
                             editable={true}
                             selectable={true}
                             selectMirror={true}
@@ -269,7 +278,7 @@ const AdminCalendar = () => {
                             <CardTitle className="text-xs font-bold uppercase tracking-widest text-slate-400">Upcoming Events</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            {events.slice(0, 3).map(event => (
+                            {allEvents.slice(0, 3).map(event => (
                                 <div key={event.id} className="flex gap-3 p-3 rounded-xl border border-slate-50 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/10 group hover:border-primary-100 transition-all cursor-pointer">
                                     <div className="flex flex-col items-center justify-center w-12 h-12 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm group-hover:scale-110 transition-transform duration-300">
                                         <span className="text-[10px] uppercase text-pink-500 font-bold">{format(new Date(event.start), 'MMM')}</span>
@@ -296,23 +305,6 @@ const AdminCalendar = () => {
                         </CardContent>
                     </Card>
 
-                    <Card className="border-none shadow-lg shadow-primary-500/20 bg-gradient-to-br from-primary-600 to-primary-800 text-white rounded-2xl overflow-hidden relative">
-                        <div className="absolute top-0 right-0 p-8 opacity-10">
-                            <CalendarIcon size={120} />
-                        </div>
-                        <CardContent className="p-6 relative z-10">
-                            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4">
-                                <Users size={20} className="text-white" />
-                            </div>
-                            <h4 className="text-lg font-bold mb-2">Team Sync</h4>
-                            <p className="text-xs text-primary-100 leading-relaxed mb-6 opacity-90">
-                                Connect with Google Calendar to sync your team's availability automatically.
-                            </p>
-                            <Button className="w-full bg-white text-primary-700 hover:bg-primary-50 border-none font-bold text-xs h-10 rounded-xl shadow-sm">
-                                Sync Now
-                            </Button>
-                        </CardContent>
-                    </Card>
                 </div>
             </div>
 

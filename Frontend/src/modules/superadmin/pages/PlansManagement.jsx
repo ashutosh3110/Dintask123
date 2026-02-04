@@ -32,8 +32,10 @@ const PlansManagement = () => {
         price: '',
         limit: '',
         isActive: true,
-        trialDays: 0
+        trialDays: 0,
+        features: []
     });
+    const [featureInput, setFeatureInput] = useState('');
 
     const filteredPlans = plans.filter(plan =>
         plan.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -60,8 +62,26 @@ const PlansManagement = () => {
             price: '',
             limit: '',
             isActive: true,
-            trialDays: 0
+            trialDays: 0,
+            features: []
         });
+        setFeatureInput('');
+    };
+
+    const addFeature = () => {
+        if (!featureInput.trim()) return;
+        setNewPlan(prev => ({
+            ...prev,
+            features: [...prev.features, featureInput.trim()]
+        }));
+        setFeatureInput('');
+    };
+
+    const removeFeature = (idx) => {
+        setNewPlan(prev => ({
+            ...prev,
+            features: prev.features.filter((_, i) => i !== idx)
+        }));
     };
 
     const handleDeletePlan = (id, name) => {
@@ -78,20 +98,20 @@ const PlansManagement = () => {
 
     return (
         <div className="space-y-8 pb-12">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="space-y-1">
-                    <h1 className="text-3xl font-black text-slate-900 dark:text-white flex items-center gap-2">
-                        Subscription Plans <CreditCard className="text-primary-600" size={28} />
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div className="space-y-0.5">
+                    <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                        Subscription Plans <CreditCard className="text-primary-600" size={24} />
                     </h1>
-                    <p className="text-slate-500 dark:text-slate-400 font-medium">
-                        Manage and scale your platform's subscription tiers.
+                    <p className="text-[10px] sm:text-xs text-slate-400 font-bold uppercase tracking-widest">
+                        Manage your platform's tiers
                     </p>
                 </div>
                 <Button
                     onClick={() => setIsAddModalOpen(true)}
-                    className="bg-primary-600 hover:bg-primary-700 h-12 px-6 rounded-2xl font-bold shadow-lg shadow-primary-500/20 gap-2"
+                    className="bg-primary-600 hover:bg-primary-700 h-10 sm:h-11 px-5 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm shadow-lg shadow-primary-500/20 gap-2"
                 >
-                    <Plus size={20} /> Create New Plan
+                    <Plus size={18} /> Create Plan
                 </Button>
             </div>
 
@@ -130,64 +150,60 @@ const PlansManagement = () => {
                                     ? "border-slate-200 dark:border-slate-800 hover:border-primary-500/50"
                                     : "border-slate-100 dark:border-slate-900 opacity-70 grayscale"
                             )}>
-                                <CardHeader className="p-8 pb-4">
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div className="p-4 rounded-3xl bg-slate-50 dark:bg-slate-800 text-primary-600 shadow-inner">
-                                            {plan.name === 'Enterprise' ? <ShieldCheck size={32} /> : plan.limit > 10 ? <Zap size={32} /> : <Briefcase size={32} />}
+                                <CardHeader className="p-5 sm:p-6 pb-2">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 text-primary-600 shadow-inner">
+                                            {plan.name === 'Enterprise' ? <ShieldCheck size={24} /> : plan.limit > 10 ? <Zap size={24} /> : <Briefcase size={24} />}
                                         </div>
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-1.5">
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
                                                 onClick={() => togglePlanStatus(plan.id, plan.isActive)}
                                                 className={cn(
-                                                    "w-10 h-10 rounded-full transition-colors",
+                                                    "w-8 h-8 rounded-full transition-colors",
                                                     plan.isActive ? "text-emerald-500 hover:bg-emerald-50" : "text-amber-500 hover:bg-amber-50"
                                                 )}
-                                                title={plan.isActive ? "Deactivate" : "Activate"}
                                             >
-                                                {plan.isActive ? <Check size={20} /> : <X size={20} />}
+                                                {plan.isActive ? <Check size={16} /> : <X size={16} />}
                                             </Button>
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
                                                 onClick={() => handleDeletePlan(plan.id, plan.name)}
-                                                className="w-10 h-10 rounded-full text-red-500 hover:bg-red-50"
-                                                title="Delete Plan"
+                                                className="w-8 h-8 rounded-full text-red-500 hover:bg-red-50"
                                             >
-                                                <Trash2 size={20} />
+                                                <Trash2 size={16} />
                                             </Button>
                                         </div>
                                     </div>
-                                    <CardTitle className="text-2xl font-black text-slate-900 dark:text-white">{plan.name}</CardTitle>
-                                    <CardDescription className="text-slate-500 dark:text-slate-400 font-medium">Standard License Package</CardDescription>
+                                    <CardTitle className="text-xl font-black text-slate-900 dark:text-white">{plan.name}</CardTitle>
+                                    <CardDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pricing Bundle</CardDescription>
                                 </CardHeader>
-                                <CardContent className="p-8 pt-4 space-y-8">
+                                <CardContent className="p-5 sm:p-6 pt-2 space-y-6">
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-4xl font-black text-slate-900 dark:text-white">₹{plan.price.toLocaleString('en-IN')}</span>
-                                        <span className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">/ month</span>
+                                        <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">₹{plan.price.toLocaleString('en-IN')}</span>
+                                        <span className="text-slate-400 font-bold uppercase text-[9px] tracking-widest">/mo</span>
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-3 text-sm font-bold text-slate-600 dark:text-slate-300">
-                                            <Users size={18} className="text-primary-500" />
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-3 text-xs font-bold text-slate-600 dark:text-slate-400">
+                                            <Users size={16} className="text-primary-500" />
                                             Up to {plan.limit} Team Members
                                         </div>
-                                        <div className="flex items-center gap-3 text-sm font-bold text-slate-600 dark:text-slate-300">
-                                            <ShieldCheck size={18} className="text-primary-500" />
-                                            {plan.trialDays > 0 ? `${plan.trialDays} Day Free Trial` : 'Full Access'}
-                                        </div>
-                                        <div className="flex items-center gap-3 text-sm font-bold text-slate-600 dark:text-slate-300">
-                                            <Zap size={18} className="text-emerald-500" />
-                                            Unlimited CRM Access
-                                        </div>
+                                        {plan.features?.slice(0, 4).map((feature, i) => (
+                                            <div key={i} className="flex items-center gap-3 text-xs font-bold text-slate-600 dark:text-slate-400">
+                                                <Check size={14} className="text-emerald-500" />
+                                                {feature}
+                                            </div>
+                                        ))}
                                     </div>
 
                                     <Button
                                         variant="outline"
-                                        className="w-full h-12 rounded-2xl border-slate-200 dark:border-slate-800 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-800"
+                                        className="w-full h-10 rounded-xl border-slate-200 dark:border-slate-800 font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800"
                                     >
-                                        Edit Bundle Details
+                                        Manage Plan
                                     </Button>
                                 </CardContent>
                             </Card>
@@ -199,7 +215,7 @@ const PlansManagement = () => {
             {/* Add Plan Modal */}
             <AnimatePresence>
                 {isAddModalOpen && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto">
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -211,49 +227,49 @@ const PlansManagement = () => {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl overflow-hidden"
+                            className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
                         >
-                            <div className="p-8 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                            <div className="p-6 sm:p-8 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center shrink-0">
                                 <div>
-                                    <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Create New Plan</h2>
-                                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Define price and limitations.</p>
+                                    <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">Create New Plan</h2>
+                                    <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">Define price and limitations.</p>
                                 </div>
                                 <Button variant="ghost" size="icon" onClick={() => setIsAddModalOpen(false)} className="rounded-full">
                                     <X size={20} />
                                 </Button>
                             </div>
 
-                            <form onSubmit={handleAddPlan} className="p-8 space-y-6">
+                            <form onSubmit={handleAddPlan} className="p-6 sm:p-8 space-y-4 sm:space-y-6 overflow-y-auto">
                                 <div className="space-y-2">
-                                    <Label htmlFor="name" className="font-bold">Plan Name</Label>
+                                    <Label htmlFor="name" className="text-xs sm:text-sm font-bold ml-1 uppercase tracking-widest text-slate-400">Plan Name</Label>
                                     <Input
                                         id="name"
                                         placeholder="e.g. Starter, Pro, Enterprise"
-                                        className="h-12 rounded-2xl"
+                                        className="h-12 rounded-2xl bg-slate-50 border-none dark:bg-slate-800 font-bold"
                                         value={newPlan.name}
                                         onChange={(e) => setNewPlan({ ...newPlan, name: e.target.value })}
                                     />
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="price" className="font-bold">Monthly Price (₹)</Label>
+                                        <Label htmlFor="price" className="text-xs sm:text-sm font-bold ml-1 uppercase tracking-widest text-slate-400">Monthly Price (₹)</Label>
                                         <Input
                                             id="price"
                                             type="number"
                                             placeholder="999"
-                                            className="h-12 rounded-2xl"
+                                            className="h-12 rounded-2xl bg-slate-50 border-none dark:bg-slate-800 font-bold"
                                             value={newPlan.price}
                                             onChange={(e) => setNewPlan({ ...newPlan, price: e.target.value })}
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="limit" className="font-bold">Member Limit</Label>
+                                        <Label htmlFor="limit" className="text-xs sm:text-sm font-bold ml-1 uppercase tracking-widest text-slate-400">Member Limit</Label>
                                         <Input
                                             id="limit"
                                             type="number"
                                             placeholder="5"
-                                            className="h-12 rounded-2xl"
+                                            className="h-12 rounded-2xl bg-slate-50 border-none dark:bg-slate-800 font-bold"
                                             value={newPlan.limit}
                                             onChange={(e) => setNewPlan({ ...newPlan, limit: e.target.value })}
                                         />
@@ -261,29 +277,46 @@ const PlansManagement = () => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="trial" className="font-bold">Trial Days</Label>
-                                    <Input
-                                        id="trial"
-                                        type="number"
-                                        placeholder="7"
-                                        className="h-12 rounded-2xl"
-                                        value={newPlan.trialDays}
-                                        onChange={(e) => setNewPlan({ ...newPlan, trialDays: e.target.value })}
-                                    />
+                                    <Label className="text-xs sm:text-sm font-bold ml-1 uppercase tracking-widest text-slate-400">Plan Features</Label>
+                                    <div className="flex gap-2">
+                                        <Input
+                                            placeholder="e.g. 24/7 Support"
+                                            className="h-12 rounded-2xl bg-slate-50 border-none dark:bg-slate-800 font-bold"
+                                            value={featureInput}
+                                            onChange={(e) => setFeatureInput(e.target.value)}
+                                            onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
+                                        />
+                                        <Button
+                                            type="button"
+                                            onClick={addFeature}
+                                            className="h-12 w-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white"
+                                        >
+                                            <Plus size={20} />
+                                        </Button>
+                                    </div>
+
+                                    <div className="flex flex-wrap gap-2 mt-3">
+                                        {newPlan.features.map((feature, idx) => (
+                                            <Badge key={idx} className="bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400 py-1.5 px-3 rounded-xl gap-2 text-xs font-bold border-none">
+                                                {feature}
+                                                <X size={14} className="cursor-pointer hover:text-red-500" onClick={() => removeFeature(idx)} />
+                                            </Badge>
+                                        ))}
+                                    </div>
                                 </div>
 
-                                <div className="pt-4 flex gap-4">
+                                <div className="pt-4 flex flex-col sm:flex-row gap-3">
                                     <Button
                                         type="button"
                                         variant="ghost"
-                                        className="flex-1 h-12 rounded-2xl text-slate-500 font-bold"
+                                        className="flex-1 h-12 rounded-2xl text-slate-500 font-bold hover:bg-slate-50"
                                         onClick={() => setIsAddModalOpen(false)}
                                     >
                                         Cancel
                                     </Button>
                                     <Button
                                         type="submit"
-                                        className="flex-1 h-12 rounded-2xl bg-primary-600 hover:bg-primary-700 font-bold shadow-lg shadow-primary-500/20"
+                                        className="flex-1 h-12 rounded-2xl bg-primary-600 hover:bg-primary-700 font-black shadow-lg shadow-primary-500/20 text-white"
                                     >
                                         Create Plan
                                     </Button>

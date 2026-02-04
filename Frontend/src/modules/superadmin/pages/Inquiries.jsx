@@ -56,50 +56,53 @@ const Inquiries = () => {
     const getStatusBadge = (status) => {
         switch (status) {
             case 'new':
-                return <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-none px-2.5 py-0.5 rounded-full flex items-center gap-1.5"><Clock3 size={12} strokeWidth={2.5} /> New</Badge>;
+                return <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-none px-2 py-0.5 rounded-full flex items-center gap-1 text-[9px] font-black uppercase tracking-tighter"><Clock3 size={10} strokeWidth={3} /> New</Badge>;
             case 'replied':
-                return <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-none px-2.5 py-0.5 rounded-full flex items-center gap-1.5"><CheckCircle2 size={12} strokeWidth={2.5} /> Replied</Badge>;
+                return <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-none px-2 py-0.5 rounded-full flex items-center gap-1 text-[9px] font-black uppercase tracking-tighter"><CheckCircle2 size={10} strokeWidth={3} /> Replied</Badge>;
             case 'archived':
-                return <Badge className="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400 border-none px-2.5 py-0.5 rounded-full flex items-center gap-1.5"><AlertCircle size={12} strokeWidth={2.5} /> Archived</Badge>;
+                return <Badge className="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400 border-none px-2 py-0.5 rounded-full flex items-center gap-1 text-[9px] font-black uppercase tracking-tighter"><AlertCircle size={10} strokeWidth={3} /> Archived</Badge>;
             default:
                 return null;
         }
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-4 md:space-y-6 max-w-7xl mx-auto">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Subscription Inquiries</h1>
-                    <p className="text-slate-500 dark:text-slate-400 mt-1 font-medium">Manage and respond to Pro and Enterprise inquiries.</p>
+                    <h1 className="text-2xl md:text-3xl font-black tracking-tight text-slate-900 dark:text-white">Inquiries</h1>
+                    <p className="text-xs md:text-sm font-bold text-slate-500 dark:text-slate-400 mt-0.5">Manage and respond to Pro and Enterprise leads.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Badge variant="outline" className="text-xs font-bold px-3 py-1 border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900">
-                        {filteredInquiries.length} Total Inquiries
+                    <Badge variant="outline" className="text-[10px] font-black uppercase tracking-widest px-3 py-1 border-slate-200 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900">
+                        {filteredInquiries.length} Leads
                     </Badge>
                 </div>
             </div>
 
-            <div className="flex flex-col md:flex-row gap-4 items-center bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div className="relative w-full md:w-96">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <div className="flex flex-col md:flex-row gap-3 items-center bg-white dark:bg-slate-900 p-3 md:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                <div className="relative w-full md:w-80">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                     <Input
-                        placeholder="Search by name, email, or company..."
-                        className="pl-10 h-11 bg-slate-50 dark:bg-slate-800/50 border-none focus-visible:ring-primary-500/30"
+                        placeholder="Search leads..."
+                        className="pl-9 h-10 bg-slate-50 dark:bg-slate-800/50 border-none focus-visible:ring-primary-500/30 text-sm font-medium"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto no-scrollbar pb-1 md:pb-0">
+                <div className="flex items-center gap-1.5 w-full md:w-auto overflow-x-auto no-scrollbar py-0.5">
                     {['all', 'new', 'replied', 'archived'].map((status) => (
                         <Button
                             key={status}
                             variant={filterStatus === status ? 'default' : 'ghost'}
                             size="sm"
-                            className={filterStatus === status ? 'bg-primary-600 shadow-md shadow-primary-500/20' : 'text-slate-500 dark:text-slate-400'}
+                            className={cn(
+                                "text-[10px] font-black uppercase tracking-widest h-8 rounded-lg",
+                                filterStatus === status ? 'bg-primary-600 shadow-md shadow-primary-500/20' : 'text-slate-500 dark:text-slate-400'
+                            )}
                             onClick={() => setFilterStatus(status)}
                         >
-                            {status.charAt(0).toUpperCase() + status.slice(1)}
+                            {status}
                         </Button>
                     ))}
                 </div>
@@ -121,63 +124,65 @@ const Inquiries = () => {
                                     className="overflow-hidden border-slate-200 dark:border-slate-800 hover:shadow-xl hover:shadow-slate-200/20 dark:hover:shadow-none transition-all duration-300 cursor-pointer"
                                     onClick={() => setSelectedInquiry(inq)}
                                 >
-                                    <div className={`h-1.5 w-full ${inq.status === 'new' ? 'bg-primary-500' : inq.status === 'replied' ? 'bg-green-500' : 'bg-slate-400'}`} />
+                                    <div className={`h-1 w-full ${inq.status === 'new' ? 'bg-primary-500' : inq.status === 'replied' ? 'bg-green-500' : 'bg-slate-400'}`} />
                                     <CardContent className="p-0">
-                                        <div className="flex flex-col lg:flex-row lg:items-center p-6 gap-6">
-                                            <div className="flex-1 space-y-4">
-                                                <div className="flex items-start justify-between">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-slate-800 dark:text-white font-bold text-lg">
+                                        <div className="flex flex-col lg:flex-row lg:items-center p-3 sm:p-5 gap-3 lg:gap-6">
+                                            <div className="flex-1 min-w-0 space-y-2.5">
+                                                <div className="flex items-start justify-between gap-2">
+                                                    <div className="flex items-center gap-2.5 min-w-0">
+                                                        <div className="w-9 h-9 md:w-11 md:h-11 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-slate-800 dark:text-white font-black text-xs md:text-lg shrink-0">
                                                             {inq.firstName[0]}{inq.lastName[0]}
                                                         </div>
-                                                        <div>
-                                                            <div className="flex items-center gap-2">
-                                                                <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-tight">
+                                                        <div className="min-w-0">
+                                                            <div className="flex flex-col sm:flex-row sm:items-center gap-1">
+                                                                <h3 className="text-sm md:text-base font-black text-slate-900 dark:text-white leading-tight truncate">
                                                                     {inq.firstName} {inq.lastName}
                                                                 </h3>
-                                                                {getStatusBadge(inq.status)}
+                                                                <div className="flex items-center">
+                                                                    {getStatusBadge(inq.status)}
+                                                                </div>
                                                             </div>
-                                                            <p className="text-sm font-semibold text-primary-600 dark:text-primary-400 flex items-center gap-1.5 mt-0.5">
-                                                                <Building2 size={14} strokeWidth={2.5} /> {inq.company}
+                                                            <p className="text-[10px] md:text-xs font-black text-primary-600 dark:text-primary-400 flex items-center gap-1 mt-0.5 uppercase tracking-tight truncate">
+                                                                <Building2 size={10} strokeWidth={3} /> {inq.company}
                                                             </p>
                                                         </div>
                                                     </div>
-                                                    <div className="lg:hidden">
+                                                    <div className="lg:hidden shrink-0">
                                                         <InquiryActions inq={inq} updateStatus={updateInquiryStatus} />
                                                     </div>
                                                 </div>
 
-                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 pt-2">
-                                                    <div className="flex items-center gap-2.5 text-sm font-medium text-slate-600 dark:text-slate-400">
-                                                        <Mail size={16} className="text-slate-400" />
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-2 gap-x-4 pt-1">
+                                                    <div className="flex items-center gap-2 text-[11px] md:text-sm font-bold text-slate-500 dark:text-slate-400">
+                                                        <Mail size={14} className="text-slate-400 shrink-0" />
                                                         <span className="truncate">{inq.workEmail}</span>
                                                     </div>
-                                                    <div className="flex items-center gap-2.5 text-sm font-medium text-slate-600 dark:text-slate-400">
-                                                        <Phone size={16} className="text-slate-400" />
+                                                    <div className="flex items-center gap-2 text-[11px] md:text-sm font-bold text-slate-500 dark:text-slate-400">
+                                                        <Phone size={14} className="text-slate-400 shrink-0" />
                                                         <span>{inq.phone}</span>
                                                     </div>
-                                                    <div className="flex items-center gap-2.5 text-sm font-medium text-slate-600 dark:text-slate-400">
-                                                        <Calendar size={16} className="text-slate-400" />
+                                                    <div className="flex items-center gap-2 text-[11px] md:text-sm font-black text-slate-600 dark:text-slate-300 uppercase tracking-tight">
+                                                        <Calendar size={14} className="text-slate-400 shrink-0" />
                                                         <span>{inq.planSelected} Plan</span>
                                                     </div>
                                                 </div>
 
                                                 {inq.questions && (
-                                                    <div className="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 text-sm italic text-slate-600 dark:text-slate-400 relative">
-                                                        <MessageSquare className="absolute -top-3 -left-3 p-1 w-7 h-7 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-full text-primary-500 shadow-sm" />
+                                                    <div className="bg-slate-50 dark:bg-slate-800/40 p-3 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 text-[11px] md:text-xs font-medium italic text-slate-600 dark:text-slate-400 relative">
+                                                        <MessageSquare className="absolute -top-2.5 -left-2.5 p-1 w-6 h-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-full text-primary-500 shadow-sm" />
                                                         "{inq.questions}"
                                                     </div>
                                                 )}
                                             </div>
 
-                                            <div className="flex flex-col justify-between items-end gap-4 border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-slate-800 pt-4 lg:pt-0 lg:pl-6 min-w-[180px]">
-                                                <div className="text-right space-y-1 w-full flex flex-row lg:flex-col justify-between items-center lg:items-end">
-                                                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
-                                                        <Clock size={12} /> Received
+                                            <div className="flex flex-row lg:flex-col justify-between items-center lg:items-end gap-3 lg:gap-4 border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-slate-800 pt-3 lg:pt-0 lg:pl-6 min-w-0 lg:min-w-[180px] w-full lg:w-auto">
+                                                <div className="text-left lg:text-right space-y-0.5 w-auto lg:w-full">
+                                                    <div className="flex lg:justify-end items-center gap-1 text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">
+                                                        <Clock size={10} /> Received
                                                     </div>
-                                                    <div className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                                                    <div className="text-[11px] md:text-sm font-black text-slate-700 dark:text-slate-300 flex flex-col lg:items-end">
                                                         {format(new Date(inq.date), 'MMM dd, yyyy')}
-                                                        <span className="block text-[11px] font-medium text-slate-400">{format(new Date(inq.date), 'HH:mm aaa')}</span>
+                                                        <span className="text-[10px] font-bold text-slate-400">{format(new Date(inq.date), 'HH:mm aaa')}</span>
                                                     </div>
                                                 </div>
 
@@ -215,18 +220,29 @@ const Inquiries = () => {
 };
 
 const InquiryActions = ({ inq, updateStatus, fullWidth = false }) => (
-    <div className={fullWidth ? "w-full space-y-2" : "flex items-center gap-2"}>
+    <div className={fullWidth ? "w-full space-y-2" : "flex items-center gap-1"}>
         <Button
             size="sm"
-            className={fullWidth ? "w-full font-bold bg-primary-600 hover:bg-primary-700" : "font-bold bg-primary-600 hover:bg-primary-700"}
-            onClick={() => window.open(`mailto:${inq.workEmail}?subject=Regarding your DinTask ${inq.planSelected} Plan Inquiry`)}
+            className={cn(
+                "font-black text-[9px] uppercase tracking-tighter bg-primary-600 hover:bg-primary-700 rounded-lg shrink-0",
+                fullWidth ? "w-full h-10" : "h-7 px-2"
+            )}
+            onClick={(e) => {
+                e.stopPropagation();
+                window.open(`mailto:${inq.workEmail}?subject=Regarding your DinTask ${inq.planSelected} Plan Inquiry`);
+            }}
         >
-            <Mail size={16} className="mr-2" /> Reply Email
+            <Mail size={10} className="mr-1" /> Reply
         </Button>
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full border border-slate-200 dark:border-slate-700">
-                    <MoreHorizontal size={18} />
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 rounded-lg border border-slate-200 dark:border-slate-700 shrink-0"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <MoreHorizontal size={12} />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 font-sans">
@@ -256,7 +272,7 @@ const InquiryDetailModal = ({ isOpen, onOpenChange, inquiry, updateStatus }) => 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[600px] rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl font-sans">
-                <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-8 text-white relative">
+                <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-6 sm:p-8 text-white relative">
                     <div className="absolute top-4 right-4 flex gap-2">
                         {/* Badge */}
                         <Badge className={cn(
@@ -267,21 +283,21 @@ const InquiryDetailModal = ({ isOpen, onOpenChange, inquiry, updateStatus }) => 
                         </Badge>
                     </div>
 
-                    <div className="flex items-center gap-6">
-                        <div className="w-20 h-20 rounded-[2rem] bg-white/10 backdrop-blur-md flex items-center justify-center text-3xl font-black border border-white/20 shadow-xl">
+                    <div className="flex flex-col sm:flex-row items-center sm:items-center gap-4 sm:gap-6">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-[1.5rem] sm:rounded-[2rem] bg-white/10 backdrop-blur-md flex items-center justify-center text-2xl sm:text-3xl font-black border border-white/20 shadow-xl">
                             {inquiry.firstName[0]}{inquiry.lastName[0]}
                         </div>
-                        <div className="space-y-1">
-                            <h2 className="text-3xl font-black tracking-tight">{inquiry.firstName} {inquiry.lastName}</h2>
-                            <p className="text-primary-400 font-bold flex items-center gap-2">
+                        <div className="space-y-1 text-center sm:text-left">
+                            <h2 className="text-2xl sm:text-3xl font-black tracking-tight">{inquiry.firstName} {inquiry.lastName}</h2>
+                            <p className="text-primary-400 font-bold flex items-center justify-center sm:justify-start gap-2">
                                 <Building2 size={18} /> {inquiry.company}
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <div className="p-8 space-y-8 bg-white dark:bg-slate-900">
-                    <div className="grid grid-cols-2 gap-8">
+                <div className="p-6 sm:p-8 space-y-6 sm:space-y-8 bg-white dark:bg-slate-900">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                         <DetailItem icon={Mail} label="Work Email" value={inquiry.workEmail} />
                         <DetailItem icon={Phone} label="Phone Number" value={inquiry.phone} />
                         <DetailItem icon={Calendar} label="Plan Interested" value={inquiry.planSelected} />
@@ -298,9 +314,9 @@ const InquiryDetailModal = ({ isOpen, onOpenChange, inquiry, updateStatus }) => 
                         </div>
                     </div>
 
-                    <div className="flex gap-4 pt-4">
+                    <div className="flex flex-col sm:flex-row gap-4 pt-4">
                         <Button
-                            className="flex-1 h-14 rounded-2xl bg-primary-600 hover:bg-primary-700 font-black text-lg gap-3"
+                            className="flex-1 h-12 sm:h-14 rounded-2xl bg-primary-600 hover:bg-primary-700 font-black text-base sm:text-lg gap-3"
                             onClick={() => window.open(`mailto:${inquiry.workEmail}?subject=DinTask Inquiry`)}
                         >
                             <Mail size={20} /> Reply via Email
@@ -308,7 +324,7 @@ const InquiryDetailModal = ({ isOpen, onOpenChange, inquiry, updateStatus }) => 
                         {inquiry.status === 'new' && (
                             <Button
                                 variant="outline"
-                                className="h-14 rounded-2xl border-slate-200 dark:border-slate-700 font-bold px-6"
+                                className="h-12 sm:h-14 rounded-2xl border-slate-200 dark:border-slate-700 font-bold px-6"
                                 onClick={() => {
                                     updateStatus(inquiry.id, 'replied');
                                     onOpenChange(false);

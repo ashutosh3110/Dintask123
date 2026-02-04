@@ -12,25 +12,25 @@ export default {
             colors: {
                 // Strict user-requested palette
                 "primary": {
-                    DEFAULT: "#2c7777",
+                    DEFAULT: "#1e6fd9",
                     foreground: "#ffffff",
-                    50: "#effcfc",
-                    100: "#dbeceb", // light bg
-                    200: "#b5d9d8",
-                    300: "#86bfbe",
-                    400: "#5ba1a0",
-                    500: "#3d8685",
-                    600: "#2c7777", // This matches the base
-                    700: "#266061",
-                    800: "#234e4f",
-                    900: "#204142",
+                    50: "#eff6ff",
+                    100: "#dbeafe",
+                    200: "#bfdbfe",
+                    300: "#93c5fd",
+                    400: "#60a5fa",
+                    500: "#3b82f6",
+                    600: "#1e6fd9",
+                    700: "#1d4ed8",
+                    800: "#1e40af",
+                    900: "#1e3a8a",
                 },
                 "background-light": "#f9fafa",
                 "background-dark": "#22252a",
 
                 // Text colors from user's HTML
-                "text-main": "#111818",     // text-[#111818]
-                "text-secondary": "#5e8787", // text-[#5e8787]
+                "text-main": "#111827",     // Improved contrast for blue theme
+                "text-secondary": "#4b5563", // Subtle gray for secondary text
 
                 border: "hsl(var(--border))",
                 input: "hsl(var(--input))",

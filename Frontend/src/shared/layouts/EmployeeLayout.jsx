@@ -9,7 +9,8 @@ import {
     Crown,
     Menu,
     LogOut,
-    UserPlus
+    UserPlus,
+    MessageSquare
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -28,11 +29,21 @@ const EmployeeLayout = () => {
         { name: 'Notes', path: '/employee/notes', icon: StickyNote },
         { name: 'Upgrade', path: '/employee/subscription', icon: Crown },
         { name: 'Join Workspace', path: '/employee/join', icon: UserPlus },
+        { name: 'Chat', path: '/employee/chat', icon: MessageSquare },
+        { name: 'Notifications', path: '/employee/notifications', icon: Bell },
         { name: 'Profile', path: '/employee/profile', icon: User },
     ];
 
-    const mainPaths = ['/employee', '/employee/calendar', '/employee/notes', '/employee/profile', '/employee/subscription', '/employee/join'];
+    const mainPaths = ['/employee', '/employee/calendar', '/employee/notes', '/employee/profile', '/employee/subscription', '/employee/join', '/employee/chat', '/employee/notifications'];
     const showFooter = mainPaths.includes(location.pathname);
+
+    const mobileNavItems = [
+        { name: 'Home', path: '/employee', icon: LayoutDashboard },
+        { name: 'Calendar', path: '/employee/calendar', icon: CalendarIcon },
+        { name: 'Chat', path: '/employee/chat', icon: MessageSquare },
+        { name: 'Alerts', path: '/employee/notifications', icon: Bell },
+        { name: 'Profile', path: '/employee/profile', icon: User },
+    ];
 
     return (
         <div className="fixed inset-0 h-[100dvh] w-full flex bg-slate-50 dark:bg-slate-950 font-sans transition-colors duration-300 overflow-hidden">
@@ -135,7 +146,7 @@ const EmployeeLayout = () => {
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                         className="md:hidden fixed bottom-6 left-1/2 w-[94%] max-w-[440px] h-16 bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl rounded-[28px] border border-white/30 dark:border-slate-800/40 shadow-[0_15px_35px_rgba(0,0,0,0.05)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.2)] z-50 px-3 flex items-center justify-around overflow-hidden"
                     >
-                        {navItems.map((item) => (
+                        {mobileNavItems.map((item) => (
                             <NavLink
                                 key={item.path}
                                 to={item.path}

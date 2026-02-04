@@ -31,7 +31,9 @@ import useTaskStore from '@/store/taskStore';
 import useAuthStore from '@/store/authStore';
 import useManagerStore from '@/store/managerStore';
 import useEmployeeStore from '@/store/employeeStore';
+import useScheduleStore from '@/store/scheduleStore';
 import { fadeInUp, staggerContainer, scaleOnTap } from '@/shared/utils/animations';
+import { format, isSameDay } from 'date-fns';
 
 const AdminDashboard = () => {
     const { user } = useAuthStore();
@@ -49,6 +51,16 @@ const AdminDashboard = () => {
         { name: 'Sat', completed: 3, pending: 2 },
         { name: 'Sun', completed: 2, pending: 1 },
     ];
+
+    const { schedules } = useScheduleStore();
+
+    const adminMeetings = useMemo(() => {
+        const today = new Date();
+        return schedules.filter(s =>
+            s.assignedTo?.toLowerCase().includes('admin') &&
+            (new Date(s.date) >= new Date(today.setHours(0, 0, 0, 0)))
+        ).sort((a, b) => new Date(a.date) - new Date(b.date));
+    }, [schedules]);
 
     const stats = useMemo(() => {
         const today = new Date().toISOString().split('T')[0];
@@ -238,6 +250,50 @@ const AdminDashboard = () => {
                                         </Button>
                                     </motion.div>
                                 </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+
+                {/* Admin Follow-ups / Meetings */}
+                <motion.div variants={fadeInUp} className="lg:col-span-3">
+                    <Card className="border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden rounded-2xl">
+                        <CardHeader className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
+                            <div className="flex items-center justify-between">
+                                <CardTitle className="text-lg font-bold flex items-center gap-2">
+                                    <Clock className="text-primary-600" size={20} />
+                                    Admin Meetings & Follow-ups
+                                </CardTitle>
+                                <Badge variant="outline" className="text-[10px] font-black">{adminMeetings.length} Scheduled</Badge>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
+                                {adminMeetings.length > 0 ? adminMeetings.slice(0, 6).map(meeting => (
+                                    <div key={meeting.id} className="p-4 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-primary-100 dark:hover:border-primary-900 transition-all group">
+                                        <div className="flex items-start justify-between mb-3">
+                                            <div className="p-2 rounded-lg bg-primary-50 dark:bg-primary-900/20 text-primary-600">
+                                                <CalendarIcon size={18} />
+                                            </div>
+                                            <Badge className="text-[9px] bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-none capitalize">{meeting.type}</Badge>
+                                        </div>
+                                        <h4 className="font-bold text-slate-900 dark:text-white mb-1 truncate">{meeting.title}</h4>
+                                        <div className="flex items-center gap-4 text-xs text-slate-500 font-medium">
+                                            <div className="flex items-center gap-1">
+                                                <Clock size={12} />
+                                                <span>{format(new Date(meeting.date), 'MMM dd')} - {meeting.time}</span>
+                                            </div>
+                                        </div>
+                                        {meeting.description && (
+                                            <p className="text-[11px] text-slate-400 mt-2 line-clamp-1 italic">"{meeting.description}"</p>
+                                        )}
+                                    </div>
+                                )) : (
+                                    <div className="col-span-full py-12 flex flex-col items-center justify-center text-slate-400 grayscale opacity-50">
+                                        <CalendarIcon size={48} className="mb-2" />
+                                        <p className="text-sm font-medium">No meetings scheduled with you.</p>
+                                    </div>
+                                )}
                             </div>
                         </CardContent>
                     </Card>

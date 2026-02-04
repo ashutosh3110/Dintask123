@@ -33,8 +33,8 @@ const AdminLogin = () => {
             <div className="hidden md:flex md:w-1/2 bg-slate-900 relative items-center justify-center p-12 overflow-hidden">
                 <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1497215728101-856f4ea42174?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center" />
                 <div className="relative z-10 text-white space-y-6 max-w-md">
-                    <div className="h-12 w-12 rounded-xl bg-blue-600 flex items-center justify-center mb-6">
-                        <Briefcase className="text-white h-6 w-6" />
+                    <div className="h-14 w-14 rounded-2xl bg-primary-600 flex items-center justify-center mb-6 shadow-xl shadow-primary-900/30">
+                        <img src="/src/assets/logo.png" alt="DinTask" className="h-9 w-9 object-contain" />
                     </div>
                     <h1 className="text-4xl font-bold tracking-tight">Manage your team with confidence.</h1>
                     <p className="text-slate-400 text-lg">Streamline operations, track performance, and boost productivity with DinTask for Business.</p>
@@ -67,7 +67,7 @@ const AdminLogin = () => {
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between">
                                         <Label htmlFor="password">Password</Label>
-                                        <a href="/admin/forgot-password" className="text-xs font-medium text-blue-600 hover:text-blue-500">
+                                        <a href="/admin/forgot-password" className="text-xs font-bold text-primary-600 hover:text-primary-500 uppercase tracking-tight">
                                             Reset Password
                                         </a>
                                     </div>
@@ -83,7 +83,7 @@ const AdminLogin = () => {
 
                                 <Button
                                     type="submit"
-                                    className="w-full h-11 text-base font-semibold bg-slate-900 hover:bg-slate-800 text-white"
+                                    className="w-full h-11 text-base font-black bg-primary-600 hover:bg-primary-700 text-white shadow-lg shadow-primary-900/20"
                                     disabled={loading}
                                 >
                                     {loading ? 'Authenticating...' : 'Secure Sign In'}

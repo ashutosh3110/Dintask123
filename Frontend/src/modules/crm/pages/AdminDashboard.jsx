@@ -4,13 +4,22 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/components/ui/table';
 import { motion } from 'framer-motion';
-import { TrendingUp, Users, Target, Award, XCircle, Briefcase, Filter } from 'lucide-react';
+import { TrendingUp, Users, Target, Award, XCircle, Briefcase, Filter, MapPin } from 'lucide-react';
 import useCRMStore from '@/store/crmStore';
+import useScheduleStore from '@/store/scheduleStore';
 import { fadeInUp, staggerContainer } from '@/shared/utils/animations';
+import { format } from 'date-fns';
+import { Calendar as CalendarIcon, Clock } from 'lucide-react';
 import { cn } from '@/shared/utils/cn';
+import { Badge } from '@/shared/components/ui/badge';
 
 const AdminDashboard = () => {
   const { leads, getPipelineData } = useCRMStore();
+  const { schedules } = useScheduleStore();
+
+  const adminMeetings = (schedules || []).filter(s =>
+    s.assignedTo?.toLowerCase().includes('admin')
+  ).sort((a, b) => new Date(a.date) - new Date(b.date));
 
   // Sample data for charts
   const pipelineData = getPipelineData();
@@ -100,6 +109,12 @@ const AdminDashboard = () => {
                 className="rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-5 py-2.5 text-xs font-bold data-[state=active]:bg-primary-600 data-[state=active]:text-white data-[state=active]:border-primary-600 transition-all shadow-sm flex items-center gap-2"
               >
                 <Filter size={14} /> Lead Sources
+              </TabsTrigger>
+              <TabsTrigger
+                value="schedule"
+                className="rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-5 py-2.5 text-xs font-bold data-[state=active]:bg-primary-600 data-[state=active]:text-white data-[state=active]:border-primary-600 transition-all shadow-sm flex items-center gap-2"
+              >
+                <CalendarIcon size={14} /> My Schedule
               </TabsTrigger>
             </TabsList>
           </div>
@@ -253,6 +268,48 @@ const AdminDashboard = () => {
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="schedule" className="mt-0">
+            <Card className="border-none shadow-sm rounded-2xl bg-white dark:bg-slate-900 overflow-hidden">
+              <CardHeader className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-lg font-bold">Upcoming Meetings & Follow-ups</CardTitle>
+                    <CardDescription>Scheduled events involving Admin</CardDescription>
+                  </div>
+                  <Badge className="bg-primary-600">{adminMeetings.length} Total</Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  {adminMeetings.length > 0 ? (
+                    adminMeetings.map(meeting => (
+                      <div key={meeting.id} className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex flex-col items-center justify-center text-primary-600">
+                            <span className="text-[10px] font-black uppercase">{format(new Date(meeting.date), 'MMM')}</span>
+                            <span className="text-sm font-bold leading-none">{format(new Date(meeting.date), 'dd')}</span>
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-slate-900 dark:text-white">{meeting.title}</h4>
+                            <div className="flex items-center gap-3 text-xs text-slate-500 mt-0.5">
+                              <span className="flex items-center gap-1"><Clock size={12} /> {meeting.time}</span>
+                              <span className="flex items-center gap-1"><MapPin size={12} /> {meeting.location || 'Remote'}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <Badge variant="outline" className="capitalize">{meeting.type}</Badge>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="py-20 flex flex-col items-center justify-center text-slate-400">
+                      <CalendarIcon size={48} className="opacity-20 mb-3" />
+                      <p className="font-bold">No upcoming schedule for Admin</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

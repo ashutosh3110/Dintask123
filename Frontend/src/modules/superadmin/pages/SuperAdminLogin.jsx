@@ -36,15 +36,15 @@ const SuperAdminLogin = () => {
             {/* Brand Side */}
             <div className="hidden md:flex md:w-1/2 bg-slate-900 relative items-center justify-center p-12 overflow-hidden">
                 <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center" />
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900/90 to-red-900/40" />
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900/90 to-primary-900/40" />
 
                 <div className="relative z-10 text-white space-y-6 max-w-md">
-                    <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center mb-6 shadow-2xl shadow-red-900/50">
-                        <Shield className="text-white h-8 w-8" />
+                    <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center mb-6 shadow-2xl shadow-primary-900/50">
+                        <img src="/src/assets/logo.png" alt="DinTask" className="h-10 w-10 object-contain" />
                     </div>
                     <h1 className="text-5xl font-black tracking-tighter">
                         Master Control <br />
-                        <span className="text-red-500">Platform.</span>
+                        <span className="text-primary-500">Platform.</span>
                     </h1>
                     <p className="text-slate-400 text-lg font-medium leading-relaxed">
                         Complete oversight of all tenants, subscriptions, and system health from a single centralized dashboard.
@@ -74,7 +74,7 @@ const SuperAdminLogin = () => {
                                 <TabsList className="grid w-full grid-cols-2 bg-slate-100 dark:bg-slate-950 rounded-lg p-1 mb-8">
                                     <TabsTrigger
                                         value="admin"
-                                        className="rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800 data-[state=active]:text-red-600 data-[state=active]:shadow-sm font-bold text-xs uppercase tracking-wider transition-all"
+                                        className="rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800 data-[state=active]:text-primary-600 data-[state=active]:shadow-sm font-bold text-xs uppercase tracking-wider transition-all"
                                     >
                                         Super Admin
                                     </TabsTrigger>
@@ -96,14 +96,14 @@ const SuperAdminLogin = () => {
                                                 placeholder="superadmin@dintask.com"
                                                 value={email}
                                                 onChange={(e) => setEmail(e.target.value)}
-                                                className="h-11 rounded-lg bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 focus-visible:ring-red-500"
+                                                className="h-11 rounded-lg bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 focus-visible:ring-primary-500"
                                             />
                                         </div>
 
                                         <div className="space-y-2">
                                             <div className="flex items-center justify-between">
                                                 <Label htmlFor="admin-password">Secure Key</Label>
-                                                <a href="/superadmin/forgot-password" className="text-xs font-medium text-red-600 hover:text-red-500">
+                                                <a href="/superadmin/forgot-password" className="text-xs font-medium text-primary-600 hover:text-primary-500">
                                                     Forgot Key?
                                                 </a>
                                             </div>
@@ -113,13 +113,13 @@ const SuperAdminLogin = () => {
                                                 placeholder="••••••••••••"
                                                 value={password}
                                                 onChange={(e) => setPassword(e.target.value)}
-                                                className="h-11 rounded-lg bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 focus-visible:ring-red-500"
+                                                className="h-11 rounded-lg bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 focus-visible:ring-primary-500"
                                             />
                                         </div>
 
                                         <Button
                                             type="submit"
-                                            className="w-full h-11 text-base font-bold bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white shadow-lg shadow-red-900/20"
+                                            className="w-full h-11 text-base font-bold bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-500 hover:to-primary-600 text-white shadow-lg shadow-primary-900/20"
                                             disabled={loading}
                                         >
                                             {loading ? 'Verifying Identity...' : 'Authenticate Access'}

@@ -11,7 +11,8 @@ const useNotificationStore = create(
                     description: 'You have been assigned to "Frontend Dashboard Redesign"',
                     time: '2 mins ago',
                     isRead: false,
-                    category: 'task'
+                    category: 'task',
+                    recipientId: '103'
                 },
                 {
                     id: '2',
@@ -19,7 +20,26 @@ const useNotificationStore = create(
                     description: 'The task "API Integration" is due in 2 hours',
                     time: '45 mins ago',
                     isRead: false,
-                    category: 'deadline'
+                    category: 'deadline',
+                    recipientId: '103'
+                },
+                {
+                    id: '5',
+                    title: 'Emergency Security Patch',
+                    description: 'Admin assigned you: "Emergency Security Patch"',
+                    time: '1 hour ago',
+                    isRead: false,
+                    category: 'task',
+                    recipientId: '103'
+                },
+                {
+                    id: '6',
+                    title: 'Direct Message',
+                    description: 'Sarah Johnson: "Can we sync on the ACME project today?"',
+                    time: '3 hours ago',
+                    isRead: false,
+                    category: 'message',
+                    recipientId: '103'
                 },
                 {
                     id: '3',
@@ -27,7 +47,8 @@ const useNotificationStore = create(
                     description: 'Sarah left a comment on your task "Landing Page Fixes"',
                     time: '1 hour ago',
                     isRead: true,
-                    category: 'comment'
+                    category: 'comment',
+                    recipientId: '103'
                 },
                 {
                     id: '4',
@@ -35,7 +56,8 @@ const useNotificationStore = create(
                     description: 'The Q1 Planning project has been completed successfully',
                     time: '5 hours ago',
                     isRead: true,
-                    category: 'system'
+                    category: 'system',
+                    recipientId: '103'
                 },
             ],
 

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Plus,
     Search,
@@ -15,7 +16,8 @@ import {
     Download,
     ChevronDown,
     ChevronUp,
-    ExternalLink
+    ExternalLink,
+    MessageSquare
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
@@ -37,6 +39,7 @@ import {
 import { cn } from '@/shared/utils/cn';
 
 const ManagerManagement = () => {
+    const navigate = useNavigate();
     const { managers, addManager, updateManager, deleteManager } = useManagerStore();
     const { employees } = useEmployeeStore();
     const [searchTerm, setSearchTerm] = useState('');
@@ -196,6 +199,9 @@ const ManagerManagement = () => {
                                                 <div className="flex justify-end gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
                                                     <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg">
                                                         <Edit2 size={14} />
+                                                    </Button>
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg" onClick={() => navigate('/admin/chat')}>
+                                                        <MessageSquare size={14} />
                                                     </Button>
                                                     <Button
                                                         variant="ghost"

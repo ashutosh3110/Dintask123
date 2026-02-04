@@ -10,7 +10,8 @@ import {
     Phone,
     Video,
     Briefcase,
-    CheckSquare
+    CheckSquare,
+    Users
 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths } from 'date-fns';
 import useAuthStore from '@/store/authStore';
@@ -65,7 +66,8 @@ const SalesSchedule = () => {
         date: new Date(),
         time: '09:00',
         type: 'meeting', // meeting, call, task, other
-        participants: []
+        participants: [],
+        assignedTo: ''
     });
 
     // Calendar logic
@@ -148,7 +150,8 @@ const SalesSchedule = () => {
             date: new Date(),
             time: '09:00',
             type: 'meeting',
-            participants: []
+            participants: [],
+            assignedTo: ''
         });
     };
 
@@ -396,6 +399,15 @@ const SalesSchedule = () => {
                             </Select>
                         </div>
                         <div className="grid gap-2">
+                            <Label htmlFor="assignedTo">Assign To (Admin/Manager/Employee)</Label>
+                            <Input
+                                id="assignedTo"
+                                placeholder="Type recipient name or role..."
+                                value={newEventData.assignedTo}
+                                onChange={(e) => setNewEventData({ ...newEventData, assignedTo: e.target.value })}
+                            />
+                        </div>
+                        <div className="grid gap-2">
                             <Label htmlFor="description">Description</Label>
                             <Textarea
                                 id="description"
@@ -432,6 +444,13 @@ const SalesSchedule = () => {
                                 </Badge>
                             )}
                         </div>
+
+                        {selectedEvent?.assignedTo && (
+                            <div className="flex items-center gap-2 text-sm font-bold text-primary-600 bg-primary-50 dark:bg-primary-900/20 px-3 py-2 rounded-xl">
+                                <Users size={16} />
+                                Assigned to: {selectedEvent.assignedTo}
+                            </div>
+                        )}
 
                         {selectedEvent?.description && (
                             <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-lg text-sm text-slate-600 dark:text-slate-300">

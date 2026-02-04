@@ -43,6 +43,7 @@ import TaskManagement from '@/modules/admin/pages/TaskManagement';
 import TaskCompletion from '@/modules/admin/pages/TaskCompletion';
 import Reports from '@/modules/admin/pages/Reports';
 import AdminCalendar from '@/modules/admin/pages/Calendar';
+import AdminChat from '@/modules/admin/pages/Chat';
 import AdminSubscription from '@/modules/admin/pages/Subscription';
 import Settings from '@/modules/admin/pages/Settings';
 import JoinRequests from '@/modules/admin/pages/JoinRequests';
@@ -61,6 +62,7 @@ import TeamProgress from '@/modules/manager/pages/TeamProgress';
 import ManagerSchedule from '@/modules/manager/pages/Schedule';
 import ManagerReports from '@/modules/manager/pages/Reports';
 import ManagerSettings from '@/modules/manager/pages/Settings';
+import ManagerChat from '@/modules/manager/pages/Chat';
 
 // Sales Pages
 import SalesLogin from '@/modules/sales/pages/SalesLogin';
@@ -97,10 +99,9 @@ import AddTask from '@/modules/user/pages/AddTask';
 import NotificationsList from '@/modules/user/pages/NotificationsList';
 import HelpCenter from '@/modules/user/pages/HelpCenter';
 import ChatSupport from '@/modules/user/pages/ChatSupport';
-import ApiDocs from '@/modules/user/pages/ApiDocs';
+import EmployeeChat from '@/modules/user/pages/Chat';
 import PrivacyPolicy from '@/modules/user/pages/PrivacyPolicy';
 import TermsOfService from '@/modules/user/pages/TermsOfService';
-import SystemStatus from '@/modules/user/pages/SystemStatus';
 import EmployeeSubscription from '@/modules/user/pages/Subscription';
 import SuccessJoin from '@/modules/user/pages/SuccessJoin';
 import JoinWorkspace from '@/modules/user/pages/JoinWorkspace';
@@ -146,6 +147,7 @@ const AppRouter = () => {
                 <Route path="tasks" element={<TaskManagement />} />
                 <Route path="tasks/:id" element={<TaskCompletion />} />
                 <Route path="reports" element={<Reports />} />
+                <Route path="chat" element={<AdminChat />} />
                 <Route path="calendar" element={<AdminCalendar />} />
                 <Route path="subscription" element={<AdminSubscription />} />
                 <Route path="settings" element={<Settings />} />
@@ -158,7 +160,6 @@ const AppRouter = () => {
                 <Route path="leads" element={<LeadsManagement />} />
                 <Route path="pipeline" element={<SalesPipeline />} />
                 <Route path="follow-ups" element={<FollowUps />} />
-                <Route path="contacts" element={<Contacts />} />
             </Route>
 
             {/* --- EMPLOYEE ROUTES --- */}
@@ -170,6 +171,7 @@ const AppRouter = () => {
                 <Route path="calendar" element={<EmployeeCalendar />} />
                 <Route path="notes" element={<EmployeeNotes />} />
                 <Route path="notifications" element={<NotificationsList />} />
+                <Route path="chat" element={<EmployeeChat />} />
                 <Route path="profile" element={<EmployeeProfile />} />
                 <Route path="profile/account" element={<PersonalAccount />} />
                 <Route path="profile/notifications" element={<Notifications />} />
@@ -181,10 +183,8 @@ const AppRouter = () => {
                 <Route path="profile/help" element={<HelpLegal />} />
                 <Route path="profile/help/privacy" element={<PrivacyPolicy />} />
                 <Route path="profile/help/terms" element={<TermsOfService />} />
-                <Route path="profile/help/status" element={<SystemStatus />} />
                 <Route path="profile/help/center" element={<HelpCenter />} />
                 <Route path="profile/help/chat" element={<ChatSupport />} />
-                <Route path="profile/help/api" element={<ApiDocs />} />
             </Route>
 
             {/* Employee CRM Panel */}
@@ -209,14 +209,7 @@ const AppRouter = () => {
                 <Route path="calendar" element={<div>System Calendar (Coming Soon)</div>} />
             </Route>
 
-            {/* Super Admin CRM Panel */}
-            <Route path="/superadmin/crm" element={<ProtectedRoute allowedRoles={['superadmin', 'superadmin_employee']}><CRMLayout role="superadmin" /></ProtectedRoute>}>
-                <Route index element={<AdminCRM />} />
-                <Route path="leads" element={<LeadsManagement />} />
-                <Route path="pipeline" element={<SalesPipeline />} />
-                <Route path="follow-ups" element={<FollowUps />} />
-                <Route path="contacts" element={<Contacts />} />
-            </Route>
+
 
             {/* --- MANAGER ROUTES --- */}
             {/* Main Manager Panel */}
@@ -227,6 +220,7 @@ const AppRouter = () => {
                 <Route path="delegation" element={<TaskDelegation />} />
                 <Route path="team" element={<TeamManagement />} />
                 <Route path="progress" element={<TeamProgress />} />
+                <Route path="chat" element={<ManagerChat />} />
                 <Route path="schedule" element={<ManagerSchedule />} />
                 <Route path="reports" element={<ManagerReports />} />
                 <Route path="settings" element={<ManagerSettings />} />

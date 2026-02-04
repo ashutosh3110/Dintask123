@@ -35,12 +35,14 @@ import { cn } from '@/shared/utils/cn';
 import useAuthStore from '@/store/authStore';
 import useTaskStore from '@/store/taskStore';
 import useEmployeeStore from '@/store/employeeStore';
+import useNotificationStore from '@/store/notificationStore';
 
 const AssignTask = () => {
     const navigate = useNavigate();
     const { user } = useAuthStore();
     const addTask = useTaskStore(state => state.addTask);
     const employees = useEmployeeStore(state => state.employees);
+    const addNotification = useNotificationStore(state => state.addNotification);
 
     // Filter employees managed by the current user
     const subEmployees = employees.filter(e => e.managerId === user?.id);
@@ -108,6 +110,15 @@ const AssignTask = () => {
             };
 
             addTask(newTask);
+
+            // Send notification to the assignee
+            addNotification({
+                title: 'New Task Assigned',
+                description: `You have been assigned: "${newTask.title}" by ${user.name}`,
+                category: 'task',
+                recipientId: formData.assignedTo
+            });
+
             toast.success("Task assigned successfully!");
             navigate('/manager/delegation'); // Redirect to delegation view
         } catch (error) {

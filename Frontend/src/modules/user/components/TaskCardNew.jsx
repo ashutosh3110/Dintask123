@@ -4,7 +4,7 @@ import { Clock, MessageSquare, Paperclip, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/shared/utils/cn';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 
-const TaskCardNew = ({ task, onClick }) => {
+const TaskCardNew = ({ task, onClick, managers = [] }) => {
     // Priority Badge Styles - matching user's HTML classes
     const priorityConfig = {
         low: { label: 'Low', color: 'bg-green-100 text-green-600' },
@@ -15,6 +15,13 @@ const TaskCardNew = ({ task, onClick }) => {
 
     const config = priorityConfig[task.priority] || priorityConfig.low;
     const isCompleted = task.status === 'completed';
+
+    // Get Assigner Info
+    const assigner = task.assignedBy === 'self'
+        ? { name: 'Self', isSelf: true }
+        : task.delegatedBy
+            ? managers.find(m => m.id === task.delegatedBy) || { name: 'Manager' }
+            : { name: 'Admin', isAdmin: true };
 
     return (
         <div
@@ -69,33 +76,38 @@ const TaskCardNew = ({ task, onClick }) => {
             </div>
 
             <div className={cn("flex items-center justify-between pt-2 mt-1 border-t border-slate-50 dark:border-slate-700", isCompleted ? "opacity-50" : "")}>
-                <div className="flex -space-x-2">
-                    {task.assignedTo && task.assignedTo.length > 0 ? (
-                        task.assignedTo.slice(0, 3).map((u, i) => (
-                            <Avatar key={i} className="h-7 w-7 border-2 border-white dark:border-slate-800">
-                                <AvatarFallback className="text-[9px] bg-slate-100 text-slate-500">U</AvatarFallback>
-                            </Avatar>
-                        ))
-                    ) : (
-                        <div className="size-7 rounded-full border-2 border-white dark:border-slate-800 bg-slate-100 flex items-center justify-center">
-                            <span className="text-[9px] font-bold text-gray-500">A</span>
-                        </div>
-                    )}
-                    {(task.assignedTo?.length || 0) > 3 && (
-                        <div className="flex size-7 items-center justify-center rounded-full border-2 border-white dark:border-slate-800 bg-slate-100 dark:bg-slate-700 text-[10px] font-bold text-gray-500">
-                            +{task.assignedTo.length - 3}
-                        </div>
-                    )}
+                <div className="flex items-center gap-2">
+                    <div className="flex -space-x-2">
+                        {task.assignedTo && task.assignedTo.length > 0 ? (
+                            task.assignedTo.slice(0, 3).map((u, i) => (
+                                <Avatar key={i} className="h-7 w-7 border-2 border-white dark:border-slate-800">
+                                    <AvatarFallback className="text-[9px] bg-slate-100 text-slate-500">U</AvatarFallback>
+                                </Avatar>
+                            ))
+                        ) : (
+                            <div className="size-7 rounded-full border-2 border-white dark:border-slate-800 bg-slate-100 flex items-center justify-center">
+                                <span className="text-[9px] font-bold text-gray-500">A</span>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Assigner Info */}
+                    <div className="flex items-center gap-1.5 ml-2 border-l border-slate-100 dark:border-slate-700 pl-3">
+                        <div className={cn(
+                            "size-1.5 rounded-full",
+                            assigner.isSelf ? "bg-emerald-500" :
+                                assigner.isAdmin ? "bg-amber-500" : "bg-primary-500"
+                        )} />
+                        <span className="text-[10px] font-bold text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">
+                            By: {assigner.name}
+                        </span>
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1 text-text-secondary">
-                        <Paperclip size={18} />
-                        <span className="text-xs font-bold">1</span>
-                    </div>
                     <div className="flex items-center gap-1 text-primary">
-                        <MessageSquare size={18} />
-                        <span className="text-xs font-bold">2</span>
+                        <MessageSquare size={16} />
+                        <span className="text-[10px] font-bold">2</span>
                     </div>
                 </div>
             </div>

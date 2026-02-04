@@ -38,6 +38,7 @@ import {
 import { Textarea } from "@/shared/components/ui/textarea";
 import { Label } from "@/shared/components/ui/label";
 import useNotificationStore from '@/store/notificationStore';
+import useChatStore from '@/store/chatStore';
 
 const TeamManagement = () => {
     const { user } = useAuthStore();
@@ -72,21 +73,30 @@ const TeamManagement = () => {
         setIsMessageModalOpen(true);
     };
 
+    const sendMessage = useChatStore(state => state.sendMessage);
+
     const handleSendMessage = () => {
         if (!messageContent.trim()) {
             toast.error("Please enter a message");
             return;
         }
 
+        // Send message via chat store
+        sendMessage(user.id, selectedMember.id, messageContent);
+
+        // Add notification for the employee
         addNotification({
             title: `Message from ${user?.name || 'Manager'}`,
             description: messageContent,
             category: 'message',
-            recipientId: selectedMember?.id // Ideally used for filtering
+            recipientId: selectedMember?.id
         });
 
         toast.success(`Message sent to ${selectedMember.name}`);
         setIsMessageModalOpen(false);
+
+        // Optionally navigate to chat page
+        navigate('/manager/chat');
     };
 
     return (
