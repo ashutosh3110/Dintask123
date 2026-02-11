@@ -66,8 +66,8 @@ exports.createTicket = async (req, res, next) => {
         // Create Persistent Notification
         try {
             if (ticket.isEscalatedToSuperAdmin) {
-                // For Super Admins
-                const superAdmins = await SuperAdmin.find({ role: 'superadmin' });
+                // For Super Admins AND Staff
+                const superAdmins = await SuperAdmin.find({ role: { $in: ['superadmin', 'superadmin_staff'] } });
                 for (const sa of superAdmins) {
                     await Notification.create({
                         recipient: sa._id,
@@ -75,7 +75,7 @@ exports.createTicket = async (req, res, next) => {
                         type: 'support_ticket',
                         title: 'New Support Escalation',
                         message: `Admin ${req.user.name} has raised a new escalation: ${ticket.title}`,
-                        link: `/support`
+                        link: `/superadmin/support`
                     });
                 }
             } else {
@@ -267,27 +267,57 @@ exports.updateTicket = async (req, res, next) => {
         // Create Persistent Notification for Response
         try {
             if (req.body.response) {
-                const isResponderAdmin = ['admin', 'superadmin', 'superadmin_staff'].includes(req.user.role);
-                const recipientId = isResponderAdmin ? ticket.creator : ticket.companyId;
+                const isResponderSuperAdmin = ['superadmin', 'superadmin_staff'].includes(req.user.role);
 
-                await Notification.create({
-                    recipient: recipientId,
-                    sender: req.user.id,
-                    type: 'support_ticket',
-                    title: 'New Response on Ticket',
-                    message: `${req.user.name} replied to: ${ticket.title}`,
-                    link: `/support`
-                });
+                if (isResponderSuperAdmin) {
+                    // Responder is Super Admin -> Notify Admin (Creator)
+                    await Notification.create({
+                        recipient: ticket.creator,
+                        sender: req.user.id,
+                        type: 'support_ticket',
+                        title: 'New Support Reply',
+                        message: `${req.user.name} (Support) replied to: ${ticket.title}`,
+                        link: `/support?ticketId=${ticket._id}`
+                    });
+                } else {
+                    // Responder is Admin -> Notify ALL Super Admins & Staff
+                    const superAdmins = await SuperAdmin.find({ role: { $in: ['superadmin', 'superadmin_staff'] } });
+                    const notifications = superAdmins.map(sa => ({
+                        recipient: sa._id,
+                        sender: req.user.id, // The Admin
+                        type: 'support_ticket',
+                        title: 'New Reply on Ticket',
+                        message: `${req.user.name} replied to escalation: ${ticket.title}`,
+                        link: `/superadmin/support?ticketId=${ticket._id}`
+                    }));
+                    await Notification.insertMany(notifications);
+                }
             } else if (req.body.status) {
                 // Notify creator of status change
-                await Notification.create({
-                    recipient: ticket.creator,
-                    sender: req.user.id,
-                    type: 'support_ticket',
-                    title: 'Ticket Status Updated',
-                    message: `Your ticket "${ticket.title}" is now ${req.body.status}`,
-                    link: `/support`
-                });
+                // If updated by Super Admin -> Notify Admin
+                // If updated by Admin -> Notify Creator (if different, e.g. employee) or usually just Admin managing it
+
+                // Focusing on Superadmin -> Admin updates
+                if (['superadmin', 'superadmin_staff'].includes(req.user.role)) {
+                    await Notification.create({
+                        recipient: ticket.creator,
+                        sender: req.user.id,
+                        type: 'support_ticket',
+                        title: 'Ticket Status Updated',
+                        message: `Your ticket "${ticket.title}" is now ${req.body.status}`,
+                        link: `/support?ticketId=${ticket._id}`
+                    });
+                } else {
+                    // Standard behavior
+                    await Notification.create({
+                        recipient: ticket.creator,
+                        sender: req.user.id,
+                        type: 'support_ticket',
+                        title: 'Ticket Status Updated',
+                        message: `Your ticket "${ticket.title}" is now ${req.body.status}`,
+                        link: `/support`
+                    });
+                }
             }
         } catch (err) {
             console.error('Notification Error:', err);
