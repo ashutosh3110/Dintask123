@@ -152,14 +152,18 @@ const MyTasks = () => {
                 <AnimatePresence mode="popLayout">
                     {myTasks.length > 0 ? myTasks.map((task) => (
                         <motion.div key={task.id} variants={fadeInUp} layout>
-                            <Card className="border-none shadow-xl shadow-slate-200/30 dark:shadow-none bg-white dark:bg-slate-900 rounded-[1.5rem] overflow-hidden group hover:scale-[1.005] transition-all">
+                            <Card className={cn(
+                                "border-none shadow-xl shadow-slate-200/30 dark:shadow-none bg-white dark:bg-slate-900 rounded-[1.5rem] overflow-hidden group hover:scale-[1.005] transition-all",
+                                task.status === 'overdue' && "ring-2 ring-rose-500/50"
+                            )}>
                                 <CardContent className="p-0">
                                     <div className="flex">
                                         <div className={cn(
                                             "w-1.5 sm:w-2 shrink-0 transition-colors",
-                                            task.priority === 'urgent' ? 'bg-red-500' :
-                                                task.priority === 'high' ? 'bg-orange-500' :
-                                                    task.priority === 'medium' ? 'bg-primary-500' : 'bg-slate-200'
+                                            task.status === 'overdue' ? 'bg-rose-600' :
+                                                task.priority === 'urgent' ? 'bg-red-500' :
+                                                    task.priority === 'high' ? 'bg-orange-500' :
+                                                        task.priority === 'medium' ? 'bg-primary-500' : 'bg-slate-200'
                                         )} />
                                         <div className="flex-1 p-4 sm:p-5 text-left">
                                             <div className="flex items-start justify-between gap-4">

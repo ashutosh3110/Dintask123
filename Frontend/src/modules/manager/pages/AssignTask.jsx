@@ -13,7 +13,11 @@ import {
     ArrowLeft,
     Zap,
     Target,
-    Layers
+    Zap,
+    Target,
+    Layers,
+    Clock,
+    Clock
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
@@ -84,7 +88,10 @@ const AssignTask = () => {
         assignedTo: 'none',
         labels: '',
         projectId: 'none',
-        teamId: 'none'
+        teamId: 'none',
+        recurrenceType: 'none',
+        recurrenceInterval: '1',
+        recurrenceEndDate: ''
     });
 
     const handleInputChange = (e) => {
@@ -114,7 +121,12 @@ const AssignTask = () => {
                 assignedTo: formData.assignedTo !== 'none' ? [formData.assignedTo] : [],
                 team: formData.teamId === 'none' ? undefined : formData.teamId,
                 project: formData.projectId === 'none' ? undefined : formData.projectId,
-                labels: formData.labels.split(',').map(l => l.trim()).filter(l => l)
+                labels: formData.labels.split(',').map(l => l.trim()).filter(l => l),
+                recurrence: {
+                    type: formData.recurrenceType,
+                    interval: parseInt(formData.recurrenceInterval) || 1,
+                    endDate: formData.recurrenceEndDate ? new Date(formData.recurrenceEndDate) : null
+                }
             };
 
             console.log("Deploying Task Payload:", newTaskPayload);
@@ -353,6 +365,61 @@ const AssignTask = () => {
                                     </>
                                 )}
                             </Button>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="border-none shadow-xl shadow-slate-200/20 dark:shadow-none bg-white dark:bg-slate-900 rounded-[2rem] overflow-hidden">
+                        <CardHeader className="py-4 px-6 border-b border-slate-50 dark:border-slate-800">
+                            <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
+                                <Clock size={14} className="text-amber-500" />
+                                Temporal Cycle
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-5 space-y-5">
+                            <div className="space-y-1.5">
+                                <Label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Recurrence Pattern</Label>
+                                <Select
+                                    value={formData.recurrenceType}
+                                    onValueChange={(val) => handleSelectChange('recurrenceType', val)}
+                                >
+                                    <SelectTrigger className="h-11 bg-slate-50 border-none dark:bg-slate-800/50 rounded-xl font-bold text-sm px-4">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-xl border-none shadow-2xl">
+                                        <SelectItem value="none" className="text-[10px] font-black uppercase">One-off Mission</SelectItem>
+                                        <SelectItem value="daily" className="text-[10px] font-black uppercase">Daily Cycle</SelectItem>
+                                        <SelectItem value="weekly" className="text-[10px] font-black uppercase">Weekly Cycle</SelectItem>
+                                        <SelectItem value="monthly" className="text-[10px] font-black uppercase">Monthly Cycle</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {formData.recurrenceType !== 'none' && (
+                                <>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Interval Factor</Label>
+                                        <Input
+                                            type="number"
+                                            min="1"
+                                            name="recurrenceInterval"
+                                            value={formData.recurrenceInterval}
+                                            onChange={handleInputChange}
+                                            className="h-11 bg-slate-50 border-none dark:bg-slate-800/50 rounded-xl font-bold text-sm px-4"
+                                            placeholder="Frequency (e.g. 1)"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Cycle Termination (Optional)</Label>
+                                        <Input
+                                            type="date"
+                                            name="recurrenceEndDate"
+                                            value={formData.recurrenceEndDate}
+                                            onChange={handleInputChange}
+                                            className="h-11 bg-slate-50 border-none dark:bg-slate-800/50 rounded-xl font-bold text-sm px-4"
+                                        />
+                                    </div>
+                                </>
+                            )}
                         </CardContent>
                     </Card>
                 </div>

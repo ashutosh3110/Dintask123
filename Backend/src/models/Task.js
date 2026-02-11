@@ -62,6 +62,19 @@ const TaskSchema = new mongoose.Schema({
   submissionNote: {
     type: String
   },
+  recurrence: {
+    type: {
+      type: String,
+      enum: ['daily', 'weekly', 'monthly', 'none'],
+      default: 'none'
+    },
+    interval: {
+      type: Number,
+      default: 1
+    },
+    endDate: Date,
+    nextRun: Date
+  },
   activityLog: [{
     user: { type: mongoose.Schema.Types.ObjectId, refPath: 'activityLog.userModel' },
     userModel: { type: String, enum: ['Admin', 'Manager', 'Employee', 'SalesExecutive'] },

@@ -37,9 +37,10 @@ const TaskHome = () => {
     // -- Summary Stats Logic --
     const stats = useMemo(() => {
         const todayCount = tasks.filter(t => isToday(parseISO(t.deadline)) && t.status !== 'completed').length;
+        const overdueCount = tasks.filter(t => t.status === 'overdue').length;
         const pendingCount = tasks.filter(t => t.status !== 'completed').length;
         const doneCount = tasks.filter(t => t.status === 'completed').length;
-        return { today: todayCount, pending: pendingCount, done: doneCount };
+        return { today: todayCount, overdue: overdueCount, pending: pendingCount, done: doneCount };
     }, [tasks]);
 
     // -- Filtering Logic --
@@ -48,6 +49,9 @@ const TaskHome = () => {
             const taskDate = parseISO(task.deadline);
             if (activeTab === 'today') {
                 return isToday(taskDate) && task.status !== 'completed';
+            }
+            if (activeTab === 'overdue') {
+                return task.status === 'overdue';
             }
             if (activeTab === 'upcoming') {
                 return isAfter(taskDate, new Date()) && !isToday(taskDate) && task.status !== 'completed';
@@ -138,7 +142,7 @@ const TaskHome = () => {
             {/* -- Tabs Navigation -- */}
             <div className="mb-4 px-6">
                 <div className="flex border-b border-slate-200 dark:border-slate-700 transition-all relative">
-                    {['today', 'upcoming', 'completed'].map((tab) => (
+                    {['today', 'overdue', 'upcoming', 'completed'].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
