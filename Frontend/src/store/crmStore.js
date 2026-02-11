@@ -57,9 +57,10 @@ const useCRMStore = create(
       },
 
       // Fetch Pending Projects
-      fetchPendingProjects: async () => {
+      fetchPendingProjects: async (search = '') => {
         try {
-          const res = await api('/crm/pending-projects');
+          const url = search ? `/crm/pending-projects?search=${search}` : '/crm/pending-projects';
+          const res = await api(url);
           if (res.success) {
             set({ pendingProjects: res.data }); // Store separately or filter from leads
           }

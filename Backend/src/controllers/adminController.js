@@ -152,21 +152,46 @@ exports.getManagers = async (req, res, next) => {
             { $sort: { createdAt: -1 } },
             { $skip: skip },
             { $limit: limit },
-            // Lookup for teams/project counts or other related info can be added here if needed
             {
               $lookup: {
-                from: 'teams',
+                from: 'projects',
                 localField: '_id',
-                foreignField: 'managerId',
-                as: 'managedTeams'
+                foreignField: 'manager',
+                as: 'managedProjects'
+              }
+            },
+            {
+              $lookup: {
+                from: 'tasks',
+                localField: '_id',
+                foreignField: 'assignedBy',
+                as: 'assignedTasks'
               }
             },
             {
               $addFields: {
-                activeTeamsCount: { $size: '$managedTeams' }
+                activeProjectsCount: {
+                  $size: {
+                    $filter: {
+                      input: '$managedProjects',
+                      as: 'project',
+                      cond: { $eq: ['$$project.status', 'active'] }
+                    }
+                  }
+                },
+                totalTasksCount: { $size: '$assignedTasks' },
+                completedTasksCount: {
+                  $size: {
+                    $filter: {
+                      input: '$assignedTasks',
+                      as: 'task',
+                      cond: { $eq: ['$$task.status', 'completed'] }
+                    }
+                  }
+                }
               }
             },
-            { $project: { password: 0, managedTeams: 0 } }
+            { $project: { password: 0, managedProjects: 0, assignedTasks: 0 } }
           ]
         }
       }
@@ -591,6 +616,10 @@ exports.resetPassword = async (req, res, next) => {
 exports.getJoinRequests = async (req, res, next) => {
   try {
     const adminId = req.user.id;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const search = req.query.search || '';
+    const startIndex = (page - 1) * limit;
 
     const [employees, sales, managers] = await Promise.all([
       Employee.find({ adminId, status: 'pending' }),
@@ -598,12 +627,31 @@ exports.getJoinRequests = async (req, res, next) => {
       Manager.find({ adminId, status: 'pending' })
     ]);
 
-    const requests = [...employees, ...sales, ...managers].sort((a, b) => b.createdAt - a.createdAt);
-    console.log(`[DEBUG] Join Requests for Admin ${adminId}: Found ${requests.length} requests`);
+    let allRequests = [...employees, ...sales, ...managers].sort((a, b) => b.createdAt - a.createdAt);
+
+    // Apply search filter if provided
+    if (search) {
+      const searchLower = search.toLowerCase();
+      allRequests = allRequests.filter(req =>
+        (req.name && req.name.toLowerCase().includes(searchLower)) ||
+        (req.email && req.email.toLowerCase().includes(searchLower))
+      );
+    }
+
+    const total = allRequests.length;
+    const requests = allRequests.slice(startIndex, startIndex + limit);
+
+    console.log(`[DEBUG] Join Requests for Admin ${adminId}: Found ${total} total after search "${search}", returning ${requests.length} for page ${page}`);
 
     res.status(200).json({
       success: true,
       count: requests.length,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      },
       data: requests
     });
   } catch (err) {

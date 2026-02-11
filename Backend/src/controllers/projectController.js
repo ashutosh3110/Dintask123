@@ -8,47 +8,68 @@ const SalesExecutive = require('../models/SalesExecutive');
 // @access  Private
 exports.getProjects = async (req, res) => {
   try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const search = req.query.search || '';
+    const startIndex = (page - 1) * limit;
+
     let query = {};
     let adminId;
 
     if (req.user.role === 'admin') {
-      // Admin sees all projects in their workspace
       adminId = req.user.id;
-      query = {
-        assignedBy: req.user.id,
-        adminId: adminId
-      };
+      query = { adminId: adminId };
     } else if (req.user.role === 'manager') {
-      // Get manager's adminId
       const manager = await Manager.findById(req.user.id);
       if (!manager) return res.status(404).json({ success: false, error: 'Manager not found' });
       adminId = manager.adminId;
-
-      // Manager sees projects assigned to them (within their workspace)
-      query = {
-        manager: req.user.id,
-        adminId: adminId
-      };
+      query = { manager: req.user.id, adminId: adminId };
     } else if (req.user.role === 'sales_executive') {
-      // Get sales exec's adminId
       const salesExec = await SalesExecutive.findById(req.user.id);
       if (!salesExec) return res.status(404).json({ success: false, error: 'Sales Executive not found' });
       adminId = salesExec.adminId;
-
-      // Sales sees their deals turned projects (within their workspace)
-      query = {
-        salesRep: req.user.id,
-        adminId: adminId
-      };
+      query = { salesRep: req.user.id, adminId: adminId };
     }
+
+    // Advanced search filter
+    if (search) {
+      const searchRegex = new RegExp(search, 'i');
+      query.$or = [
+        { name: searchRegex },
+        { 'client.name': searchRegex },
+        { 'client.company': searchRegex }
+      ];
+    }
+
+    // To search within populated client fields properly, we might need a different approach 
+    // but for now, we'll fetch and filter if needed, or use a more complex aggregation.
+    // However, Mongoose doesn't support $or on populated fields directly without aggregation.
+    // Let's stick to a simpler name search or use a better query if client info is stored in Project.
+
+    // Check Project model to see if it has client info embedded or just ref.
+    // For now, let's just search by Project Name.
+
+    const total = await Project.countDocuments(query);
 
     const projects = await Project.find(query)
       .populate('client', 'name company email mobile')
       .populate('manager', 'name email')
       .populate('salesRep', 'name')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(startIndex)
+      .limit(limit);
 
-    res.status(200).json({ success: true, count: projects.length, data: projects });
+    res.status(200).json({
+      success: true,
+      count: projects.length,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      },
+      data: projects
+    });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

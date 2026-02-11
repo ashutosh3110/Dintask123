@@ -82,6 +82,7 @@ import SalesChat from '@/modules/sales/pages/Chat';
 import Schedule from '@/modules/sales/pages/Schedule';
 import SalesReports from '@/modules/sales/pages/Reports';
 import SalesSettings from '@/modules/sales/pages/Settings';
+import SalesNotifications from '@/modules/sales/pages/Notifications';
 
 // CRM Pages
 import CRMHome from '@/modules/crm/pages/CRMHome';
@@ -294,6 +295,7 @@ const AppRouter = () => {
                 <Route path="reports" element={<SalesReports />} />
                 <Route path="chat" element={<SalesChat />} />
                 <Route path="settings" element={<SalesSettings />} />
+                <Route path="notifications" element={<SalesNotifications />} />
                 <Route path="support" element={<SupportCenter />} />
             </Route>
 

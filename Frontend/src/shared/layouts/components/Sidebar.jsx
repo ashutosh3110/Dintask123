@@ -104,6 +104,7 @@ const Sidebar = ({ role, isOpen, setIsOpen, isCollapsed, setIsCollapsed }) => {
                 { name: 'Reports', path: '/sales/reports', icon: BarChart3 },
                 { name: 'Chat', path: '/sales/chat', icon: MessageSquare },
                 { name: 'Schedule', path: '/sales/schedule', icon: CalendarIcon },
+                { name: 'Notifications', path: '/sales/notifications', icon: Bell, badge: unreadCount },
                 { name: 'Settings', path: '/sales/settings', icon: SettingsIcon },
                 { name: 'Support', path: '/sales/support', icon: LifeBuoy },
             ]
@@ -116,7 +117,7 @@ const Sidebar = ({ role, isOpen, setIsOpen, isCollapsed, setIsCollapsed }) => {
                 { name: 'Managers', path: '/admin/managers', icon: ShieldCheck },
                 { name: 'Employees', path: '/admin/employees', icon: Users },
                 { name: 'Sales', path: '/admin/sales', icon: TrendingUp },
-                { name: 'Projects', path: '/admin/projects', icon: Briefcase },
+                { name: 'Projects', path: '/admin/projects', icon: Briefcase, end: true },
                 // Added Project Approvals
                 {
                     name: 'Project Approvals',
@@ -158,6 +159,13 @@ const Sidebar = ({ role, isOpen, setIsOpen, isCollapsed, setIsCollapsed }) => {
     ];
 
 
+
+    const managerSettingsSubItems = isManager
+        ? [
+            { name: 'Profile', path: '/manager/settings?tab=profile', icon: User, tab: 'profile' },
+            { name: 'Security', path: '/manager/settings?tab=security', icon: Shield, tab: 'security' },
+        ]
+        : [];
 
     const adminSettingsSubItems = isAdmin
         ? [
@@ -322,7 +330,7 @@ const Sidebar = ({ role, isOpen, setIsOpen, isCollapsed, setIsCollapsed }) => {
                             <NavLink
                                 key={item.path}
                                 to={item.path}
-                                end={item.path === `/${role}`}
+                                end={item.end || item.path === `/${role}`}
                                 onClick={() => setIsOpen(false)}
                                 className={({ isActive }) => cn(
                                     "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-bold group border border-transparent",

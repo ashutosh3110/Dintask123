@@ -4,17 +4,32 @@ import { toast } from 'sonner';
 
 const useProjectStore = create((set, get) => ({
   projects: [],
+  projectPagination: {
+    page: 1,
+    limit: 10,
+    total: 0,
+    pages: 1
+  },
   currentProject: null,
   loading: false,
   error: null,
 
   // Fetch Projects (for current user)
-  fetchProjects: async () => {
+  fetchProjects: async (params = {}) => {
     set({ loading: true });
     try {
-      const res = await api('/projects');
+      const queryParams = new URLSearchParams();
+      if (params.page) queryParams.append('page', params.page);
+      if (params.limit) queryParams.append('limit', params.limit);
+      if (params.search) queryParams.append('search', params.search);
+
+      const res = await api(`/projects?${queryParams.toString()}`);
       if (res.success) {
-        set({ projects: res.data, loading: false });
+        set({
+          projects: res.data,
+          projectPagination: res.pagination || { page: 1, limit: 10, total: 0, pages: 1 },
+          loading: false
+        });
       }
     } catch (error) {
       set({ error: error.message, loading: false });

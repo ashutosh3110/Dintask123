@@ -267,6 +267,10 @@ exports.requestProjectConversion = async (req, res) => {
       return res.status(400).json({ success: false, error: 'Only Won leads can be converted' });
     }
 
+    if (!lead.amount || lead.amount <= 0) {
+      return res.status(400).json({ success: false, error: 'Project budget cannot be zero. Please update the deal amount first.' });
+    }
+
     lead.approvalStatus = 'pending_project';
     await lead.save();
 
@@ -338,6 +342,7 @@ exports.approveProject = async (req, res) => {
 exports.getPendingProjects = async (req, res) => {
   try {
     let adminId = req.user.id;
+    const search = req.query.search || '';
 
     if (req.user.role === 'sales_executive' || req.user.role === 'sales') {
       const salesExec = await SalesExecutive.findById(req.user.id);
@@ -345,11 +350,21 @@ exports.getPendingProjects = async (req, res) => {
       adminId = salesExec.adminId;
     }
 
-    const leads = await Lead.find({
+    let query = {
       adminId: adminId,
       status: 'Won',
       approvalStatus: 'pending_project'
-    }).populate('owner', 'name');
+    };
+
+    if (search) {
+      const searchRegex = new RegExp(search, 'i');
+      query.$or = [
+        { name: searchRegex },
+        { company: searchRegex }
+      ];
+    }
+
+    const leads = await Lead.find(query).populate('owner', 'name');
 
     res.status(200).json({ success: true, count: leads.length, data: leads });
   } catch (err) {
