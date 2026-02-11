@@ -63,8 +63,8 @@ const Clients = () => {
 
     return (
         <div className="space-y-4 sm:space-y-6 pb-10">
-            {/* Sticky Header & Stats Section */}
-            <div className="sticky top-0 z-30 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-md pt-4 -mt-4 pb-2 space-y-4 sm:space-y-6">
+            {/* Header & Stats Section */}
+            <div className="pt-2 pb-2 space-y-4 sm:space-y-6">
                 {/* Header section */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-1">
                     <div className="flex items-center gap-3">
@@ -87,7 +87,7 @@ const Clients = () => {
                 </div>
 
                 {/* High-Density Stats Bar */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pb-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pb-2 px-1">
                     {[
                         { label: 'Total Base', value: stats.total, icon: <Users size={16} />, color: 'primary', border: 'border-primary-100', shadow: 'shadow-primary-200/50', gradient: 'bg-gradient-to-br from-white to-primary-50/30' },
                         { label: 'Active Links', value: stats.active, icon: <TrendingUp size={16} />, color: 'emerald', border: 'border-emerald-100', shadow: 'shadow-emerald-200/50', gradient: 'bg-gradient-to-br from-white to-emerald-50/30' },

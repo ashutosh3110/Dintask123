@@ -11,6 +11,7 @@ const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail');
 const Plan = require('../models/Plan');
 const Payment = require('../models/Payment');
+const Notification = require('../models/Notification');
 
 // @desc    Get system stats
 // @route   GET /api/v1/superadmin/stats
@@ -219,6 +220,22 @@ exports.updateAdmin = async (req, res, next) => {
       return next(new ErrorResponse(`Admin not found with id of ${req.params.id}`, 404));
     }
 
+    // Notify Admin of Status Change
+    if (subscriptionStatus && subscriptionStatus !== admin.subscriptionStatus) {
+      try {
+        await Notification.create({
+          recipient: admin._id,
+          sender: req.user.id,
+          type: 'general',
+          title: 'Account Status Update',
+          message: `Your account status has been updated to: ${subscriptionStatus}`,
+          link: '/billing'
+        });
+      } catch (error) {
+        console.error('Notification Error:', error);
+      }
+    }
+
     res.status(200).json({
       success: true,
       data: admin
@@ -280,6 +297,20 @@ exports.updateAdminPlan = async (req, res, next) => {
 
     if (!admin) {
       return next(new ErrorResponse(`Admin not found with id of ${req.params.id}`, 404));
+    }
+
+    // Notify Admin of Plan Update
+    try {
+      await Notification.create({
+        recipient: admin._id,
+        sender: req.user.id,
+        type: 'general',
+        title: 'Plan Updated',
+        message: `Your plan has been updated to ${planName} by the Super Admin.`,
+        link: '/billing'
+      });
+    } catch (error) {
+      console.error('Notification Error:', error);
     }
 
     res.status(200).json({
@@ -1304,6 +1335,22 @@ exports.updateStaff = async (req, res, next) => {
       new: true,
       runValidators: true
     });
+
+    // Notify Staff
+    try {
+      if (req.user.id !== staff._id.toString()) { // Don't notify if self-update (though route is superadmin root only)
+        await Notification.create({
+          recipient: staff._id,
+          sender: req.user.id,
+          type: 'general',
+          title: 'Profile Updated',
+          message: 'Your account details have been updated by the Administrator.',
+          link: '/profile'
+        });
+      }
+    } catch (error) {
+      console.error('Notification Error:', error);
+    }
 
     res.status(200).json({
       success: true,

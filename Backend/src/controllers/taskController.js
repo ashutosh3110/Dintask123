@@ -313,6 +313,53 @@ exports.updateTask = async (req, res) => {
     }).populate('activityLog.user', 'name')
       .populate('subTasks.user', 'name profileImage');
 
+    // -- RECURRENCE LOGIC --
+    if (req.body.status === 'completed' && task.recurrence && task.recurrence.type && task.recurrence.type !== 'none') {
+      const { type, interval, endDate } = task.recurrence;
+      // Use deadline if exists, else use current time as base
+      let nextDeadline = task.deadline ? new Date(task.deadline) : new Date();
+
+      const intervalVal = interval || 1;
+
+      if (type === 'daily') nextDeadline.setDate(nextDeadline.getDate() + intervalVal);
+      if (type === 'weekly') nextDeadline.setDate(nextDeadline.getDate() + (intervalVal * 7));
+      if (type === 'monthly') nextDeadline.setMonth(nextDeadline.getMonth() + intervalVal);
+
+      // Check if within end date (if specified)
+      const isWithinEndDate = !endDate || nextDeadline <= new Date(endDate);
+
+      if (isWithinEndDate) {
+        // Reset subtasks for the new task
+        const newSubTasks = task.subTasks.map(st => ({
+          user: st.user,
+          status: 'pending',
+          progress: 0
+        }));
+
+        await Task.create({
+          title: task.title,
+          description: task.description,
+          project: task.project, // Keep project link
+          assignedTo: task.assignedTo,
+          subTasks: newSubTasks,
+          assignedBy: task.assignedBy,
+          team: task.team,
+          adminId: task.adminId,
+          priority: task.priority,
+          deadline: nextDeadline,
+          recurrence: task.recurrence, // Propagate recurrence settings
+          labels: task.labels,
+          status: 'pending',
+          progress: 0,
+          activityLog: [{
+            user: req.user.id,
+            userModel: userModel, // variable from scope above
+            action: 'System: Recurring Task Generated'
+          }]
+        });
+      }
+    }
+
     res.status(200).json({ success: true, data: task });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });

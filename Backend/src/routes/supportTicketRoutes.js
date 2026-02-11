@@ -5,6 +5,7 @@ const {
     getTickets,
     getTicket,
     updateTicket,
+    deleteTicket,
     getTicketStats
 } = require('../controllers/supportTicketController');
 
@@ -21,6 +22,7 @@ router.route('/')
 
 router.route('/:id')
     .get(getTicket)
-    .put(updateTicket);
+    .put(updateTicket)
+    .delete(deleteTicket);
 
 module.exports = router;

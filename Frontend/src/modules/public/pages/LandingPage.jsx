@@ -363,7 +363,7 @@ const LandingPage = () => {
                         <img
                             src="/dintask-logo.png"
                             alt="DinTask"
-                            className="h-12 sm:h-16 w-auto object-contain"
+                            className="h-20 sm:h-28 w-auto object-contain transition-transform hover:scale-105 py-2"
                         />
                     </div>
 
