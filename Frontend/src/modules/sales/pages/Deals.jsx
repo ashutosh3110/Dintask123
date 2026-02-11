@@ -13,7 +13,9 @@ import {
     Phone,
     Mail,
     Building,
-    ArrowRight
+    ArrowRight,
+    Edit2,
+    Trash2
 } from 'lucide-react';
 import { cn } from '@/shared/utils/cn';
 import { useNavigate } from 'react-router-dom';
@@ -199,11 +201,25 @@ const Deals = () => {
 
     const handleDeleteDeal = () => {
         if (selectedDeal) {
-            deleteLead(selectedDeal._id || selectedDeal.id);
-            toast.success("Deal deleted successfully");
-            setIsViewOpen(false);
-            setSelectedDeal(null);
+            if (window.confirm('Purge this tactical asset from the deployment pipeline? This action is irreversible.')) {
+                deleteLead(selectedDeal._id || selectedDeal.id);
+                toast.success("Asset purged from pipeline");
+                setIsViewOpen(false);
+                setSelectedDeal(null);
+            }
         }
+    };
+
+    const handleEditClick = (deal) => {
+        setSelectedDeal(deal);
+        setEditDealData({
+            name: deal.name,
+            company: deal.company,
+            amount: deal.amount,
+            status: deal.status,
+            priority: deal.priority
+        });
+        setIsEditOpen(true);
     };
 
     const handleEditDeal = () => {
@@ -392,18 +408,10 @@ const Deals = () => {
                                                     className="h-7 w-7 p-0 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        setSelectedDeal(deal);
-                                                        setEditDealData({
-                                                            name: deal.name,
-                                                            company: deal.company,
-                                                            amount: deal.amount,
-                                                            status: deal.status,
-                                                            priority: deal.priority
-                                                        });
-                                                        setIsEditOpen(true);
+                                                        handleEditClick(deal);
                                                     }}
                                                 >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                                                    <Edit2 size={14} />
                                                 </Button>
 
                                                 {deal.status === 'Won' && (
@@ -433,30 +441,76 @@ const Deals = () => {
                         </Table>
                     </div>
 
-                    {/* Mobile View */}
+                    {/* Mobile View - Refined Dossier Style */}
                     <div className="md:hidden space-y-3 p-3">
                         {filteredDeals.map((deal) => (
-                            <div key={deal._id || deal.id} className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-3" onClick={() => handleViewDeal(deal._id || deal.id)}>
-                                <div className="flex items-start justify-between">
+                            <div key={deal._id || deal.id} className="group bg-white dark:bg-slate-900 p-4 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 relative overflow-hidden active:scale-[0.98] transition-all" onClick={() => handleViewDeal(deal._id || deal.id)}>
+                                <div className="flex items-start justify-between mb-3 relative z-10">
                                     <div className="flex items-center gap-3">
-                                        <div className="size-10 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center text-xs font-black text-primary-600">
-                                            {deal.name?.substring(0, 1)}
+                                        <div className="size-11 rounded-2xl bg-primary-50 dark:bg-primary-900/20 text-primary-600 flex items-center justify-center text-sm font-black uppercase shadow-inner shadow-primary-500/10 shrink-0">
+                                            {deal.name?.charAt(0)}
                                         </div>
-                                        <div>
-                                            <p className="text-sm font-black text-slate-900 dark:text-white uppercase leading-none mb-1">{deal.company || deal.name}</p>
-                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">₹{(deal.amount || 0).toLocaleString()}</p>
+                                        <div className="min-w-0">
+                                            <h4 className="font-black text-slate-900 dark:text-white text-sm leading-tight uppercase tracking-tight truncate">{deal.company || deal.name}</h4>
+                                            <Badge className={cn("mt-1 border-none text-[7px] font-black uppercase tracking-widest h-4 px-1.5 rounded-lg", getStageColor(deal.status))}>
+                                                {deal.status}
+                                            </Badge>
                                         </div>
                                     </div>
-                                    <Badge className={cn("border-none text-[8px] font-black uppercase tracking-widest h-5 px-2 rounded-lg", getStageColor(deal.status))}>
-                                        {deal.status}
+                                    <Badge
+                                        variant="outline"
+                                        className={cn("text-[8px] uppercase font-black px-2 py-0.5 border shadow-none rounded-lg shrink-0",
+                                            deal.priority === 'high' ? 'bg-red-50 text-red-600 border-red-100' :
+                                                deal.priority === 'medium' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                                                    'bg-slate-50 text-slate-500 border-slate-100'
+                                        )}
+                                    >
+                                        {deal.priority}
                                     </Badge>
                                 </div>
-                                <div className="flex items-center justify-between pt-3 border-t border-slate-200/50 dark:border-slate-700/50">
-                                    <div className="flex items-center gap-2">
-                                        <div className={cn("size-2 rounded-full", deal.priority === 'high' ? 'bg-red-500' : 'bg-slate-300')} />
-                                        <span className="text-[9px] font-black uppercase text-slate-400">{deal.priority} PRIORITY</span>
+
+                                <div className="grid grid-cols-2 gap-2 mb-4">
+                                    <div className="p-3 rounded-2xl bg-slate-50/50 dark:bg-slate-800/40 border border-slate-100/50 dark:border-slate-800/50 flex flex-col justify-center">
+                                        <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">Valuation Focus</p>
+                                        <div className="flex items-center gap-1 text-primary-600 font-black text-sm">
+                                            <IndianRupee size={10} className="stroke-[3.5px]" />
+                                            {Number(deal.amount || 0).toLocaleString()}
+                                        </div>
                                     </div>
-                                    <ArrowRight size={14} className="text-slate-300" />
+                                    <div className="p-3 rounded-2xl bg-slate-50/50 dark:bg-slate-800/40 border border-slate-100/50 dark:border-slate-800/50 flex flex-col justify-center">
+                                        <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">Sector Node</p>
+                                        <p className="text-[10px] font-black text-slate-700 dark:text-slate-300 uppercase truncate">
+                                            {String(deal._id || deal.id).substring(0, 8)}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-50 dark:border-slate-800/50">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-9 px-4 rounded-xl text-primary-600 hover:bg-primary-50 font-black text-[10px] uppercase tracking-widest"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleEditClick(deal);
+                                        }}
+                                    >
+                                        <Edit2 size={12} className="mr-2" />
+                                        Recalibrate
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-9 px-4 rounded-xl text-red-500 hover:bg-red-50 font-black text-[10px] uppercase tracking-widest"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedDeal(deal);
+                                            handleDeleteDeal();
+                                        }}
+                                    >
+                                        <Trash2 size={12} className="mr-2" />
+                                        Purge
+                                    </Button>
                                 </div>
                             </div>
                         ))}
@@ -479,48 +533,59 @@ const Deals = () => {
             {/* Dialogs */}
             {/* View Deal Dialog */}
             <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-                <DialogContent className="sm:max-w-[500px] rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
-                    <div className="h-28 bg-slate-900 p-8 flex flex-col justify-end relative overflow-hidden">
+                <DialogContent className="w-[94vw] max-w-[500px] rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white dark:bg-slate-900">
+                    <div className="h-24 sm:h-28 bg-slate-900 p-6 sm:p-8 flex flex-col justify-end relative overflow-hidden">
                         <div className="absolute top-0 right-0 size-40 bg-primary-600/20 rounded-full blur-3xl -mr-20 -mt-20" />
-                        <h2 className="text-xl font-black text-white tracking-tight uppercase relative z-10">{selectedDeal?.company || selectedDeal?.name}</h2>
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest relative z-10">Sector Operations Overview</p>
+                        <h2 className="text-lg sm:text-xl font-black text-white tracking-tight uppercase relative z-10 truncate">{selectedDeal?.company || selectedDeal?.name}</h2>
+                        <p className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest relative z-10">Sector Operations Overview</p>
                     </div>
-                    <div className="p-8 space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col">
-                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Market Valuation</p>
-                                <p className="text-xl font-black text-primary-600 leading-none">₹{(selectedDeal?.amount || 0).toLocaleString()}</p>
+                    <div className="p-5 sm:p-8 space-y-5 sm:space-y-6">
+                        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                            <div className="p-3.5 sm:p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col">
+                                <p className="text-[7px] sm:text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Market Valuation</p>
+                                <p className="text-lg sm:text-xl font-black text-primary-600 leading-none">₹{(selectedDeal?.amount || 0).toLocaleString()}</p>
                             </div>
-                            <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col">
-                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Deployment Stage</p>
-                                <Badge className={cn("border-none text-[8px] font-black uppercase h-6 px-2.5 rounded-lg w-fit", getStageColor(selectedDeal?.status))}>
+                            <div className="p-3.5 sm:p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col">
+                                <p className="text-[7px] sm:text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Deployment Stage</p>
+                                <Badge className={cn("border-none text-[8px] font-black uppercase h-5 sm:h-6 px-2 sm:px-2.5 rounded-lg w-fit", getStageColor(selectedDeal?.status))}>
                                     {selectedDeal?.status}
                                 </Badge>
                             </div>
                         </div>
 
                         <div className="space-y-4">
-                            <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100 pb-2">Personnel Linkages</h4>
+                            <h4 className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100 pb-2">Personnel Linkages</h4>
                             {[
                                 { icon: User, label: 'Operator', value: selectedDeal?.name },
                                 { icon: Mail, label: 'Hub', value: selectedDeal?.email || 'N/A' },
                                 { icon: Phone, label: 'Direct', value: selectedDeal?.mobile || 'N/A' }
                             ].map((item, i) => (
                                 <div key={i} className="flex items-center gap-3">
-                                    <div className="size-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+                                    <div className="size-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
                                         <item.icon size={14} />
                                     </div>
                                     <div className="min-w-0">
-                                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{item.label}</p>
-                                        <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{item.value}</p>
+                                        <p className="text-[7px] sm:text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{item.label}</p>
+                                        <p className="text-[11px] sm:text-xs font-bold text-slate-900 dark:text-white truncate">{item.value}</p>
                                     </div>
                                 </div>
                             ))}
                         </div>
 
-                        <DialogFooter className="gap-2 pt-4 border-t border-slate-100">
-                            <Button className="flex-1 h-10 rounded-xl bg-primary-600 hover:bg-primary-700 text-[9px] font-black uppercase tracking-widest text-white shadow-lg shadow-primary-500/20" onClick={() => setIsViewOpen(false)}>
-                                Exit
+                        <DialogFooter className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-100">
+                            <Button
+                                variant="outline"
+                                className="h-10 rounded-xl text-[9px] font-black uppercase tracking-widest border-slate-200"
+                                onClick={() => {
+                                    setIsViewOpen(false);
+                                    handleEditClick(selectedDeal);
+                                }}
+                            >
+                                <Edit2 size={12} className="mr-2" />
+                                Edit Parameter
+                            </Button>
+                            <Button className="h-10 rounded-xl bg-primary-600 hover:bg-primary-700 text-[9px] font-black uppercase tracking-widest text-white shadow-lg shadow-primary-500/20" onClick={() => setIsViewOpen(false)}>
+                                Abort View
                             </Button>
                         </DialogFooter>
                     </div>
@@ -529,7 +594,7 @@ const Deals = () => {
 
             {/* Add Deal Dialog */}
             <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-                <DialogContent className="sm:max-w-md rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden font-sans">
+                <DialogContent className="w-[94vw] max-w-md rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden font-sans">
                     <div className="bg-primary-600 p-6 text-white">
                         <DialogTitle className="text-xl font-black uppercase tracking-tight">Initiate Acquisition</DialogTitle>
                         <p className="text-[9px] font-black text-primary-100 uppercase tracking-[0.2em] mt-1 italic">New marketplace opportunity</p>
@@ -592,7 +657,7 @@ const Deals = () => {
 
             {/* Edit Deal Dialog */}
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                <DialogContent className="sm:max-w-md rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden font-sans">
+                <DialogContent className="w-[94vw] max-w-md rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden font-sans">
                     <div className="bg-slate-900 p-6 text-white">
                         <DialogTitle className="text-xl font-black uppercase tracking-tight">Recalibrate Parameters</DialogTitle>
                         <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1 italic">Updating tactical metadata</p>
