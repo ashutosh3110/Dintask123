@@ -58,7 +58,6 @@ const SupportCenter = () => {
     const location = useLocation();
     const isSalesSupport = location.pathname === '/sales/support';
     const fileInputRef = React.useRef(null);
-
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState(role === 'admin' ? 'received' : 'sent');
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
