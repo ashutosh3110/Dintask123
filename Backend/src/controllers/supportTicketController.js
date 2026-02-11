@@ -111,6 +111,7 @@ exports.getTickets = async (req, res, next) => {
         const page = parseInt(req.query.page, 10) || 1;
         const limit = parseInt(req.query.limit, 10) || 10;
         const startIndex = (page - 1) * limit;
+        const search = req.query.search;
 
         // Build query based on role
         let match = {};
@@ -138,6 +139,14 @@ exports.getTickets = async (req, res, next) => {
             match.priority = req.query.priority;
         }
 
+        // Search Filter
+        if (search) {
+            match.$or = [
+                { title: { $regex: search, $options: 'i' } },
+                { ticketId: { $regex: search, $options: 'i' } }
+            ];
+        }
+
         query = SupportTicket.find(match)
             .populate('creator', 'name email role')
             .populate('companyId', 'companyName');
@@ -158,6 +167,33 @@ exports.getTickets = async (req, res, next) => {
                 pages: Math.ceil(total / limit)
             },
             data: tickets
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+// @desc    Delete ticket
+// @route   DELETE /api/v1/support-tickets/:id
+// @access  Private (SuperAdmin only)
+exports.deleteTicket = async (req, res, next) => {
+    try {
+        const ticket = await SupportTicket.findById(req.params.id);
+
+        if (!ticket) {
+            return next(new ErrorResponse('Ticket not found', 404));
+        }
+
+        // Only Super Admin can delete
+        if (req.user.role !== 'superadmin' && req.user.role !== 'superadmin_staff') {
+            return next(new ErrorResponse('Not authorized to delete tickets', 403));
+        }
+
+        await ticket.deleteOne();
+
+        res.status(200).json({
+            success: true,
+            data: {}
         });
     } catch (err) {
         next(err);

@@ -7,6 +7,12 @@ const useTicketStore = create((set, get) => ({
     tickets: [],
     loading: false,
     error: null,
+    pagination: {
+        page: 1,
+        limit: 10,
+        total: 0,
+        pages: 1
+    },
 
     stats: {
         avgFeedback: 0,
@@ -25,16 +31,39 @@ const useTicketStore = create((set, get) => ({
         }
     },
 
-    fetchTickets: async (scope = 'all') => {
+    fetchTickets: async ({ page = 1, limit = 10, search = '', scope = 'all' } = {}) => {
         set({ loading: true, error: null });
         try {
-            const query = scope ? `?scope=${scope}` : '';
-            const res = await api(`/support-tickets${query}`);
-            set({ tickets: res.data || [], loading: false });
+            const queryParams = new URLSearchParams({
+                page,
+                limit,
+                search,
+                scope
+            });
+            const res = await api(`/support-tickets?${queryParams.toString()}`);
+            set({
+                tickets: res.data || [],
+                pagination: res.pagination || { page, limit, total: 0, pages: 1 },
+                loading: false
+            });
         } catch (err) {
             console.error("Fetch Tickets Error:", err);
             set({ error: err.message, loading: false });
-            // toast.error(err.message || 'Failed to fetch tickets'); 
+        }
+    },
+
+    deleteTicket: async (id) => {
+        try {
+            await api(`/support-tickets/${id}`, { method: 'DELETE' });
+            set(state => ({
+                tickets: state.tickets.filter(t => t._id !== id)
+            }));
+            toast.success('Ticket deleted successfully');
+            return true;
+        } catch (err) {
+            console.error("Delete Ticket Error:", err);
+            toast.error(err.message || 'Failed to delete ticket');
+            return false;
         }
     },
 
