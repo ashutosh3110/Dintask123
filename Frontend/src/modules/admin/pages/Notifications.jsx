@@ -11,7 +11,10 @@ import {
     Archive,
     Inbox,
     Trash,
-    MoreHorizontal
+    MoreHorizontal,
+    CreditCard,
+    MessageSquare,
+    Headphones
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useNotificationStore from '@/store/notificationStore';
@@ -90,6 +93,9 @@ const Notifications = () => {
             case 'success': return <CheckCircle2 size={18} className="text-emerald-500" />;
             case 'error': return <AlertCircle size={18} className="text-red-500" />;
             case 'warning': return <AlertCircle size={18} className="text-amber-500" />;
+            case 'payment': return <CreditCard size={18} className="text-blue-500" />;
+            case 'inquiry': return <MessageSquare size={18} className="text-purple-500" />;
+            case 'support_ticket': return <Headphones size={18} className="text-indigo-500" />;
             default: return <Info size={18} className="text-primary-500" />;
         }
     };

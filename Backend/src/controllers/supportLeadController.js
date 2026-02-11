@@ -1,5 +1,7 @@
 const SupportLead = require('../models/SupportLead');
 const ErrorResponse = require('../utils/errorResponse');
+const Notification = require('../models/Notification');
+const SuperAdmin = require('../models/SuperAdmin');
 
 // @desc    Submit a new support/business inquiry lead
 // @route   POST /api/v1/support/lead
@@ -31,6 +33,36 @@ exports.submitLead = async (req, res, next) => {
             source,
             interestedPlan
         });
+
+        // --- NOTIFICATION LOGIC START ---
+        try {
+            // 1. Find all Superadmins to notify (including staff)
+            const superAdmins = await SuperAdmin.find({
+                role: { $in: ['superadmin', 'superadmin_staff'] }
+            });
+
+            // 2. Pick a "sender" ID (Since this is public, use the first superadmin acting as 'System')
+            const systemSenderId = superAdmins.length > 0 ? superAdmins[0]._id : null;
+
+            if (systemSenderId) {
+                const notifications = superAdmins.map(admin => ({
+                    recipient: admin._id,
+                    sender: systemSenderId, // Self-notification acts as System notification
+                    type: 'inquiry',
+                    title: 'New Business Inquiry',
+                    message: `New Lead: ${name} from ${companyName || 'Unknown'} (${interestedPlan || 'General'})`,
+                    link: `/superadmin/inquiries` // Link to the Inquiries page (frontend route)
+                }));
+
+                if (notifications.length > 0) {
+                    await Notification.insertMany(notifications);
+                }
+            }
+        } catch (notifyErr) {
+            console.error('Notification Error:', notifyErr);
+            // Don't fail the request if notification fails
+        }
+        // --- NOTIFICATION LOGIC END ---
 
         res.status(201).json({
             success: true,
