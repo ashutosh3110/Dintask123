@@ -31,7 +31,8 @@ import {
     Menu,
     X,
     HelpCircle,
-    ChevronDown
+    ChevronDown,
+    Loader2
 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent } from '@/shared/components/ui/card';
@@ -48,7 +49,8 @@ import {
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Textarea } from "@/shared/components/ui/textarea";
-import axios from 'axios';
+import { cn } from '@/shared/utils/cn';
+import apiRequest from '@/lib/api';
 
 const LandingPage = () => {
     const navigate = useNavigate();
@@ -59,10 +61,95 @@ const LandingPage = () => {
     const [heroContent, setHeroContent] = useState({
         heroBadge: "YOUR COMPLETE CRM PLATFORM",
         heroTitle: "Five powerful CRM modules to run your entire business.",
-        heroSubtitle: "Access our Sales, Project Management, HR, Finance, and Client Portal modules—all integrated in one platform.",
+        heroSubtitle: "Access our Sales, Project Management, HR, Finance, and Client Portal modules—all integrated in one platform. Manage your entire business operations without switching between multiple tools. Get started today and transform how you work.",
         heroCtaPrimary: "Get Started",
         heroCtaSecondary: "View Modules"
     });
+
+    useEffect(() => {
+        const fetchContent = async () => {
+            try {
+                // Fetch Hero
+                const heroRes = await apiRequest('/landing-page/hero');
+                if (heroRes.success && heroRes.data) {
+                    setHeroContent({
+                        heroBadge: heroRes.data.badge || "YOUR COMPLETE CRM PLATFORM",
+                        heroTitle: heroRes.data.title || "Five powerful CRM modules to run your entire business.",
+                        heroSubtitle: heroRes.data.subtitle || "Access our Sales, Project Management, HR, Finance, and Client Portal modules—all integrated in one platform.",
+                        heroCtaPrimary: heroRes.data.ctaPrimary || "Get Started",
+                        heroCtaSecondary: heroRes.data.ctaSecondary || "View Modules"
+                    });
+                }
+
+                // Fetch Platform Section
+                const platformRes = await apiRequest('/landing-page/platform');
+                if (platformRes.success && platformRes.data) {
+                    setTestimonialSection({
+                        testimonialBadge: platformRes.data.badge || "All-in-one suite",
+                        testimonialTitle: platformRes.data.title || "DinTask One",
+                        testimonialSubtitle: platformRes.data.subtitle || "The operating system for business.",
+                        testimonialDescription: platformRes.data.description || "Run your entire business on DinTask with our unified cloud software.",
+                        testimonialCtaText: platformRes.data.ctaText || "TRY DINTASK ONE",
+                        testimonialQuote: platformRes.data.quote || "DinTask One is a boon for all. It transformed our workflow.",
+                        testimonialAuthorName: platformRes.data.authorName || "Rishi Sir",
+                        testimonialAuthorRole: platformRes.data.authorRole || "Founder & CEO, DinTask",
+                        testimonialAuthorImage: platformRes.data.authorImage || "https://api.dicebear.com/7.x/avataaars/svg?seed=Rishi",
+                        testimonialBgColor: "#ffcc00"
+                    });
+                }
+
+                // Fetch Tactical Section
+                const tacticalRes = await apiRequest('/landing-page/tactical');
+                if (tacticalRes.success && tacticalRes.data) {
+                    setTacticalContent({
+                        tacticalTitle: tacticalRes.data.title || "The Tactical Interface.",
+                        tacticalSubtitle: tacticalRes.data.subtitle || "Tactical Preview",
+                        showcaseImages: (tacticalRes.data.images && tacticalRes.data.images.length > 0)
+                            ? tacticalRes.data.images
+                            : [
+                                '/src/assets/dashboard_1.png',
+                                '/src/assets/dashboard_2.png',
+                                '/src/assets/dashboard_3.png'
+                            ]
+                    });
+                }
+
+                // Fetch Footer CTA (Command Center)
+                const footerCtaRes = await apiRequest('/landing-page/footer-cta');
+                if (footerCtaRes.success && footerCtaRes.data) {
+                    setDemoCta({
+                        demoTitle: footerCtaRes.data.title || "Ready to experience the Command Center?",
+                        demoDescription: footerCtaRes.data.description || "Join thousands of managers who have optimized their workforce with DinTask's integrated suite.",
+                        demoCtaPrimary: footerCtaRes.data.ctaPrimary || "START FREE TRIAL",
+                        demoCtaSecondary: footerCtaRes.data.ctaSecondary || "BOOK A DEMO",
+                        demoFloatingImages: footerCtaRes.data.images || []
+                    });
+                }
+
+                // Fetch Pricing Plans
+                const pricingRes = await apiRequest('/landing-page-plans');
+                if (pricingRes.success) {
+                    setPricingPlans(pricingRes.data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch landing page content:', error);
+            }
+        };
+
+        const fetchTestimonials = async () => {
+            try {
+                const res = await apiRequest('/testimonials/approved');
+                if (res.success && res.data) {
+                    setTestimonials(res.data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch testimonials:', error);
+            }
+        };
+
+        fetchContent();
+        fetchTestimonials();
+    }, []);
     const [isAnnual, setIsAnnual] = useState(true);
 
     // Testimonial Submission States
@@ -88,12 +175,10 @@ const LandingPage = () => {
     const [tacticalContent, setTacticalContent] = useState({
         tacticalTitle: "The Tactical Interface.",
         tacticalSubtitle: "Tactical Preview",
-        showcaseImages: [
-            '/src/assets/dashboard_1.png',
-            '/src/assets/dashboard_2.png',
-            '/src/assets/dashboard_3.png'
-        ]
+        showcaseImages: []
     });
+
+    const [pricingPlans, setPricingPlans] = useState([]);
 
     const [socialContact, setSocialContact] = useState({
         socialLinks: {
@@ -143,7 +228,7 @@ const LandingPage = () => {
 
     const [openFaq, setOpenFaq] = useState(null);
 
-    const faqs = [
+    const [faqs, setFaqs] = useState([
         {
             id: 1,
             question: "Can I customize the modules to fit my business needs?",
@@ -159,35 +244,33 @@ const LandingPage = () => {
             question: "What kind of support do you provide?",
             answer: "We offer comprehensive support including 24/7 email assistance, a detailed knowledge base, and priority support for enterprise clients to ensure your success."
         }
-    ];
+    ]);
+
+    useEffect(() => {
+        const fetchFaqs = async () => {
+            try {
+                const res = await apiRequest('/landing-page/faqs');
+                if (res.success && res.data && Array.isArray(res.data)) {
+                    setFaqs(res.data.map((f, i) => ({ ...f, id: f._id || i + 1 })));
+                }
+            } catch (error) {
+                console.error('Failed to fetch FAQs:', error);
+            }
+        };
+        fetchFaqs();
+    }, []);
 
     const toggleFaq = (index) => {
         setOpenFaq(prev => prev === index ? null : index);
     };
 
     useEffect(() => {
-        const fetchContent = async () => {
-            try {
-                const res = await axios.get('http://localhost:5000/api/v1/landing-page/content');
-                if (res.data.success) {
-                    const data = res.data.data;
-                    // Update states with fetched data
-                    if (data.hero) setHeroContent(prev => ({ ...prev, ...data.hero }));
-                    if (data.features?.modules) setModules(data.features.modules);
-                    if (data.strategic_options?.options) setStrategicOptions(data.strategic_options.options);
-                    if (data.tactical_preview) setTacticalContent(prev => ({ ...prev, ...data.tactical_preview }));
-                }
-            } catch (error) {
-                console.error('Failed to fetch landing page content:', error);
-            }
-        };
-
-        fetchContent();
-
         // Ensure body is scrollable when landing page mounts
         document.body.style.overflow = 'auto';
         document.body.style.overflowX = 'hidden';
     }, []);
+
+
 
 
 
@@ -222,7 +305,10 @@ const LandingPage = () => {
         setSubmitStatus(null);
 
         try {
-            await axios.post('http://localhost:5000/api/v1/testimonials', formData);
+            await apiRequest('/testimonials', {
+                method: 'POST',
+                body: formData
+            });
             setSubmitStatus('success');
             // Reset form
             setTimeout(() => {
@@ -272,65 +358,9 @@ const LandingPage = () => {
         }
     ]);
 
-    const [strategicOptions, setStrategicOptions] = useState([
-        {
-            id: '01',
-            title: 'OPTIONS 01',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.',
-            icon: 'Search',
-            color: 'text-[#8bc34a]',
-            bgColor: 'bg-[#8bc34a]',
-            borderColor: 'border-[#8bc34a]'
-        },
-        {
-            id: '02',
-            title: 'OPTIONS 02',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.',
-            icon: 'Lightbulb',
-            color: 'text-yellow-600',
-            bgColor: 'bg-[#FFEE8C]',
-            borderColor: 'border-yellow-400'
-        },
-        {
-            id: '03',
-            title: 'OPTIONS 03',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.',
-            icon: 'Target',
-            color: 'text-[#0288D1]',
-            bgColor: 'bg-[#0288D1]',
-            borderColor: 'border-[#0288D1]'
-        }
-    ]);
 
-    const [testimonials, setTestimonials] = useState([
-        {
-            id: 1,
-            name: 'Michael Jackson',
-            role: 'CEO Of Company',
-            image: '/user1.jpg',
-            rating: 5,
-            testimonial: 'Lorem ipsum is simply dummy text of the Printing industry Lorem ipsum has been industry\'s',
-            highlighted: false
-        },
-        {
-            id: 2,
-            name: 'Parvez Hossein',
-            role: 'CEO Of Company',
-            image: '/user2.jpg',
-            rating: 5,
-            testimonial: 'Lorem ipsum is simply dummy text of the Printing industry Lorem ipsum has been industry\'s',
-            highlighted: true
-        },
-        {
-            id: 3,
-            name: 'Shoikot Hasan',
-            role: 'CEO Of Company',
-            image: '/user3.jpg',
-            rating: 5,
-            testimonial: 'Lorem ipsum is simply dummy text of the Printing industry Lorem ipsum has been industry\'s',
-            highlighted: false
-        }
-    ]);
+
+    const [testimonials, setTestimonials] = useState([]);
 
 
 
@@ -458,17 +488,9 @@ const LandingPage = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.2 }}
-                        className="text-5xl md:text-7xl lg:text-[5.5rem] font-bold tracking-tight text-slate-900 dark:text-white leading-[1.1] mb-8"
+                        className="text-4xl md:text-6xl lg:text-[5rem] font-bold tracking-tight text-slate-900 dark:text-white leading-[1.1] mb-8"
                     >
-                        <span className="text-yellow-600 block sm:inline">Five powerful</span> <span className="text-blue-600">CRM</span> modules to run your entire <span className="relative inline-block mt-2 sm:mt-0">
-                            <span className="relative z-10">business.</span>
-                            <motion.span
-                                initial={{ width: 0 }}
-                                animate={{ width: "100%" }}
-                                transition={{ duration: 0.8, delay: 0.8, ease: "circOut" }}
-                                className="absolute bottom-1 sm:bottom-3 left-0 h-3 sm:h-6 bg-[#FFEE8C] -z-0 -rotate-1 rounded-sm"
-                            />
-                        </span>
+                        {heroContent.heroTitle}
                     </motion.h1>
 
                     <motion.p
@@ -477,7 +499,7 @@ const LandingPage = () => {
                         transition={{ duration: 0.6, delay: 0.4 }}
                         className="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed mb-10"
                     >
-                        Access our Sales, Project Management, HR, Finance, and Client Portal modules—all integrated in one platform. Manage your entire business operations without switching between multiple tools. Get started today and transform how you work.
+                        {heroContent.heroSubtitle}
                     </motion.p>
 
                     <motion.div
@@ -553,68 +575,7 @@ const LandingPage = () => {
 
 
                 {/* Strategic Options Section - Based on Reference Image */}
-                <section className="py-12 sm:py-24 bg-gradient-to-b from-[#FFEE8C] via-[#FFF9C4] to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 overflow-x-clip">
-                    <div className="max-w-7xl mx-auto px-2 sm:px-6">
-                        <div className="grid grid-cols-3 gap-2 sm:gap-16 lg:gap-24">
-                            {strategicOptions.slice(0, 3).map((opt, i) => {
-                                // Static color and icon mapping - NOT from database
-                                const staticConfig = [
-                                    {
-                                        icon: Search,
-                                        color: 'text-[#8bc34a]',
-                                        bgColor: 'bg-[#8bc34a]',
-                                        borderColor: 'border-[#8bc34a]'
-                                    },
-                                    {
-                                        icon: Lightbulb,
-                                        color: 'text-[#00BFA5]',
-                                        bgColor: 'bg-[#00BFA5]',
-                                        borderColor: 'border-[#00BFA5]'
-                                    },
-                                    {
-                                        icon: ShieldCheck,
-                                        color: 'text-[#0288D1]',
-                                        bgColor: 'bg-[#0288D1]',
-                                        borderColor: 'border-[#0288D1]'
-                                    }
-                                ];
 
-                                const config = staticConfig[i] || staticConfig[0];
-                                const IconComponent = config.icon;
-
-                                return (
-                                    <motion.div
-                                        key={opt.id || i}
-                                        initial={{ opacity: 0, y: 30 }}
-                                        whileInView={{ opacity: 1, y: 0 }}
-                                        viewport={{ once: true }}
-                                        transition={{ delay: i * 0.2 }}
-                                        className="relative flex items-center justify-center py-4 sm:py-10"
-                                    >
-                                        {/* Top-Left Solid Block */}
-                                        <div className={`absolute top-0 left-0 w-8 sm:w-32 h-8 sm:h-32 ${config.bgColor} opacity-100 -z-0`} />
-
-                                        {/* Bottom-Right Outlined Frame */}
-                                        <div className={`absolute bottom-0 right-0 w-12 sm:w-48 h-12 sm:h-48 border-[2px] sm:border-[6px] ${config.borderColor} -z-0`} />
-
-                                        {/* Main White Card */}
-                                        <Card className="w-full bg-white dark:bg-slate-900 border-none shadow-[0_10px_25px_rgba(0,0,0,0.15)] sm:shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-none relative z-10 px-2 sm:px-6 py-4 sm:py-10 text-center">
-                                            <div className={`mb-1 sm:mb-4 flex justify-center ${config.color}`}>
-                                                <IconComponent className="size-4 sm:size-9" strokeWidth={1.5} />
-                                            </div>
-                                            <h3 className={`text-[6px] sm:text-xl font-black uppercase tracking-widest mb-1 sm:mb-4 ${config.color}`}>
-                                                {opt.title}
-                                            </h3>
-                                            <p className="text-[5px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 leading-tight sm:leading-relaxed line-clamp-2 sm:line-clamp-none">
-                                                {opt.description}
-                                            </p>
-                                        </Card>
-                                    </motion.div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </section>
 
                 {/* Five Powerful Modules Section */}
                 <section id="tactical" className="py-24 bg-gradient-to-b from-[#FFEE8C] via-[#FFF9C4] to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 overflow-hidden scroll-mt-20">
@@ -650,9 +611,9 @@ const LandingPage = () => {
                                                 'bg-purple-100 text-purple-600',
                                                 'bg-amber-100 text-amber-600',
                                                 'bg-emerald-100 text-emerald-600'
-                                            ][activeModule]
+                                            ][activeModule % 5]
                                                 }`}>
-                                                {React.createElement([Layers, Target, Users, Briefcase, Globe][activeModule], { size: 28 })}
+                                                {React.createElement(getIconComponent(modules[activeModule]?.icon || 'Layers'), { size: 28 })}
                                             </div>
                                             <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${[
                                                 'bg-[#FFEE8C]/50 text-yellow-800',
@@ -660,36 +621,18 @@ const LandingPage = () => {
                                                 'bg-purple-50 text-purple-700',
                                                 'bg-amber-50 text-amber-700',
                                                 'bg-emerald-50 text-emerald-700'
-                                            ][activeModule]
+                                            ][activeModule % 5]
                                                 }`}>
-                                                {[
-                                                    'PM Cloud',
-                                                    'Sales Cloud',
-                                                    'HR Cloud',
-                                                    'Finance Cloud',
-                                                    'Client Cloud'
-                                                ][activeModule]}
+                                                {modules[activeModule]?.title || 'Module'}
                                             </span>
                                         </div>
 
                                         <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-6">
-                                            {[
-                                                'Project Delivery Control Tower',
-                                                'Sales Pipeline & CRM Engine',
-                                                'Human Resource Management',
-                                                'Financial Command Center',
-                                                'Client Interaction Portal'
-                                            ][activeModule]}
+                                            {modules[activeModule]?.title || 'Untitled Module'}
                                         </h3>
 
                                         <p className="text-slate-600 dark:text-slate-400 text-lg mb-8 leading-relaxed">
-                                            {[
-                                                'Manage projects efficiently with milestone tracking, QA workflows, urgent task escalation, testing readiness, and resource planning from a single delivery dashboard.',
-                                                'Track leads, manage deals, and automate follow-ups. Visualize your sales funnel and forecast revenue with precision tools designed for high-performing sales teams.',
-                                                'Streamline recruitment, onboarding, and employee management. Handle leave requests, performance reviews, and payroll integration in one secure system.',
-                                                'Gain total visibility into your financial health. Manage invoices, expenses, and automated billing while generating real-time financial reports.',
-                                                'Give your clients a professional gateway to interact with your business. Share updates, files, and get approvals seamlessly.'
-                                            ][activeModule]}
+                                            {modules[activeModule]?.description || 'No description available for this module.'}
                                         </p>
 
                                         <div className="inline-block bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 text-sm font-semibold mb-8">
@@ -884,131 +827,88 @@ const LandingPage = () => {
 
                         {/* Pricing Cards Grid */}
                         <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                            {/* Starter Plan */}
-                            <div className="border border-yellow-200 dark:border-slate-800 rounded-2xl p-6 bg-white dark:bg-slate-900 shadow-xl shadow-yellow-50/50 dark:shadow-none hover:border-yellow-300 transition-all duration-300 relative flex flex-col">
-                                <div className="absolute top-6 left-6">
-                                    <span className="bg-[#FFEE8C] text-slate-900 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Starter – CRM + HRMS + TMS</span>
-                                </div>
-
-                                <div className="mt-8 mb-4">
-                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight mb-2">
-                                        CRM, HRMS & Task Management for <span className="text-yellow-600">small teams</span>.
-                                    </h3>
-                                    <div className="flex items-baseline gap-1 mb-1">
-                                        <span className="text-3xl font-bold text-yellow-500">₹{isAnnual ? '1,699' : '1,999'}</span>
-                                        <span className="text-slate-500 text-sm">/month</span>
+                            {pricingPlans.length > 0 ? pricingPlans.map((plan, index) => (
+                                <div
+                                    key={plan._id || index}
+                                    className={cn(
+                                        "rounded-2xl p-6 relative flex flex-col transition-all duration-300",
+                                        plan.isPopular
+                                            ? "border-2 border-yellow-200 dark:border-yellow-900/50 bg-[#FFEE8C]/20 dark:bg-slate-900 shadow-2xl shadow-yellow-100/50 dark:shadow-none transform lg:-translate-y-2"
+                                            : "border border-yellow-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl shadow-yellow-50/50 dark:shadow-none hover:border-yellow-300"
+                                    )}
+                                >
+                                    <div className="absolute top-6 left-6">
+                                        <span className="bg-[#FFEE8C] text-slate-900 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">{plan.badge}</span>
                                     </div>
-                                    {isAnnual && (
-                                        <div className="text-xs text-slate-400 font-medium">
-                                            <span className="line-through mr-2">₹23,988/year</span>
-                                            <span className="text-emerald-500">Save ₹3,600 with yearly</span>
+
+                                    <div className="mt-8 mb-4">
+                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight mb-2 whitespace-pre-line">
+                                            {/* Subtitle often contains formatting, we can just render text or use basic markdown if implemented. For now plain text. */}
+                                            {plan.subtitle.split('*').map((part, i) =>
+                                                i % 2 === 1 ? <span key={i} className="text-yellow-600">{part}</span> : part
+                                            )}
+                                        </h3>
+                                        <div className="flex items-baseline gap-1 mb-1">
+                                            <span className="text-3xl font-bold text-yellow-500">₹{isAnnual ? (plan.annualPriceMonthly || plan.monthlyPrice) : plan.monthlyPrice}</span>
+                                            <span className="text-slate-500 text-sm">/month</span>
+                                        </div>
+                                        {isAnnual && plan.yearlySaveText && (
+                                            <div className="text-xs text-slate-400 font-medium">
+                                                {plan.yearlyFakePrice && <span className="line-through mr-2">{plan.yearlyFakePrice}</span>}
+                                                <span className="text-emerald-500">{plan.yearlySaveText}</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {plan.isPopular && (
+                                        <div className="flex items-center gap-2 mb-8 text-xs font-bold text-amber-500 uppercase tracking-widest">
+                                            <Zap className="fill-current" size={16} /> Most Popular
                                         </div>
                                     )}
-                                </div>
-
-                                <div className="flex items-center gap-2 mb-8 text-xs font-bold text-slate-400 uppercase tracking-widest">
-                                    <CheckCircle2 className="text-emerald-500" size={16} /> Best for small teams
-                                </div>
-
-                                <div className="space-y-2 mb-4 flex-1">
-                                    {['CRM Lead & Client Management', 'Sales Pipeline & Follow-ups', 'HRMS – Employee Management', 'Attendance & Leave Management', 'Basic Payroll Setup', 'Task & Project Management (TMS)', 'Role & Permission Management', 'Reports & Dashboard'].map((feature, i) => (
-                                        <div key={i} className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
-                                            <div className="flex-shrink-0 w-5 h-5 rounded-full border border-yellow-200 flex items-center justify-center text-yellow-600">
-                                                <CheckCircle2 size={12} />
-                                            </div>
-                                            {feature}
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <Button onClick={() => navigate('/register')} variant="outline" className="w-full border-yellow-300 text-yellow-700 hover:bg-[#FFEE8C]/30 hover:text-yellow-800 dark:border-yellow-800 dark:text-yellow-400 dark:hover:bg-yellow-900/20 font-bold py-3 h-auto">
-                                    Get Started
-                                </Button>
-                            </div>
-
-                            {/* Growth Plan - Featured */}
-                            <div className="border-2 border-yellow-200 dark:border-yellow-900/50 rounded-2xl p-6 bg-[#FFEE8C]/20 dark:bg-slate-900 shadow-2xl shadow-yellow-100/50 dark:shadow-none relative flex flex-col transform lg:-translate-y-2 transition-all duration-300">
-                                <div className="absolute top-6 left-6">
-                                    <span className="bg-[#FFEE8C] text-slate-900 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Growth – CRM + HRMS + TMS</span>
-                                </div>
-
-                                <div className="mt-8 mb-4">
-                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight mb-2">
-                                        CRM, HRMS & Task Management for <span className="text-yellow-600">growing businesses</span>.
-                                    </h3>
-                                    <div className="flex items-baseline gap-1 mb-1">
-                                        <span className="text-4xl font-bold text-yellow-500">₹{isAnnual ? '5,999' : '6,999'}</span>
-                                        <span className="text-slate-500 text-sm">/month</span>
-                                    </div>
-                                    {isAnnual && (
-                                        <div className="text-xs text-slate-400 font-medium">
-                                            <span className="line-through mr-2">₹83,988/year</span>
-                                            <span className="text-emerald-500">Save ₹11,999 with yearly</span>
+                                    {plan.isBestValue && !plan.isPopular && (
+                                        <div className="flex items-center gap-2 mb-8 text-xs font-bold text-purple-500 uppercase tracking-widest">
+                                            <Star className="fill-current" size={16} /> Best Value
                                         </div>
                                     )}
-                                </div>
-
-                                <div className="flex items-center gap-2 mb-8 text-xs font-bold text-amber-500 uppercase tracking-widest">
-                                    <Zap className="fill-current" size={16} /> Most Popular
-                                </div>
-
-                                <div className="space-y-2 mb-4 flex-1">
-                                    {['Full CRM with Leads, Deals & Clients', 'Sales Automation & Follow-ups', 'HRMS – Employee, Attendance & Leave', 'Payroll Management', 'Task, Project & Team Tracking', 'Performance & Productivity Reports', 'Multi-role Access Control', 'Centralized Dashboard'].map((feature, i) => (
-                                        <div key={i} className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-200 font-medium">
-                                            <div className="flex-shrink-0 w-5 h-5 rounded-full bg-yellow-400 flex items-center justify-center text-slate-900">
-                                                <CheckCircle2 size={12} />
-                                            </div>
-                                            {feature}
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <Button onClick={() => navigate('/register')} className="w-full bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-bold py-3 h-auto shadow-lg shadow-yellow-200 dark:shadow-none border-0">
-                                    Get Started
-                                </Button>
-                            </div>
-
-                            {/* Enterprise Plan */}
-                            <div className="border border-yellow-200 dark:border-slate-800 rounded-2xl p-6 bg-white dark:bg-slate-900 shadow-xl shadow-yellow-50/50 dark:shadow-none hover:border-yellow-300 transition-all duration-300 relative flex flex-col">
-                                <div className="absolute top-6 left-6">
-                                    <span className="bg-[#FFEE8C] text-slate-900 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Enterprise – CRM + HRMS + TMS</span>
-                                </div>
-
-                                <div className="mt-8 mb-4">
-                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight mb-2">
-                                        CRM, HRMS & Task Management platform for <span className="text-yellow-600">large organizations</span>.
-                                    </h3>
-                                    <div className="flex items-baseline gap-1 mb-1">
-                                        <span className="text-3xl font-bold text-yellow-500">₹{isAnnual ? '9,999' : '11,999'}</span>
-                                        <span className="text-slate-500 text-sm">/month</span>
-                                    </div>
-                                    {isAnnual && (
-                                        <div className="text-xs text-slate-400 font-medium">
-                                            <span className="line-through mr-2">₹143,988/year</span>
-                                            <span className="text-emerald-500">Save ₹24,000 with yearly</span>
+                                    {!plan.isPopular && !plan.isBestValue && (
+                                        <div className="flex items-center gap-2 mb-8 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                                            <CheckCircle2 className="text-emerald-500" size={16} /> Best for small teams
                                         </div>
                                     )}
-                                </div>
 
-                                <div className="flex items-center gap-2 mb-8 text-xs font-bold text-purple-500 uppercase tracking-widest">
-                                    <Star className="fill-current" size={16} /> Best Value
-                                </div>
-
-                                <div className="space-y-2 mb-4 flex-1">
-                                    {['Advanced CRM & Sales Management', 'Lead, Deal & Client Automation', 'Complete HRMS Suite', 'Attendance, Leave & Payroll', 'Task, Project & Team Management', 'Advanced Reports & Analytics', 'Role-based Permissions', 'Secure & Scalable Architecture'].map((feature, i) => (
-                                        <div key={i} className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
-                                            <div className="flex-shrink-0 w-5 h-5 rounded-full border border-yellow-200 flex items-center justify-center text-yellow-600">
-                                                <CheckCircle2 size={12} />
+                                    <div className="space-y-2 mb-4 flex-1">
+                                        {plan.features.map((feature, i) => (
+                                            <div key={i} className={cn("flex items-center gap-2 text-xs", plan.isPopular ? "text-slate-700 dark:text-slate-200 font-medium" : "text-slate-600 dark:text-slate-300")}>
+                                                <div className={cn(
+                                                    "flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center",
+                                                    plan.isPopular ? "bg-yellow-400 text-slate-900" : "border border-yellow-200 text-yellow-600"
+                                                )}>
+                                                    <CheckCircle2 size={12} />
+                                                </div>
+                                                {feature}
                                             </div>
-                                            {feature}
-                                        </div>
-                                    ))}
-                                </div>
+                                        ))}
+                                    </div>
 
-                                <Button onClick={() => navigate('/contact')} variant="outline" className="w-full border-yellow-200 text-yellow-600 hover:bg-[#FFEE8C]/30 hover:text-yellow-700 dark:border-yellow-800 dark:text-yellow-400 dark:hover:bg-yellow-900/20 font-bold py-3 h-auto">
-                                    Get Started
-                                </Button>
-                            </div>
+                                    <Button
+                                        onClick={() => navigate(plan.buttonLink || '/register')}
+                                        variant={plan.isPopular ? 'default' : 'outline'}
+                                        className={cn(
+                                            "w-full font-bold py-3 h-auto",
+                                            plan.isPopular
+                                                ? "bg-yellow-400 hover:bg-yellow-500 text-slate-900 shadow-lg shadow-yellow-200 dark:shadow-none border-0"
+                                                : "border-yellow-200 text-yellow-600 hover:bg-[#FFEE8C]/30 hover:text-yellow-700 dark:border-yellow-800 dark:text-yellow-400 dark:hover:bg-yellow-900/20"
+                                        )}
+                                    >
+                                        {plan.buttonText || "Get Started"}
+                                    </Button>
+                                </div>
+                            )) : (
+                                <div className="col-span-3 text-center py-10">
+                                    <Loader2 className="animate-spin text-yellow-500 mx-auto" size={32} />
+                                    <p className="text-slate-500 mt-2">Loading plans...</p>
+                                </div>
+                            )}
                         </div>
 
                         <div className="mt-16 text-center text-slate-400 text-sm">
@@ -1132,46 +1032,59 @@ const LandingPage = () => {
                             </Dialog>
                         </div>
 
-                        {/* Testimonials Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {testimonials.slice(0, 3).map((testimonial, index) => (
-                                <motion.div
-                                    key={testimonial.id || index}
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    whileInView={{ opacity: 1, scale: 1 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: index * 0.1 }}
-                                >
-                                    <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-lg border border-slate-100 dark:border-slate-800 flex flex-col h-full hover:shadow-xl transition-all duration-300">
-                                        {/* Stars & Content */}
-                                        <div className="flex-1 mb-4 text-left">
-                                            <div className="flex gap-1 mb-3 text-yellow-400">
-                                                {[...Array(5)].map((_, i) => (
-                                                    <Star key={i} size={14} fill="currentColor" />
-                                                ))}
+                        {/* Testimonials Grid - Horizontal Scroll */}
+                        <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 -mx-6 px-6 no-scrollbar touch-pan-x">
+                            {testimonials.length > 0 ? (
+                                testimonials.map((testimonial, index) => (
+                                    <motion.div
+                                        key={testimonial._id || index}
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        whileInView={{ opacity: 1, scale: 1 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: index * 0.1 }}
+                                        className="snap-center flex-shrink-0 w-[85vw] md:w-[350px]"
+                                    >
+                                        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-lg border border-slate-100 dark:border-slate-800 flex flex-col h-full hover:shadow-xl transition-all duration-300">
+                                            {/* Stars & Content */}
+                                            <div className="flex-1 mb-4 text-left">
+                                                <div className="flex gap-1 mb-3 text-yellow-400">
+                                                    {[...Array(5)].map((_, i) => (
+                                                        <Star size={14} fill={i < testimonial.rating ? "currentColor" : "none"} className={i < testimonial.rating ? "" : "text-slate-300 dark:text-slate-700"} key={i} />
+                                                    ))}
+                                                </div>
+                                                <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed italic">
+                                                    "{testimonial.testimonial}"
+                                                </p>
                                             </div>
-                                            <p className="text-slate-600 dark:text-slate-300 text-xs leading-relaxed italic">
-                                                "{testimonial.testimonial || testimonial.message}"
-                                            </p>
-                                        </div>
 
-                                        {/* Profile - Bottom Right */}
-                                        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-50 dark:border-slate-800/50 mt-auto">
-                                            <div className="text-right">
-                                                <h3 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">{testimonial.name}</h3>
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{testimonial.role}</p>
-                                            </div>
-                                            <div className="w-10 h-10 rounded-full p-0.5 border border-yellow-400 flex-shrink-0">
-                                                <img
-                                                    src={testimonial.image || `https://api.dicebear.com/7.x/initials/svg?seed=${testimonial.name}`}
-                                                    alt={testimonial.name}
-                                                    className="w-full h-full rounded-full object-cover bg-slate-100"
-                                                />
+                                            {/* Profile - Bottom Right */}
+                                            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-50 dark:border-slate-800/50 mt-auto">
+                                                <div className="text-right">
+                                                    <h3 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">{testimonial.name}</h3>
+                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{testimonial.role}</p>
+                                                </div>
+                                                <div className="w-10 h-10 rounded-full p-0.5 border border-yellow-400 flex-shrink-0">
+                                                    {testimonial.image ? (
+                                                        <img
+                                                            src={testimonial.image}
+                                                            alt={testimonial.name}
+                                                            className="w-full h-full rounded-full object-cover bg-slate-100"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-500 text-xs">
+                                                            {testimonial.name?.charAt(0)}
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </motion.div>
-                            ))}
+                                    </motion.div>
+                                ))
+                            ) : (
+                                <div className="col-span-full text-center py-12 w-full text-slate-500">
+                                    No testimonials yet. Be the first to share your story!
+                                </div>
+                            )}
                         </div>
                     </div>
                 </section>
@@ -1208,7 +1121,7 @@ const LandingPage = () => {
                                     >
                                         <div className={`flex-shrink-0 size-8 sm:size-10 rounded-lg flex items-center justify-center font-bold text-sm sm:text-base transition-colors ${openFaq === index ? 'bg-[#FFEE8C] text-slate-900' : 'bg-[#FFEE8C]/50 text-slate-700'
                                             }`}>
-                                            {faq.id}
+                                            {index + 1}
                                         </div>
                                         <span className="flex-1 font-bold text-slate-900 dark:text-slate-100 text-sm sm:text-lg">
                                             {faq.question}

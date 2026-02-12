@@ -127,11 +127,13 @@ import SubscriptionHistory from '@/modules/superadmin/pages/SubscriptionHistory'
 import BillingPayments from '@/modules/superadmin/pages/BillingPayments';
 import GlobalUsersOverview from '@/modules/superadmin/pages/GlobalUsersOverview';
 import SupportCenter from '@/modules/shared/pages/SupportCenter';
-import LandingPageManager from '@/modules/superadmin/pages/LandingPageManager';
+
 
 import StaffManagement from '@/modules/superadmin/pages/StaffManagement';
 import IntelManager from '@/modules/superadmin/pages/IntelManager';
 import SuperAdminNotifications from '@/modules/superadmin/pages/Notifications';
+import LandingPageManager from '@/modules/superadmin/pages/LandingPageManager';
+import TestimonialsManager from '@/modules/superadmin/pages/TestimonialsManager';
 
 // Public Pages
 import LandingPage from '@/modules/public/pages/LandingPage';
@@ -140,6 +142,7 @@ import Privacy from '@/modules/public/pages/Privacy';
 import Terms from '@/modules/public/pages/Terms';
 import Cookies from '@/modules/public/pages/Cookies';
 import Welcome from '@/modules/public/pages/Welcome';
+import ClientTestimonial from '@/modules/public/pages/ClientTestimonial';
 
 // Layouts
 import CRMLayout from '@/shared/layouts/CRMLayout';
@@ -154,6 +157,7 @@ const AppRouter = () => {
             <Route path="/" element={<LandingPage />} />
             <Route path="/init" element={<InitialSplash />} />
             <Route path="/welcome" element={<Welcome />} />
+            <Route path="/client" element={<ClientTestimonial />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
@@ -252,9 +256,11 @@ const AppRouter = () => {
                 <Route path="history" element={<SubscriptionHistory />} />
                 <Route path="settings" element={<SuperAdminSettings />} />
                 <Route path="notifications" element={<SuperAdminNotifications />} />
-                <Route path="landing-page" element={<LandingPageManager />} />
+
 
                 <Route path="system-intel" element={<IntelManager />} />
+                <Route path="landing-page" element={<LandingPageManager />} />
+                <Route path="testimonials" element={<TestimonialsManager />} />
 
                 {/* Restricted Routes for Root SuperAdmin Only */}
                 <Route element={<ProtectedRoute allowedRoles={['superadmin']}><Outlet /></ProtectedRoute>}>
