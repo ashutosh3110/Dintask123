@@ -6,9 +6,6 @@ import {
     MessageSquare,
     User,
     ArrowLeft,
-    MoreVertical,
-    Phone,
-    Video,
     Info,
     CheckCheck,
     Clock
@@ -19,6 +16,7 @@ import { cn } from '@/shared/utils/cn';
 import { Input } from '@/shared/components/ui/input';
 import { Button } from '@/shared/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
+import { Badge } from '@/shared/components/ui/badge';
 
 import useAuthStore from '@/store/authStore';
 import useEmployeeStore from '@/store/employeeStore';
@@ -26,7 +24,7 @@ import useChatStore from '@/store/chatStore';
 
 const AdminChat = () => {
     const { user: currentUser, role: userRole } = useAuthStore();
-    const { employees, fetchEmployees } = useEmployeeStore();
+    const { allEmployees, fetchAllEmployees } = useEmployeeStore();
     const {
         conversations,
         activeConversation,
@@ -47,8 +45,8 @@ const AdminChat = () => {
     // Initial load
     useEffect(() => {
         fetchConversations();
-        fetchEmployees();
-    }, [fetchConversations, fetchEmployees]);
+        fetchAllEmployees();
+    }, [fetchConversations, fetchAllEmployees]);
 
     // Map role to DB Model
     const getModelName = (role) => {
@@ -65,11 +63,11 @@ const AdminChat = () => {
     // Filter employees for search
     const filteredEmployees = useMemo(() => {
         if (!searchTerm) return [];
-        return employees.filter(e =>
+        return allEmployees.filter(e =>
             e._id !== currentUser?._id &&
             e.name.toLowerCase().includes(searchTerm.toLowerCase())
         );
-    }, [employees, currentUser, searchTerm]);
+    }, [allEmployees, currentUser, searchTerm]);
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -155,7 +153,7 @@ const AdminChat = () => {
                             {showAllUsers && !searchTerm && (
                                 <div className="mb-4 animate-in fade-in slide-in-from-top-2 duration-300">
                                     <p className="px-3 text-[9px] font-black text-primary-600 uppercase tracking-widest mb-2">Internal Directory</p>
-                                    {employees.filter(u => u._id !== currentUser?._id).map(emp => (
+                                    {allEmployees.filter(u => u._id !== currentUser?._id).map(emp => (
                                         <button
                                             key={emp._id}
                                             onClick={() => handleStartChat(emp)}
@@ -299,13 +297,7 @@ const AdminChat = () => {
                                 </div>
                                 <div className="flex items-center gap-1 sm:gap-2">
                                     <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary-600">
-                                        <Phone size={16} />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary-600">
-                                        <Video size={16} />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary-600">
-                                        <MoreVertical size={16} />
+                                        <Info size={16} />
                                     </Button>
                                 </div>
                             </div>

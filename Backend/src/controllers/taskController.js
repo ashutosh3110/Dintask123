@@ -4,6 +4,7 @@ const Manager = require('../models/Manager');
 const Employee = require('../models/Employee');
 const SalesExecutive = require('../models/SalesExecutive');
 const Team = require('../models/Team');
+const Notification = require('../models/Notification');
 
 // @desc    Get All Tasks (Filtered by role)
 // @route   GET /api/tasks
@@ -186,6 +187,20 @@ exports.createTask = async (req, res) => {
       await Project.findByIdAndUpdate(project, { $push: { tasks: task._id } });
     }
 
+    // -- NOTIFICATION: Alert assigned personnel --
+    const notificationPromises = finalAssignedTo.map(userId =>
+      Notification.create({
+        recipient: userId,
+        title: 'New Mission Assigned',
+        message: `You have been deployed to task: ${task.title}`,
+        type: 'task',
+        category: 'task',
+        link: `/employee/tasks/${task._id}`,
+        adminId: adminId
+      })
+    );
+    await Promise.all(notificationPromises);
+
     res.status(201).json({ success: true, data: task });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
@@ -355,6 +370,24 @@ exports.updateTask = async (req, res) => {
             userModel: userModel, // variable from scope above
             action: 'System: Recurring Task Generated'
           }]
+        });
+      }
+    }
+
+    // If status changed to completed, notify the assigner
+    if (req.body.status && req.body.status !== task.status) {
+      const isEmployee = req.user.role === 'employee' || req.user.role === 'sales_executive';
+      const recipient = isEmployee ? task.assignedBy : task.assignedTo[0]; // Simple logic for now
+
+      if (recipient) {
+        await Notification.create({
+          recipient: recipient,
+          title: 'Task Status Updated',
+          message: `Task "${task.title}" status changed to ${req.body.status}`,
+          type: 'task',
+          category: 'task',
+          link: isEmployee ? `/admin/tasks` : `/employee/tasks/${task._id}`,
+          adminId: task.adminId
         });
       }
     }

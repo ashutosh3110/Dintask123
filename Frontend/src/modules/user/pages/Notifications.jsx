@@ -64,8 +64,8 @@ const Notifications = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 onClick={() => handleNotificationClick(notification)}
                                 className={`p-4 rounded-2xl border cursor-pointer transition-all hover:shadow-md ${notification.isRead
-                                        ? 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 opacity-70'
-                                        : 'bg-white dark:bg-slate-900 border-primary-100 dark:border-primary-900/30 shadow-sm'
+                                    ? 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 opacity-70'
+                                    : 'bg-white dark:bg-slate-900 border-primary-100 dark:border-primary-900/30 shadow-sm'
                                     }`}
                             >
                                 <div className="flex gap-4">

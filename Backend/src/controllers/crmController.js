@@ -9,46 +9,60 @@ const Notification = require('../models/Notification');
 // @access  Private (Admin, Sales)
 exports.getLeads = async (req, res) => {
   try {
-    console.log(`[CRM DEBUG] Fetching Leads for User: ${req.user.name} (${req.user.id}), Role: ${req.user.role}`);
+    const { search, status, priority, page = 1, limit = 100 } = req.query;
+    console.log(`[CRM DEBUG] Fetching Leads for User: ${req.user.name} (${req.user.id}), Role: ${req.user.role}, Filters:`, { search, status, priority });
 
-    let query = { adminId: req.user.id }; // By default, fetch leads for this admin's workspace
+    let query = { adminId: req.user.id };
 
-    // If Sales Executive is requesting, filter by owner
     if (req.user.role === 'sales_executive' || req.user.role === 'sales') {
       const salesExec = await SalesExecutive.findById(req.user.id);
       if (!salesExec) {
-        console.log(`[CRM DEBUG] Sales Rep NOT found for ID: ${req.user.id}`);
         return res.status(404).json({ success: false, error: 'Sales Rep not found' });
       }
-
-      // Detailed logging for Sales Exec
-      console.log(`[CRM DEBUG] Found Sales Exec: ${salesExec.name}, AdminID: ${salesExec.adminId}`);
-
-      // Construct query: ensure correct adminId and owner
       query = { owner: salesExec._id, adminId: salesExec.adminId };
-      console.log(`[CRM DEBUG] Query used:`, JSON.stringify(query));
-    }
-    // If Admin is requesting, fetch all leads associated with their adminId (which is req.user.id for Admin)
-    else if (req.user.role === 'admin') {
+    } else if (req.user.role === 'admin') {
       query = { adminId: req.user.id };
-      console.log(`[CRM DEBUG] Admin Query used:`, JSON.stringify(query));
     }
 
-    const leads = await Lead.find(query).populate('owner', 'name email');
-
-    // Log the results overview
-    console.log(`[CRM DEBUG] Leads Found: ${leads.length}`);
-    if (leads.length > 0) {
-      const statuses = leads.reduce((acc, lead) => {
-        acc[lead.status] = (acc[lead.status] || 0) + 1;
-        return acc;
-      }, {});
-      console.log(`[CRM DEBUG] Status Breakdown:`, statuses);
-    } else {
-      console.log(`[CRM DEBUG] No leads found matching the criteria.`);
+    // Add search filter
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { company: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
     }
 
-    res.status(200).json({ success: true, count: leads.length, data: leads });
+    // Add status filter
+    if (status && status !== 'all') {
+      query.status = status;
+    }
+
+    // Add priority filter
+    if (priority && priority !== 'all') {
+      query.priority = priority;
+    }
+
+    const total = await Lead.countDocuments(query);
+    const skip = (page - 1) * limit;
+
+    const leads = await Lead.find(query)
+      .populate('owner', 'name email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number(limit));
+
+    res.status(200).json({
+      success: true,
+      count: leads.length,
+      pagination: {
+        total,
+        pages: Math.ceil(total / limit),
+        currentPage: Number(page),
+        limit: Number(limit)
+      },
+      data: leads
+    });
   } catch (err) {
     console.error(`[CRM DEBUG] Error in getLeads:`, err);
     res.status(500).json({ success: false, error: err.message });
@@ -271,6 +285,10 @@ exports.requestProjectConversion = async (req, res) => {
       return res.status(400).json({ success: false, error: 'Project budget cannot be zero. Please update the deal amount first.' });
     }
 
+    if (!lead.deadline) {
+      return res.status(400).json({ success: false, error: 'Mandatory: Please set a project deadline before conversion.' });
+    }
+
     lead.approvalStatus = 'pending_project';
     await lead.save();
 
@@ -392,3 +410,85 @@ exports.getSalesExecutives = async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 }
+// @desc    Get sales report data
+// @route   GET /api/crm/reports
+// @access  Private (Admin, Sales)
+exports.getSalesReport = async (req, res) => {
+  try {
+    const { period = 'month' } = req.query;
+    let query = { adminId: req.user.id };
+
+    if (req.user.role === 'sales_executive' || req.user.role === 'sales') {
+      const salesExec = await SalesExecutive.findById(req.user.id);
+      if (!salesExec) return res.status(404).json({ success: false, error: 'Sales Rep not found' });
+      query = { owner: salesExec._id, adminId: salesExec.adminId };
+    }
+
+    // Determine date range based on period
+    const now = new Date();
+    let startDate = new Date();
+    if (period === 'week') startDate.setDate(now.getDate() - 7);
+    else if (period === 'month') startDate.setMonth(now.getMonth() - 1);
+    else if (period === 'quarter') startDate.setMonth(now.getMonth() - 3);
+    else if (period === 'year') startDate.setFullYear(now.getFullYear() - 1);
+
+    query.createdAt = { $gte: startDate };
+
+    const leads = await Lead.find(query);
+
+    // Basic Metrics
+    const totalDeals = leads.length;
+    const wonLeads = leads.filter(l => l.status === 'Won');
+    const totalRevenue = wonLeads.reduce((sum, l) => sum + (l.amount || 0), 0);
+    const avgDealValue = totalDeals > 0 ? Math.round(leads.reduce((sum, l) => sum + (l.amount || 0), 0) / totalDeals) : 0;
+    const conversionRate = totalDeals > 0 ? Math.round((wonLeads.length / totalDeals) * 100) : 0;
+
+    // Revenue Trajectory (Chart Data)
+    // Group by date based on period
+    const trajectoryMap = {};
+    leads.forEach(l => {
+      if (l.status === 'Won') {
+        const dateKey = l.createdAt.toISOString().split('T')[0];
+        trajectoryMap[dateKey] = (trajectoryMap[dateKey] || 0) + (l.amount || 0);
+      }
+    });
+
+    const trajectory = Object.keys(trajectoryMap)
+      .sort()
+      .map(date => ({
+        date,
+        revenue: trajectoryMap[date]
+      }));
+
+    // Status Distribution
+    const statusMap = {};
+    leads.forEach(l => {
+      statusMap[l.status] = (statusMap[l.status] || 0) + 1;
+    });
+    const distribution = Object.keys(statusMap).map(status => ({
+      name: status,
+      value: statusMap[status]
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: {
+        metrics: {
+          totalRevenue,
+          totalDeals,
+          avgDealValue,
+          wonDealsCount: wonLeads.length,
+          conversionRate,
+          revenueChange: '+12.5%', // Placeholder for now, could calculate vs previous period
+          dealsChange: '+8.2%',
+          avgValueChange: '+4.1%'
+        },
+        trajectory,
+        distribution,
+        period
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};

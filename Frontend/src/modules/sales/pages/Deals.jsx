@@ -38,6 +38,7 @@ import useCRMStore from '@/store/crmStore';
 import useAuthStore from '@/store/authStore';
 import useSalesStore from '@/store/salesStore';
 import { toast } from 'sonner';
+import { useDebounce } from '@/shared/hooks/use-debounce';
 
 
 const Deals = () => {
@@ -72,38 +73,45 @@ const Deals = () => {
         company: '',
         amount: '',
         status: 'New',
-        priority: 'medium'
+        priority: 'medium',
+        deadline: ''
     });
 
-    // Fetch leads on mount
+    const debouncedSearch = useDebounce(searchTerm, 500);
+
+    // Fetch leads on mount and when filters change
     useEffect(() => {
-        fetchLeads();
-    }, []);
+        fetchLeads({
+            search: debouncedSearch,
+            status: selectedStage,
+            priority: selectedPriority
+        });
+    }, [debouncedSearch, selectedStage, selectedPriority]);
 
     // Get current sales rep data
     const salesRep = useMemo(() => {
         return getSalesRepByEmail(user?.email);
     }, [user?.email, getSalesRepByEmail]);
 
-    // Filter and sort deals
+    // Simplified filteredDeals (now mostly handle sorting)
     const filteredDeals = useMemo(() => {
         if (!user) return [];
 
-        let myDeals = (leads || []).filter(lead => lead.status === 'Won');
+        // Note: The leads are already filtered by the backend for search/status/priority
+        // We only show 'Won' deals in this specific view, but if selectedStage is set, 
+        // the backend handles it. If user wants a 'Deals' view that only shows Won, 
+        // we might need to decide if backend 'status' should be forced to 'Won' here.
+        // User said "sales me deals me jo search bar h and filter ko backend se connect karo".
+        // In Deals.jsx, it seems it originally filtered for 'Won' deals only by default?
+        // Let's check line 93: let myDeals = (leads || []).filter(lead => lead.status === 'Won');
 
-        return myDeals
-            .filter(deal => {
-                const matchesSearch = (deal.company || deal.name || '').toLowerCase().includes(searchTerm.toLowerCase());
+        let displayLeads = leads || [];
 
-                // Allow 'Won' deals to appear regardless of stage filter if they are not in the current filter but relevant? 
-                // No, standard behavior is to respect the filter.
-                // But let's ensure 'All Sectors' (selectedStage === 'all') includes everything.
+        // If this page is specifically for 'Won' deals (Deals page), 
+        // we should probably ensure the backend fetch includes status=Won.
+        // But the previous code allowed filtering by stage too.
 
-                const matchesStage = selectedStage === 'all' || deal.status === selectedStage;
-                const matchesPriority = selectedPriority === 'all' || deal.priority === selectedPriority;
-
-                return matchesSearch && matchesStage && matchesPriority;
-            })
+        return [...displayLeads]
             .sort((a, b) => {
                 let aVal, bVal;
                 switch (sortBy) {
@@ -132,7 +140,7 @@ const Deals = () => {
                 if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
                 return 0;
             });
-    }, [leads, searchTerm, selectedStage, selectedPriority, sortBy, sortOrder, user]);
+    }, [leads, sortBy, sortOrder, user]);
 
     const dealStats = useMemo(() => {
         const totalDeals = filteredDeals.length;
@@ -201,9 +209,9 @@ const Deals = () => {
 
     const handleDeleteDeal = () => {
         if (selectedDeal) {
-            if (window.confirm('Purge this tactical asset from the deployment pipeline? This action is irreversible.')) {
+            if (window.confirm('Remove this deal from the pipeline? This action is irreversible.')) {
                 deleteLead(selectedDeal._id || selectedDeal.id);
-                toast.success("Asset purged from pipeline");
+                toast.success("Deal removed from pipeline");
                 setIsViewOpen(false);
                 setSelectedDeal(null);
             }
@@ -217,7 +225,8 @@ const Deals = () => {
             company: deal.company,
             amount: deal.amount,
             status: deal.status,
-            priority: deal.priority
+            priority: deal.priority,
+            deadline: deal.deadline ? new Date(deal.deadline).toISOString().split('T')[0] : ''
         });
         setIsEditOpen(true);
     };
@@ -229,7 +238,8 @@ const Deals = () => {
                 company: selectedDeal.company,
                 amount: selectedDeal.amount,
                 status: selectedDeal.status,
-                priority: selectedDeal.priority
+                priority: selectedDeal.priority,
+                deadline: selectedDeal.deadline ? new Date(selectedDeal.deadline).toISOString().split('T')[0] : ''
             });
             setIsEditOpen(true);
             setIsViewOpen(false);
@@ -257,10 +267,10 @@ const Deals = () => {
                 <div className="flex items-center gap-3">
                     <div>
                         <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase">
-                            Sales <span className="text-primary-600">Pipeline</span>
+                            Sales <span className="text-primary-600">Deals</span>
                         </h1>
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
-                            Operational deal flow & conversions
+                            Manage active business deals & closures
                         </p>
                     </div>
                 </div>
@@ -272,10 +282,10 @@ const Deals = () => {
             {/* Quick Stats Grid - Compact */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                 {[
-                    { label: 'Active Pipeline', value: dealStats.activeDeals, icon: IndianRupee, color: 'text-primary-600', border: 'border-primary-100', shadow: 'shadow-primary-100/50', gradient: 'from-white to-primary-50/30', trend: 'Force Strength' },
-                    { label: 'Strategic Wins', value: dealStats.wonDeals, icon: CheckSquare, color: 'text-emerald-600', border: 'border-emerald-100', shadow: 'shadow-emerald-100/50', gradient: 'from-white to-emerald-50/30', trend: 'Conversion' },
-                    { label: 'Total Value', value: `₹${(dealStats.totalValue / 1000).toFixed(1)}k`, icon: TrendingUp, color: 'text-blue-600', border: 'border-blue-100', shadow: 'shadow-blue-100/50', gradient: 'from-white to-blue-50/30', trend: 'Portfolio' },
-                    { label: 'Efficiency', value: `${dealStats.winRate}%`, icon: ArrowUpRight, color: 'text-amber-600', border: 'border-amber-100', shadow: 'shadow-amber-100/50', gradient: 'from-white to-amber-50/30', trend: 'Success Rate' }
+                    { label: 'Deals In Progress', value: dealStats.activeDeals, icon: IndianRupee, color: 'text-primary-600', border: 'border-primary-100', shadow: 'shadow-primary-100/50', gradient: 'from-white to-primary-50/30', trend: 'Deal Value' },
+                    { label: 'Deals Won', value: dealStats.wonDeals, icon: CheckSquare, color: 'text-emerald-600', border: 'border-emerald-100', shadow: 'shadow-emerald-100/50', gradient: 'from-white to-emerald-50/30', trend: 'Conversions' },
+                    { label: 'Pipeline Value', value: `₹${(dealStats.totalValue / 1000).toFixed(1)}k`, icon: TrendingUp, color: 'text-blue-600', border: 'border-blue-100', shadow: 'shadow-blue-100/50', gradient: 'from-white to-blue-50/30', trend: 'Potential' },
+                    { label: 'Success Rate', value: `${dealStats.winRate}%`, icon: ArrowUpRight, color: 'text-amber-600', border: 'border-amber-100', shadow: 'shadow-amber-100/50', gradient: 'from-white to-amber-50/30', trend: 'Accuracy' }
                 ].map((stat, i) => (
                     <Card key={i} className={cn(
                         "border-2 shadow-lg rounded-2xl overflow-hidden group transition-all duration-300 hover:-translate-y-1",
@@ -430,6 +440,10 @@ const Deals = () => {
                                                                     toast.error("Project budget cannot be zero. Please update the deal amount.");
                                                                     return;
                                                                 }
+                                                                if (!deal.deadline) {
+                                                                    toast.error("Project deadline is mandatory. Please recalibrate (edit) the deal and set a deadline.");
+                                                                    return;
+                                                                }
                                                                 requestProjectConversion(deal._id || deal.id);
                                                             }}
                                                         >
@@ -541,16 +555,16 @@ const Deals = () => {
                     <div className="h-24 sm:h-28 bg-slate-900 p-6 sm:p-8 flex flex-col justify-end relative overflow-hidden">
                         <div className="absolute top-0 right-0 size-40 bg-primary-600/20 rounded-full blur-3xl -mr-20 -mt-20" />
                         <h2 className="text-lg sm:text-xl font-black text-white tracking-tight uppercase relative z-10 truncate">{selectedDeal?.company || selectedDeal?.name}</h2>
-                        <p className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest relative z-10">Sector Operations Overview</p>
+                        <p className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest relative z-10">Business Deal Overview</p>
                     </div>
                     <div className="p-5 sm:p-8 space-y-5 sm:space-y-6">
                         <div className="grid grid-cols-2 gap-3 sm:gap-4">
                             <div className="p-3.5 sm:p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col">
-                                <p className="text-[7px] sm:text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Market Valuation</p>
+                                <p className="text-[7px] sm:text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Expected Revenue</p>
                                 <p className="text-lg sm:text-xl font-black text-primary-600 leading-none">₹{(selectedDeal?.amount || 0).toLocaleString()}</p>
                             </div>
                             <div className="p-3.5 sm:p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col">
-                                <p className="text-[7px] sm:text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Deployment Stage</p>
+                                <p className="text-[7px] sm:text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Deal Status</p>
                                 <Badge className={cn("border-none text-[8px] font-black uppercase h-5 sm:h-6 px-2 sm:px-2.5 rounded-lg w-fit", getStageColor(selectedDeal?.status))}>
                                     {selectedDeal?.status}
                                 </Badge>
@@ -558,11 +572,11 @@ const Deals = () => {
                         </div>
 
                         <div className="space-y-4">
-                            <h4 className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100 pb-2">Personnel Linkages</h4>
+                            <h4 className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100 pb-2">Client Contacts</h4>
                             {[
-                                { icon: User, label: 'Operator', value: selectedDeal?.name },
-                                { icon: Mail, label: 'Hub', value: selectedDeal?.email || 'N/A' },
-                                { icon: Phone, label: 'Direct', value: selectedDeal?.mobile || 'N/A' }
+                                { icon: User, label: 'Contact Person', value: selectedDeal?.name },
+                                { icon: Mail, label: 'Email Address', value: selectedDeal?.email || 'N/A' },
+                                { icon: Phone, label: 'Phone Number', value: selectedDeal?.mobile || 'N/A' }
                             ].map((item, i) => (
                                 <div key={i} className="flex items-center gap-3">
                                     <div className="size-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
@@ -586,10 +600,10 @@ const Deals = () => {
                                 }}
                             >
                                 <Edit2 size={12} className="mr-2" />
-                                Edit Parameter
+                                Edit Deal
                             </Button>
                             <Button className="h-10 rounded-xl bg-primary-600 hover:bg-primary-700 text-[9px] font-black uppercase tracking-widest text-white shadow-lg shadow-primary-500/20" onClick={() => setIsViewOpen(false)}>
-                                Abort View
+                                Close Details
                             </Button>
                         </DialogFooter>
                     </div>
@@ -600,12 +614,12 @@ const Deals = () => {
             <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                 <DialogContent className="w-[94vw] max-w-md rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden font-sans">
                     <div className="bg-primary-600 p-6 text-white">
-                        <DialogTitle className="text-xl font-black uppercase tracking-tight">Initiate Acquisition</DialogTitle>
-                        <p className="text-[9px] font-black text-primary-100 uppercase tracking-[0.2em] mt-1 italic">New marketplace opportunity</p>
+                        <DialogTitle className="text-xl font-black uppercase tracking-tight">Add New Deal</DialogTitle>
+                        <p className="text-[9px] font-black text-primary-100 uppercase tracking-[0.2em] mt-1 italic">Register new business opportunity</p>
                     </div>
                     <div className="p-6 space-y-4 bg-white dark:bg-slate-900">
                         <div className="space-y-1.5">
-                            <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Entity identifier</Label>
+                            <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Company / Client Name</Label>
                             <Input
                                 value={newDealData.clientName}
                                 onChange={(e) => setNewDealData({ ...newDealData, clientName: e.target.value })}
@@ -615,7 +629,7 @@ const Deals = () => {
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1.5">
-                                <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Market Valuation</Label>
+                                <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Expected Revenue</Label>
                                 <Input
                                     type="number"
                                     value={newDealData.amount}
@@ -631,15 +645,15 @@ const Deals = () => {
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent className="rounded-xl">
-                                        <SelectItem value="high">High Alert</SelectItem>
-                                        <SelectItem value="medium">Standard</SelectItem>
-                                        <SelectItem value="low">Low Risk</SelectItem>
+                                        <SelectItem value="high">High Priority</SelectItem>
+                                        <SelectItem value="medium">Medium Priority</SelectItem>
+                                        <SelectItem value="low">Low Priority</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
                         </div>
                         <div className="space-y-1.5">
-                            <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Lifecycle Stage</Label>
+                            <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Current Deal Stage</Label>
                             <Select value={newDealData.status} onValueChange={(val) => setNewDealData({ ...newDealData, status: val })}>
                                 <SelectTrigger className="h-10 rounded-xl bg-slate-50 border-none font-bold text-[10px] uppercase">
                                     <SelectValue />
@@ -652,8 +666,8 @@ const Deals = () => {
                             </Select>
                         </div>
                         <DialogFooter className="pt-4 flex gap-3">
-                            <Button variant="ghost" onClick={() => setIsAddOpen(false)} className="flex-1 h-10 rounded-xl font-black text-[9px] uppercase tracking-widest">Abort</Button>
-                            <Button onClick={submitNewDeal} className="flex-1 h-10 rounded-xl font-black text-[9px] uppercase tracking-widest bg-primary-600 hover:bg-primary-700 text-white shadow-lg">Confirm</Button>
+                            <Button variant="ghost" onClick={() => setIsAddOpen(false)} className="flex-1 h-10 rounded-xl font-black text-[9px] uppercase tracking-widest">Cancel</Button>
+                            <Button onClick={submitNewDeal} className="flex-1 h-10 rounded-xl font-black text-[9px] uppercase tracking-widest bg-primary-600 hover:bg-primary-700 text-white shadow-lg">Save Deal</Button>
                         </DialogFooter>
                     </div>
                 </DialogContent>
@@ -663,12 +677,12 @@ const Deals = () => {
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
                 <DialogContent className="w-[94vw] max-w-md rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden font-sans">
                     <div className="bg-slate-900 p-6 text-white">
-                        <DialogTitle className="text-xl font-black uppercase tracking-tight">Recalibrate Parameters</DialogTitle>
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1 italic">Updating tactical metadata</p>
+                        <DialogTitle className="text-xl font-black uppercase tracking-tight">Edit Deal Details</DialogTitle>
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1 italic">Update business opportunity info</p>
                     </div>
                     <div className="p-6 space-y-4 bg-white dark:bg-slate-900">
                         <div className="space-y-1.5">
-                            <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Entity name</Label>
+                            <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Deal Name</Label>
                             <Input
                                 value={editDealData.name}
                                 onChange={(e) => setEditDealData({ ...editDealData, name: e.target.value })}
@@ -677,7 +691,7 @@ const Deals = () => {
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1.5">
-                                <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Valuation (₹)</Label>
+                                <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Deal Amount (₹)</Label>
                                 <Input
                                     type="number"
                                     value={editDealData.amount}
@@ -692,9 +706,9 @@ const Deals = () => {
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent className="rounded-xl">
-                                        <SelectItem value="high">High Alert</SelectItem>
-                                        <SelectItem value="medium">Standard</SelectItem>
-                                        <SelectItem value="low">Low Risk</SelectItem>
+                                        <SelectItem value="high">High Priority</SelectItem>
+                                        <SelectItem value="medium">Medium Priority</SelectItem>
+                                        <SelectItem value="low">Low Priority</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -712,9 +726,18 @@ const Deals = () => {
                                 </SelectContent>
                             </Select>
                         </div>
+                        <div className="space-y-1.5">
+                            <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Target Deadline</Label>
+                            <Input
+                                type="date"
+                                value={editDealData.deadline}
+                                onChange={(e) => setEditDealData({ ...editDealData, deadline: e.target.value })}
+                                className="h-10 rounded-xl bg-slate-50 border-none font-bold text-sm px-4"
+                            />
+                        </div>
                         <DialogFooter className="pt-4 flex gap-3">
                             <Button variant="ghost" onClick={() => setIsEditOpen(false)} className="flex-1 h-10 rounded-xl font-black text-[9px] uppercase tracking-widest">Cancel</Button>
-                            <Button onClick={submitEditDeal} className="flex-1 h-10 rounded-xl font-black text-[9px] uppercase tracking-widest bg-slate-900 hover:bg-slate-800 text-white">Apply Sync</Button>
+                            <Button onClick={submitEditDeal} className="flex-1 h-10 rounded-xl font-black text-[9px] uppercase tracking-widest bg-slate-900 hover:bg-slate-800 text-white">Save Changes</Button>
                         </DialogFooter>
                     </div>
                 </DialogContent>

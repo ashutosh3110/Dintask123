@@ -44,6 +44,8 @@ import socketService from '@/services/socket';
 
 const SupportCenter = () => {
     const { user, role } = useAuthStore();
+    const location = useLocation();
+    const isSalesSupport = location.pathname.includes('/sales/support');
     const { tickets, addTicket, updateTicketStatus, fetchTickets, loading, fetchTicketStats, stats, replyToTicket, initializeSocket, uploadFiles, giveFeedback, deleteTicket, pagination } = useTicketStore();
     const fileInputRef = React.useRef(null);
     const [searchQuery, setSearchQuery] = useState('');

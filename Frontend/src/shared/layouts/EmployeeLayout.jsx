@@ -14,14 +14,21 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import { cn } from '@/shared/utils/cn';
 import useAuthStore from '@/store/authStore';
+import useNotificationStore from '@/store/notificationStore';
 import { Button } from '@/shared/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/shared/components/ui/avatar';
 import { scaleOnTap } from '@/shared/utils/animations';
+import React from 'react';
 
 const EmployeeLayout = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { user, logout } = useAuthStore();
+    const { unreadCount, fetchNotifications } = useNotificationStore();
+
+    React.useEffect(() => {
+        fetchNotifications();
+    }, [fetchNotifications]);
 
     const navItems = [
         { name: 'Home', path: '/employee', icon: LayoutDashboard },
@@ -62,10 +69,13 @@ const EmployeeLayout = () => {
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-10 w-10 rounded-xl text-slate-500 hover:text-[#4461f2] hover:bg-slate-50 dark:hover:bg-slate-800"
+                        className="h-10 w-10 rounded-xl text-slate-500 hover:text-[#4461f2] hover:bg-slate-50 dark:hover:bg-slate-800 relative"
                         onClick={() => navigate('/employee/notifications')}
                     >
                         <Bell size={18} />
+                        {unreadCount > 0 && (
+                            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-slate-900 shadow-sm" />
+                        )}
                     </Button>
                     <button
                         onClick={() => navigate('/employee/profile')}
