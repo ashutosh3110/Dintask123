@@ -19,7 +19,8 @@ import {
     Paperclip,
     FileText,
     X,
-    Loader2
+    Loader2,
+    Repeat
 } from 'lucide-react';
 import api from '@/lib/api';
 import { format, isAfter } from 'date-fns';
@@ -63,7 +64,7 @@ const TaskDetail = () => {
     const { tasks, updateTask } = useTaskStore();
     const { employees } = useEmployeeStore();
     const { managers } = useManagerStore();
-    const { user: currentUser } = useAuthStore();
+    const { user } = useAuthStore();
     const addNotification = useNotificationStore(state => state.addNotification);
 
 
@@ -88,7 +89,7 @@ const TaskDetail = () => {
     React.useEffect(() => {
         if (task) {
             // Find user's subtask if available (for group tasks)
-            const mySubTask = task.subTasks?.find(st => st.user?._id === currentUser?.id || st.user === currentUser?.id);
+            const mySubTask = task.subTasks?.find(st => st.user?._id === user?.id || st.user === user?.id);
             if (mySubTask) {
                 setMyProgress(mySubTask.progress || 0);
             } else {
@@ -96,7 +97,7 @@ const TaskDetail = () => {
             }
             setMyStatusNote(task.statusNotes || '');
         }
-    }, [task, currentUser]);
+    }, [task, user]);
 
     const handleUpdateProgress = async () => {
         setIsUpdating(true);
@@ -148,8 +149,9 @@ const TaskDetail = () => {
         setAttachments(prev => prev.filter((_, i) => i !== index));
     };
 
-    const isAssignee = task?.assignedTo?.includes(currentUser?.id) || task?.assignedTo?.some(u => u._id === currentUser?.id);
-    const mySubTask = task?.subTasks?.find(st => st.user?._id === currentUser?.id || st.user === currentUser?.id);
+    const isAssignee = task?.assignedTo?.includes(user?.id) || task?.assignedTo?.some(u => u._id === user?.id);
+    const isManager = (user?.role === 'manager' && (task?.assignedBy === user?.id || task?.assignedBy?._id === user?.id)) || user?.role === 'admin';
+    const mySubTask = task?.subTasks?.find(st => st.user?._id === user?.id || st.user === user?.id);
 
     const handleMarkComplete = () => {
         setIsSubmittingReview(true);
@@ -164,7 +166,7 @@ const TaskDetail = () => {
         if (task.delegatedBy || task.assignedBy) {
             addNotification({
                 title: 'Task Review Requested',
-                description: `${currentUser?.name} submitted: "${task.title}" for approval`,
+                description: `${user?.name} submitted: "${task.title}" for approval`,
                 category: 'task',
                 recipientId: task.delegatedBy || task.assignedBy
             });
@@ -422,6 +424,30 @@ const TaskDetail = () => {
                                 </CardContent>
                             </Card>
 
+                            {task.recurrence?.type && task.recurrence.type !== 'none' && (
+                                <Card className="rounded-2xl md:rounded-3xl border-none shadow-sm bg-white dark:bg-slate-900">
+                                    <CardContent className="p-4 md:p-5 text-left">
+                                        <div className="flex items-center gap-2 mb-3 text-slate-400">
+                                            <div className="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600">
+                                                <Repeat size={14} />
+                                            </div>
+                                            <span className="text-[10px] font-black uppercase tracking-widest">Recurrence</span>
+                                        </div>
+                                        <p className="text-sm font-bold text-slate-900 dark:text-white capitalize">
+                                            {task.recurrence.type} Cycle
+                                        </p>
+                                        <p className="text-[10px] text-indigo-600 font-medium mt-1">
+                                            Repeats every {task.recurrence.interval} {task.recurrence.type === 'daily' ? 'day(s)' : task.recurrence.type === 'weekly' ? 'week(s)' : 'month(s)'}
+                                        </p>
+                                        {task.recurrence.endDate && (
+                                            <p className="text-[9px] text-slate-400 font-bold mt-1 uppercase tracking-wider">
+                                                Until: {format(new Date(task.recurrence.endDate), 'MMM dd, yyyy')}
+                                            </p>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            )}
+
                             <Card className="rounded-3xl border-none shadow-sm bg-white dark:bg-slate-900">
                                 <CardContent className="p-5 text-left space-y-4">
                                     <div className="flex items-center gap-2 mb-1 text-slate-400">
@@ -490,94 +516,152 @@ const TaskDetail = () => {
                             </Card>
                         </div>
                     </div>
+
+                    {/* Manager/Owner Controls */}
+                    {((user?.role === 'manager' && (task.assignedBy === user.id || task.assignedBy?._id === user.id)) || user?.role === 'admin') && (
+                        <Card className="rounded-2xl md:rounded-3xl border-none shadow-sm bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800">
+                            <CardContent className="p-4 md:p-5 text-left space-y-4">
+                                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Command Controls</h4>
+
+
+
+                                <div className="grid grid-cols-2 gap-3">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => navigate(`/manager/assign-task?edit=${task.id}`)}
+                                        className="h-9 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-[10px] uppercase tracking-widest rounded-lg"
+                                    >
+                                        Edit Directive
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                            if (confirm("Confirm deletion of this directive? This action is irreversible.")) {
+                                                useTaskStore.getState().deleteTask(task.id);
+                                                navigate(-1);
+                                            }
+                                        }}
+                                        className="h-9 border-rose-100 dark:border-rose-900/30 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 font-bold text-[10px] uppercase tracking-widest rounded-lg"
+                                    >
+                                        Delete
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
                 </div>
             </div>
 
             {/* Sticky Footer Actions */}
             <div className="fixed bottom-0 left-0 right-0 p-4 backdrop-blur-md bg-white/80 dark:bg-gray-900/80 border-t border-slate-100 dark:border-slate-800 z-30">
                 <div className="max-w-4xl mx-auto">
-                    {task.status !== 'completed' && task.status !== 'review' ? (
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <button
-                                    disabled={task.project && ['on_hold', 'cancelled'].includes(task.project.status)}
-                                    className={cn(
-                                        "w-full h-14 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all",
-                                        task.status === 'overdue' ? "bg-red-600 shadow-red-500/20" : "bg-primary shadow-primary/20",
-                                        task.project && ['on_hold', 'cancelled'].includes(task.project.status) && "opacity-50 cursor-not-allowed filter grayscale"
-                                    )}
-                                >
-                                    <Send size={20} />
-                                    <span>{task.status === 'overdue' ? 'Submit Overdue Mission' : 'Submit for Review'}</span>
-                                </button>
-                            </DialogTrigger>
-                            <DialogContent className="rounded-[2.5rem] border-none">
-                                <DialogHeader>
-                                    <DialogTitle className="text-xl font-black uppercase tracking-tight">Mission Submission</DialogTitle>
-                                    <DialogDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">Provide operational evidence for directive fulfilment.</DialogDescription>
-                                </DialogHeader>
-                                <div className="space-y-4 py-4">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1">Evidence Statement</label>
-                                        <Input
-                                            placeholder="What exactly was completed? (e.g. Migration finished, repo updated)"
-                                            value={submissionNote}
-                                            onChange={(e) => setSubmissionNote(e.target.value)}
-                                            className="h-12 bg-slate-50 border-none rounded-xl font-bold"
-                                        />
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        <div className="flex items-center justify-between px-1">
-                                            <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Technical Attachments</label>
-                                            <label className="cursor-pointer">
-                                                <input type="file" multiple className="hidden" onChange={handleFileUpload} disabled={isUploading} />
-                                                <div className="flex items-center gap-1.5 text-[9px] font-black text-primary-600 uppercase tracking-widest bg-primary-50 px-2 py-1 rounded-lg hover:bg-primary-100 transition-colors">
-                                                    {isUploading ? <Loader2 size={10} className="animate-spin" /> : <Paperclip size={10} />}
-                                                    ATTACH FILES
-                                                </div>
-                                            </label>
+                    {/* MANAGER / ADMIN VIEW: Review Controls */}
+                    {isManager && task.status === 'review' ? (
+                        <div className="grid grid-cols-2 gap-3 w-full">
+                            <Button
+                                onClick={() => {
+                                    updateTask(task.id, { status: 'completed', progress: 100 });
+                                    toast.success("Directive Approved");
+                                }}
+                                className="h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg shadow-emerald-500/20"
+                            >
+                                <CheckCircle2 size={18} className="mr-2" /> Approve Mission
+                            </Button>
+                            <Button
+                                onClick={() => {
+                                    updateTask(task.id, { status: 'in_progress', progress: 50 });
+                                    toast.error("Directive Returned for Revision");
+                                }}
+                                className="h-14 bg-rose-600 hover:bg-rose-700 text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg shadow-rose-500/20"
+                            >
+                                <X size={18} className="mr-2" /> Reject Mission
+                            </Button>
+                        </div>
+                    ) : (
+                        /* ASSIGNEE VIEW: Submit Controls */
+                        isAssignee && task.status !== 'completed' && task.status !== 'review' ? (
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <button
+                                        disabled={task.project && ['on_hold', 'cancelled'].includes(task.project.status)}
+                                        className={cn(
+                                            "w-full h-14 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all",
+                                            task.status === 'overdue' ? "bg-red-600 shadow-red-500/20" : "bg-primary shadow-primary/20",
+                                            task.project && ['on_hold', 'cancelled'].includes(task.project.status) && "opacity-50 cursor-not-allowed filter grayscale"
+                                        )}
+                                    >
+                                        <Send size={20} />
+                                        <span>{task.status === 'overdue' ? 'Submit Overdue Mission' : 'Submit for Review'}</span>
+                                    </button>
+                                </DialogTrigger>
+                                <DialogContent className="rounded-[2.5rem] border-none">
+                                    <DialogHeader>
+                                        <DialogTitle className="text-xl font-black uppercase tracking-tight">Mission Submission</DialogTitle>
+                                        <DialogDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">Provide operational evidence for directive fulfilment.</DialogDescription>
+                                    </DialogHeader>
+                                    <div className="space-y-4 py-4">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1">Evidence Statement</label>
+                                            <Input
+                                                placeholder="What exactly was completed? (e.g. Migration finished, repo updated)"
+                                                value={submissionNote}
+                                                onChange={(e) => setSubmissionNote(e.target.value)}
+                                                className="h-12 bg-slate-50 border-none rounded-xl font-bold"
+                                            />
                                         </div>
 
-                                        {attachments.length > 0 && (
-                                            <div className="grid grid-cols-1 gap-2">
-                                                {attachments.map((file, idx) => (
-                                                    <div key={idx} className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-100 rounded-xl group">
-                                                        <div className="flex items-center gap-2 overflow-hidden">
-                                                            <FileText size={14} className="text-slate-400 shrink-0" />
-                                                            <span className="text-[10px] font-bold text-slate-600 truncate">{file.name}</span>
-                                                        </div>
-                                                        <button onClick={() => removeAttachment(idx)} className="text-slate-400 hover:text-red-500 transition-colors">
-                                                            <X size={14} />
-                                                        </button>
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between px-1">
+                                                <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Technical Attachments</label>
+                                                <label className="cursor-pointer">
+                                                    <input type="file" multiple className="hidden" onChange={handleFileUpload} disabled={isUploading} />
+                                                    <div className="flex items-center gap-1.5 text-[9px] font-black text-primary-600 uppercase tracking-widest bg-primary-50 px-2 py-1 rounded-lg hover:bg-primary-100 transition-colors">
+                                                        {isUploading ? <Loader2 size={10} className="animate-spin" /> : <Paperclip size={10} />}
+                                                        ATTACH FILES
                                                     </div>
-                                                ))}
+                                                </label>
                                             </div>
-                                        )}
 
-                                        {attachments.length === 0 && !isUploading && (
-                                            <div className="h-16 flex flex-col items-center justify-center border-2 border-dashed border-slate-100 rounded-2xl">
-                                                <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">No technical assets attached</p>
-                                            </div>
-                                        )}
+                                            {attachments.length > 0 && (
+                                                <div className="grid grid-cols-1 gap-2">
+                                                    {attachments.map((file, idx) => (
+                                                        <div key={idx} className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-100 rounded-xl group">
+                                                            <div className="flex items-center gap-2 overflow-hidden">
+                                                                <FileText size={14} className="text-slate-400 shrink-0" />
+                                                                <span className="text-[10px] font-bold text-slate-600 truncate">{file.name}</span>
+                                                            </div>
+                                                            <button onClick={() => removeAttachment(idx)} className="text-slate-400 hover:text-red-500 transition-colors">
+                                                                <X size={14} />
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {attachments.length === 0 && !isUploading && (
+                                                <div className="h-16 flex flex-col items-center justify-center border-2 border-dashed border-slate-100 rounded-2xl">
+                                                    <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">No technical assets attached</p>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                                <DialogFooter>
-                                    <Button onClick={handleMarkComplete} className="w-full h-12 bg-primary text-white font-black uppercase tracking-wider rounded-xl">
-                                        CONFIRM DEPLOΥΜΕΝΤ
-                                    </Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
-                    ) : (
-                        <button disabled className="w-full h-14 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 font-bold rounded-xl flex items-center justify-center gap-2 opacity-80 cursor-not-allowed">
-                            <CheckCircle2 size={24} />
-                            <span>{task.status === 'review' ? 'Awaiting Review' : 'Mission Fulfilled'}</span>
-                        </button>
+                                    <DialogFooter>
+                                        <Button onClick={handleMarkComplete} className="w-full h-12 bg-primary text-white font-black uppercase tracking-wider rounded-xl">
+                                            CONFIRM DEPLOΥΜΕΝΤ
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
+                        ) : (
+                            <button disabled className="w-full h-14 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 font-bold rounded-xl flex items-center justify-center gap-2 opacity-80 cursor-not-allowed">
+                                {task.status === 'review' ? <Clock size={24} className="text-amber-500" /> : <CheckCircle2 size={24} />}
+                                <span>{task.status === 'review' ? 'Awaiting Command Review' : task.status === 'completed' ? 'Mission Fulfilled' : 'Active Operation'}</span>
+                            </button>
+                        )
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

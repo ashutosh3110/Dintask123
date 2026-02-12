@@ -72,7 +72,218 @@ const useSuperAdminStore = create(
                 churnRate: 0
             },
             systemIntel: [],
+            landingPageContent: null,
             loading: false,
+
+            fetchLandingPageContent: async () => {
+                try {
+                    const response = await apiRequest('/landing-page/hero');
+                    if (response.success) {
+                        set({ landingPageContent: response.data });
+                    }
+                } catch (err) {
+                    console.error('Failed to fetch landing page content:', err);
+                }
+            },
+
+            updateLandingPageContent: async (data) => {
+                try {
+                    const response = await apiRequest('/landing-page/hero', {
+                        method: 'PUT',
+                        body: data
+                    });
+                    if (response.success) {
+                        set({ landingPageContent: response.data });
+                        return true;
+                    }
+                } catch (err) {
+                    console.error('Failed to update landing page content:', err);
+                }
+                return false;
+            },
+
+            platformContent: null,
+            fetchPlatformContent: async () => {
+                try {
+                    const response = await apiRequest('/landing-page/platform');
+                    if (response.success) {
+                        set({ platformContent: response.data });
+                    }
+                } catch (err) {
+                    console.error('Failed to fetch platform content:', err);
+                }
+            },
+
+            updatePlatformContent: async (dataOrFormData) => {
+                try {
+                    // Check if dataOrFormData is FormData
+                    const isFormData = dataOrFormData instanceof FormData;
+
+                    const response = await apiRequest('/landing-page/platform', {
+                        method: 'PUT',
+                        body: isFormData ? dataOrFormData : dataOrFormData
+                    });
+
+                    if (response.success) {
+                        set({ platformContent: response.data });
+                        return true;
+                    }
+                } catch (err) {
+                    console.error('Failed to update platform content:', err);
+                }
+                return false;
+            },
+
+            faqsContent: [],
+            fetchFaqsContent: async () => {
+                try {
+                    const response = await apiRequest('/landing-page/faqs');
+                    if (response.success) {
+                        set({ faqsContent: response.data });
+                    }
+                } catch (err) {
+                    console.error('Failed to fetch FAQs content:', err);
+                }
+            },
+
+            updateFaqsContent: async (faqsData) => {
+                try {
+                    const response = await apiRequest('/landing-page/faqs', {
+                        method: 'PUT',
+                        body: { faqs: faqsData }
+                    });
+                    if (response.success) {
+                        set({ faqsContent: response.data });
+                        return true;
+                    }
+                } catch (err) {
+                    console.error('Failed to update FAQs content:', err);
+                }
+                return false;
+            },
+
+            tacticalContent: null,
+            fetchTacticalContent: async () => {
+                try {
+                    const response = await apiRequest('/landing-page/tactical');
+                    if (response.success) {
+                        set({ tacticalContent: response.data });
+                    }
+                } catch (err) {
+                    console.error('Failed to fetch tactical content:', err);
+                }
+            },
+
+            updateTacticalContent: async (formData) => {
+                try {
+                    const response = await apiRequest('/landing-page/tactical', {
+                        method: 'PUT',
+                        body: formData
+                    });
+
+                    if (response.success) {
+                        set({ tacticalContent: response.data });
+                        return true;
+                    }
+                } catch (err) {
+                    console.error('Failed to update tactical content:', err);
+                }
+                return false;
+            },
+
+            footerCtaContent: null,
+            fetchFooterCtaContent: async () => {
+                try {
+                    const response = await apiRequest('/landing-page/footer-cta');
+                    if (response.success) {
+                        set({ footerCtaContent: response.data });
+                    }
+                } catch (err) {
+                    console.error('Failed to fetch footer CTA content:', err);
+                }
+            },
+
+            updateFooterCtaContent: async (formData) => {
+                try {
+                    const response = await apiRequest('/landing-page/footer-cta', {
+                        method: 'PUT',
+                        body: formData
+                    });
+
+                    if (response.success) {
+                        set({ footerCtaContent: response.data });
+                        return true;
+                    }
+                } catch (err) {
+                    console.error('Failed to update footer CTA content:', err);
+                }
+                return false;
+            },
+
+            pricingPlans: [],
+            fetchPricingPlans: async () => {
+                try {
+                    const response = await apiRequest('/landing-page-plans');
+                    if (response.success) {
+                        set({ pricingPlans: response.data });
+                    }
+                } catch (err) {
+                    console.error('Failed to fetch pricing plans:', err);
+                }
+            },
+
+            createPricingPlan: async (planData) => {
+                try {
+                    const response = await apiRequest('/landing-page-plans', {
+                        method: 'POST',
+                        body: JSON.stringify(planData),
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    if (response.success) {
+                        set((state) => ({ pricingPlans: [...state.pricingPlans, response.data] }));
+                        return true;
+                    }
+                } catch (err) {
+                    console.error('Failed to create pricing plan:', err);
+                }
+                return false;
+            },
+
+            updatePricingPlan: async (id, planData) => {
+                try {
+                    const response = await apiRequest(`/landing-page-plans/${id}`, {
+                        method: 'PUT',
+                        body: JSON.stringify(planData),
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    if (response.success) {
+                        set((state) => ({
+                            pricingPlans: state.pricingPlans.map(plan => plan._id === id ? response.data : plan)
+                        }));
+                        return true;
+                    }
+                } catch (err) {
+                    console.error('Failed to update pricing plan:', err);
+                }
+                return false;
+            },
+
+            deletePricingPlan: async (id) => {
+                try {
+                    const response = await apiRequest(`/landing-page-plans/${id}`, {
+                        method: 'DELETE'
+                    });
+                    if (response.success) {
+                        set((state) => ({
+                            pricingPlans: state.pricingPlans.filter(plan => plan._id !== id)
+                        }));
+                        return true;
+                    }
+                } catch (err) {
+                    console.error('Failed to delete pricing plan:', err);
+                }
+                return false;
+            },
 
             fetchSystemIntel: async () => {
                 try {

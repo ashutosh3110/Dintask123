@@ -173,7 +173,7 @@ const PlansManagement = () => {
             </div>
 
             {/* Tactical Search Toolbar */}
-            <div className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl p-5 rounded-[2.5rem] border border-slate-200/50 dark:border-slate-800/50 shadow-xl flex flex-col md:flex-row gap-5 items-center">
+            <div className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl p-5 rounded-[2rem] border-2 border-slate-100 dark:border-slate-800/50 shadow-xl shadow-slate-200/30 flex flex-col md:flex-row gap-5 items-center">
                 <div className="relative flex-1 group w-full">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary-500 transition-colors" size={20} />
                     <Input
@@ -202,9 +202,9 @@ const PlansManagement = () => {
                             transition={{ duration: 0.4, delay: index * 0.1, ease: "easeOut" }}
                         >
                             <Card className={cn(
-                                "overflow-hidden border-2 transition-all duration-500 rounded-[3rem] group relative",
+                                "overflow-hidden border-2 transition-all duration-500 rounded-[3rem] group relative hover:-translate-y-1",
                                 plan.isActive
-                                    ? "border-slate-200/50 dark:border-slate-800/50 hover:border-primary-500/50 hover:shadow-2xl hover:shadow-primary-500/10"
+                                    ? "border-slate-200 shadow-lg shadow-slate-200/40 hover:border-primary-500/50 hover:shadow-2xl hover:shadow-primary-500/10"
                                     : "border-slate-100 dark:border-slate-900 opacity-60 grayscale scale-95"
                             )}>
                                 <CardHeader className="p-8 pb-4">

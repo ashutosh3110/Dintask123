@@ -197,36 +197,36 @@ const StaffManagement = () => {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-none shadow-sm bg-white dark:bg-slate-900 rounded-3xl">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="border-2 border-blue-100 shadow-lg shadow-blue-200/40 bg-white dark:bg-slate-900 rounded-[2rem] transition-all hover:-translate-y-1">
           <CardContent className="p-6 flex items-center gap-4">
             <div className="p-3 rounded-2xl bg-primary-50 dark:bg-primary-900/10">
               <Users className="text-primary-600" size={24} />
             </div>
             <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Staff</p>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-white">{staffPagination?.total || 0}</h3>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Active Staff</p>
+              <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter italic">{staffPagination?.total || 0}</h3>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-none shadow-sm bg-white dark:bg-slate-900 rounded-3xl">
+        <Card className="border-2 border-emerald-100 shadow-lg shadow-emerald-200/40 bg-white dark:bg-slate-900 rounded-[2rem] transition-all hover:-translate-y-1">
           <CardContent className="p-6 flex items-center gap-4">
             <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-900/10">
               <ShieldCheck className="text-emerald-600" size={24} />
             </div>
             <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">System Security</p>
-              <h3 className="text-2xl font-black text-emerald-600 uppercase italic">Active</h3>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">System Security</p>
+              <h3 className="text-2xl font-black text-emerald-600 uppercase italic tracking-tighter">Active</h3>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-none shadow-sm bg-white dark:bg-slate-900 rounded-3xl">
+        <Card className="border-2 border-amber-100 shadow-lg shadow-amber-200/40 bg-white dark:bg-slate-900 rounded-[2rem] transition-all hover:-translate-y-1">
           <CardContent className="p-6 flex items-center gap-4">
             <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-900/10">
               <Lock className="text-amber-600" size={24} />
             </div>
             <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Access Protocol</p>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Access Protocol</p>
               <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter italic">RBAC 2.0</h3>
             </div>
           </CardContent>
@@ -234,7 +234,7 @@ const StaffManagement = () => {
       </div>
 
       {/* Main Table Section */}
-      <Card className="border-none shadow-sm bg-white dark:bg-slate-900 rounded-3xl overflow-hidden">
+      <Card className="border-2 border-slate-100 shadow-xl shadow-slate-200/30 bg-white dark:bg-slate-900 rounded-[2rem] overflow-hidden">
         <CardHeader className="p-6 border-b border-slate-50 dark:border-slate-800">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
