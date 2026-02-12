@@ -501,7 +501,7 @@ const LandingPage = () => {
             </nav>
 
             {/* Hero Section */}
-            <section className="relative min-h-screen flex flex-col justify-center pt-24 pb-16 md:pt-36 md:pb-24 px-6 bg-gradient-to-b from-[#FFEE8C] via-[#FFF9C4] to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 overflow-hidden z-0 transition-all duration-300">
+            <section className="fixed top-0 left-0 w-full h-screen flex flex-col justify-center pt-24 pb-16 md:pt-36 md:pb-24 px-6 bg-gradient-to-b from-[#FFEE8C] via-[#FFF9C4] to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 overflow-hidden z-0 transition-all duration-300">
                 {/* Background Blobs - Adjusted for Dark Mode */}
                 <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
                     <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#FFEE8C]/40 rounded-full blur-[100px]" />
@@ -554,7 +554,7 @@ const LandingPage = () => {
             </section>
 
 
-            <div className="relative z-10 bg-transparent dark:bg-slate-950 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+            <div className="relative z-10 mt-[100vh] bg-white dark:bg-slate-950 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
                 <section id="about" className="py-20 relative overflow-x-clip border-t border-b border-white/50 bg-gradient-to-b from-[#FFEE8C] via-[#FFF9C4] to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
                     <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
                         <motion.div

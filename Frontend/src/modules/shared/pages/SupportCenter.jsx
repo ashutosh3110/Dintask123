@@ -646,7 +646,7 @@ const SupportCenter = () => {
                                         <Loader2 className="animate-spin text-[#4461f2]" size={32} />
                                     </div>
                                 ) : tickets.length > 0 ? (
-                                    <>
+                                    <div className="space-y-4" key="tickets-list">
                                         {tickets.map((ticket, index) => (
                                             <motion.div
                                                 layout
@@ -783,7 +783,7 @@ const SupportCenter = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                    </>
+                                    </div>
                                 ) : (
                                     <div className="text-center py-20 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-[2.5rem] border-2 border-dashed border-slate-200 dark:border-slate-800">
                                         <MessageSquare size={54} className="mx-auto text-slate-300 dark:text-slate-700 mb-5 opacity-50" />
