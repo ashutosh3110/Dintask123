@@ -1204,6 +1204,185 @@ exports.getActionableLists = async (req, res, next) => {
   }
 };
 
+// @desc    Get reports statistics and performance data
+// @route   GET /api/v1/admin/reports/stats
+// @access  Private (Admin only)
+exports.getReportsStats = async (req, res, next) => {
+  try {
+    if (!req.user || req.user.role !== 'admin') {
+      return next(new ErrorResponse('Not authorized to access reports statistics', 403));
+    }
+
+    const { days, memberId, status, search } = req.query;
+    const adminId = req.user.id;
+    const adminObjectId = new mongoose.Types.ObjectId(adminId);
+
+    // Build Task Match Query
+    const taskMatch = { adminId: adminObjectId };
+
+    // Period Filter
+    if (days && days !== 'all') {
+      const dateLimit = new Date();
+      dateLimit.setDate(dateLimit.getDate() - parseInt(days));
+      taskMatch.createdAt = { $gte: dateLimit };
+    }
+
+    // Status Filter
+    if (status && status !== 'all') {
+      taskMatch.status = status;
+    }
+
+    // Search Filter
+    if (search) {
+      taskMatch.title = { $regex: search, $options: 'i' };
+    }
+
+    // Member Filter
+    if (memberId && memberId !== 'all') {
+      const memberObjectId = new mongoose.Types.ObjectId(memberId);
+      taskMatch.$or = [
+        { assignedTo: memberObjectId },
+        { assignedBy: memberObjectId }
+      ];
+    }
+
+    const Task = require('../models/Task');
+    const Employee = require('../models/Employee');
+    const Manager = require('../models/Manager');
+
+    // Parallel execution
+    const [taskStats, employeePerformance, managerPerformance] = await Promise.all([
+      // 1. Overall Task Stats (Applying filters)
+      Task.aggregate([
+        { $match: taskMatch },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: 1 },
+            completed: {
+              $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] }
+            }
+          }
+        }
+      ]),
+
+      // 2. Employee Performance (Always fetch all employees but calculate metrics for filtered tasks)
+      Employee.aggregate([
+        { $match: { adminId: adminObjectId, status: 'active' } },
+        {
+          $lookup: {
+            from: 'tasks',
+            let: { empId: '$_id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$adminId', adminObjectId] },
+                      { $in: ['$$empId', '$assignedTo'] },
+                      // Period filter in sub-pipeline
+                      days && days !== 'all' ? { $gte: ['$createdAt', new Date(new Date().setDate(new Date().getDate() - parseInt(days)))] } : {},
+                      // Status filter in sub-pipeline
+                      status && status !== 'all' ? { $eq: ['$status', status] } : {},
+                      // Search filter in sub-pipeline
+                      search ? { $regexMatch: { input: '$title', regex: search, options: 'i' } } : {}
+                    ].filter(cond => Object.keys(cond).length > 0)
+                  }
+                }
+              }
+            ],
+            as: 'empTasks'
+          }
+        },
+        {
+          $project: {
+            name: 1,
+            email: 1,
+            role: 1,
+            department: 1,
+            avatar: 1,
+            totalTasks: { $size: '$empTasks' },
+            completedTasks: {
+              $size: {
+                $filter: {
+                  input: '$empTasks',
+                  as: 'task',
+                  cond: { $eq: ['$$task.status', 'completed'] }
+                }
+              }
+            }
+          }
+        }
+      ]),
+
+      // 3. Manager Performance (Always fetch all managers but calculate metrics for filtered tasks)
+      Manager.aggregate([
+        { $match: { adminId: adminObjectId, status: 'active' } },
+        {
+          $lookup: {
+            from: 'tasks',
+            let: { mId: '$_id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$adminId', adminObjectId] },
+                      { $eq: ['$assignedBy', '$$mId'] },
+                      // Period filter in sub-pipeline
+                      days && days !== 'all' ? { $gte: ['$createdAt', new Date(new Date().setDate(new Date().getDate() - parseInt(days)))] } : {},
+                      // Status filter in sub-pipeline
+                      status && status !== 'all' ? { $eq: ['$status', status] } : {},
+                      // Search filter in sub-pipeline
+                      search ? { $regexMatch: { input: '$title', regex: search, options: 'i' } } : {}
+                    ].filter(cond => Object.keys(cond).length > 0)
+                  }
+                }
+              }
+            ],
+            as: 'mgrTasks'
+          }
+        },
+        {
+          $project: {
+            name: 1,
+            email: 1,
+            role: 1,
+            department: 1,
+            avatar: 1,
+            totalTasks: { $size: '$mgrTasks' },
+            completedTasks: {
+              $size: {
+                $filter: {
+                  input: '$mgrTasks',
+                  as: 'task',
+                  cond: { $eq: ['$$task.status', 'completed'] }
+                }
+              }
+            }
+          }
+        }
+      ])
+    ]);
+
+    const stats = taskStats[0] || { total: 0, completed: 0 };
+    const completionRate = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
+
+    res.status(200).json({
+      success: true,
+      data: {
+        totalTasks: stats.total,
+        completedTasks: stats.completed,
+        completionRate,
+        employeePerformance: employeePerformance.map(e => ({ ...e, id: e._id, completionRate: e.totalTasks > 0 ? Math.round((e.completedTasks / e.totalTasks) * 100) : 0 })),
+        managerPerformance: managerPerformance.map(m => ({ ...m, id: m._id, completionRate: m.totalTasks > 0 ? Math.round((m.completedTasks / m.totalTasks) * 100) : 0 }))
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // Helper to get token from model, create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
   // Create token

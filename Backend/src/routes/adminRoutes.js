@@ -20,7 +20,8 @@ const {
     getRevenueChart,
     getSalesPipelineChart,
     getProjectHealthChart,
-    getActionableLists
+    getActionableLists,
+    getReportsStats
 } = require('../controllers/adminController');
 const { getPlans } = require('../controllers/planController');
 
@@ -45,6 +46,7 @@ router.get('/dashboard-charts/revenue', getRevenueChart);
 router.get('/dashboard-charts/pipeline', getSalesPipelineChart);
 router.get('/dashboard-charts/projects', getProjectHealthChart);
 router.get('/dashboard-actionable-lists', getActionableLists);
+router.get('/reports/stats', getReportsStats);
 
 // Restricted Admin and Super Admin only routes
 router.use(authorize('admin', 'superadmin'));

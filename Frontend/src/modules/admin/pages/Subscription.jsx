@@ -37,7 +37,7 @@ import useAuthStore from '@/store/authStore';
 import api from '@/lib/api';
 
 const Subscription = () => {
-    const { employees, subscriptionLimit } = useEmployeeStore();
+    const { employees, fetchEmployees, subscriptionLimit, fetchSubscriptionLimit, limitStatus } = useEmployeeStore();
     const { user, fetchProfile } = useAuthStore();
     const { plans, fetchPlans, createOrder, verifyPayment, billingHistory, fetchBillingHistory, downloadInvoice } = useSubscriptionStore();
     const [loadingPlan, setLoadingPlan] = React.useState(null);
@@ -48,6 +48,8 @@ const Subscription = () => {
     React.useEffect(() => {
         fetchPlans();
         fetchBillingHistory();
+        fetchEmployees();
+        fetchSubscriptionLimit();
     }, []);
 
     const loadRazorpayScript = () => {
@@ -122,7 +124,9 @@ const Subscription = () => {
         setLoadingPlan(null);
     };
 
-    const usagePercentage = (employees.length / (user?.planDetails?.userLimit || subscriptionLimit)) * 100;
+    const displayLimit = limitStatus?.limit || user?.planDetails?.userLimit || subscriptionLimit || 0;
+    const currentCount = limitStatus?.current !== undefined ? limitStatus.current : employees.length;
+    const usagePercentage = displayLimit > 0 ? (currentCount / displayLimit) * 100 : 0;
 
     const currentPlan = {
         name: user?.subscriptionPlan || 'Starter',
@@ -187,7 +191,7 @@ const Subscription = () => {
                                 <div className="space-y-2">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-slate-500">Total Seats Used</span>
-                                        <span className="font-bold text-slate-900 dark:text-white">{employees.length} / {subscriptionLimit}</span>
+                                        <span className="font-bold text-slate-900 dark:text-white">{currentCount} / {displayLimit}</span>
                                     </div>
                                     <Progress value={usagePercentage} className="h-2 bg-slate-100 dark:bg-slate-800" />
                                     <p className="text-[10px] text-slate-400 italic">

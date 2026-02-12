@@ -18,10 +18,9 @@ exports.getTasks = async (req, res) => {
     const teamIds = userTeams.map(t => t._id);
 
     if (req.user.role === 'admin') {
-      // Admin sees tasks in their workspace
+      // Admin sees ALL tasks in their workspace
       adminId = req.user.id;
       query = {
-        assignedBy: req.user.id,
         adminId: adminId
       };
     } else if (req.user.role === 'manager') {

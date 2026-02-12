@@ -90,6 +90,25 @@ const useTaskStore = create((set, get) => ({
         } catch (error) {
             toast.error("Failed to delete task");
         }
+    },
+
+    // Reports Stats
+    reportsStats: null,
+    fetchReportsStats: async (params = {}) => {
+        try {
+            const queryParams = new URLSearchParams();
+            if (params.days) queryParams.append('days', params.days);
+            if (params.memberId) queryParams.append('memberId', params.memberId);
+            if (params.status) queryParams.append('status', params.status);
+            if (params.search) queryParams.append('search', params.search);
+
+            const res = await api(`/admin/reports/stats?${queryParams.toString()}`);
+            if (res.success) {
+                set({ reportsStats: res.data });
+            }
+        } catch (error) {
+            console.error("Failed to fetch reports stats", error);
+        }
     }
 }));
 

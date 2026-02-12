@@ -25,8 +25,11 @@ const CRMLayout = ({ role }) => {
         { icon: <Users size={18} />, label: 'Leads', path: `/${role}/crm/leads` },
         { icon: <TrendingUp size={18} />, label: 'Pipeline', path: `/${role}/crm/pipeline` },
         ...(role !== 'manager' ? [{ icon: <PhoneCall size={18} />, label: 'Follow Ups', path: `/${role}/crm/follow-ups` }] : []),
-        ...(role !== 'admin' ? [{ icon: <Contact size={18} />, label: 'Contacts', path: `/${role}/crm/contacts` }] : []),
-    ];
+        { icon: <Contact size={18} />, label: 'Contacts', path: `/${role}/crm/contacts` },
+    ].filter(item => {
+        if (item.label === 'Contacts' && (role === 'admin' || role === 'sales')) return false;
+        return true;
+    });
 
     const SidebarContent = () => (
         <div className={cn(

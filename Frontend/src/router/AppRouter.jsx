@@ -305,7 +305,6 @@ const AppRouter = () => {
                 <Route path="leads" element={<LeadsManagement />} />
                 <Route path="pipeline" element={<SalesPipeline />} />
                 <Route path="follow-ups" element={<FollowUps />} />
-                <Route path="contacts" element={<Contacts />} />
             </Route>
 
             {/* Default Redirection */}
