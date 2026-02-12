@@ -50,6 +50,7 @@ import useCRMStore from '@/store/crmStore';
 import { cn } from '@/shared/utils/cn';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { useDebounce } from '@/shared/hooks/use-debounce';
 
 const SalesPipeline = () => {
   const {
@@ -64,9 +65,17 @@ const SalesPipeline = () => {
     fetchLeads
   } = useCRMStore();
 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterPriority, setFilterPriority] = useState('all');
+
+  const debouncedSearch = useDebounce(searchTerm, 500);
+
   React.useEffect(() => {
-    fetchLeads();
-  }, []);
+    fetchLeads({
+      search: debouncedSearch,
+      priority: filterPriority
+    });
+  }, [debouncedSearch, filterPriority]);
 
   const [draggedLead, setDraggedLead] = useState(null);
   const [draggedFromStage, setDraggedFromStage] = useState(null);
@@ -76,8 +85,7 @@ const SalesPipeline = () => {
   const [selectedLead, setSelectedLead] = useState(null);
   const [editingDealData, setEditingDealData] = useState(null);
   const [outcomeReason, setOutcomeReason] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterPriority, setFilterPriority] = useState('all');
+  const [outcomeDeadline, setOutcomeDeadline] = useState('');
 
   // New Deal Form State
   const [newDealData, setNewDealData] = useState({
@@ -91,26 +99,16 @@ const SalesPipeline = () => {
 
   const pipelineData = getPipelineData();
 
-  // Calculate totals and filter data
+  // Calculate totals (filtering is now handled by backend)
   const processedPipeline = useMemo(() => {
     return pipelineData.map(column => {
-      const filteredLeads = column.leads.filter(lead => {
-        if (!lead) return false;
-        const matchesSearch = lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          lead.company.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesPriority = filterPriority === 'all' || lead.priority === filterPriority;
-        return matchesSearch && matchesPriority;
-      });
-
-      const totalValue = filteredLeads.reduce((sum, lead) => sum + (Number(lead.amount) || 0), 0);
-
+      const totalValue = column.leads.reduce((sum, lead) => sum + (Number(lead.amount) || 0), 0);
       return {
         ...column,
-        leads: filteredLeads,
         totalValue
       };
     });
-  }, [pipelineData, searchTerm, filterPriority]);
+  }, [pipelineData]);
 
   const handleDragStart = (e, leadId, stage) => {
     setDraggedLead(leadId);
@@ -128,13 +126,13 @@ const SalesPipeline = () => {
 
   const handleDrop = (toStage) => {
     if (draggedLead && draggedFromStage !== toStage) {
-      moveLead(draggedLead, draggedFromStage, toStage);
-
       if (toStage === 'Won' || toStage === 'Lost') {
         const lead = leads.find(l => (l._id === draggedLead || l.id === draggedLead));
         setSelectedLead({ ...lead, status: toStage }); // Temporarily update status for dialog
+        setOutcomeDeadline(lead.deadline ? new Date(lead.deadline).toISOString().split('T')[0] : '');
         setIsOutcomeOpen(true);
       } else {
+        moveLead(draggedLead, draggedFromStage, toStage);
         toast.success(`Deal moved to ${toStage}`);
       }
     }
@@ -142,10 +140,20 @@ const SalesPipeline = () => {
     setDraggedFromStage(null);
   };
 
-  const handleSubmitReason = () => {
+  const handleSubmitOutcome = async () => {
+    const leadId = selectedLead._id || selectedLead.id;
+
+    // Update lead with status, reason (notes), and deadline
+    await editLead(leadId, {
+      status: selectedLead.status,
+      notes: outcomeReason ? `${selectedLead.notes || ''}\nOutcome Note: ${outcomeReason}` : selectedLead.notes,
+      deadline: outcomeDeadline || selectedLead.deadline
+    });
+
     toast.success(`Deal marked as ${selectedLead.status}`);
     setIsOutcomeOpen(false);
     setOutcomeReason('');
+    setOutcomeDeadline('');
     setSelectedLead(null);
   };
 
@@ -184,7 +192,8 @@ const SalesPipeline = () => {
   const handleEditClick = (lead) => {
     setEditingDealData({
       ...lead,
-      amount: lead.amount.toString() // Ensure amount is editable string
+      amount: lead.amount.toString(), // Ensure amount is editable string
+      deadline: lead.deadline ? new Date(lead.deadline).toISOString().split('T')[0] : ''
     });
     setIsEditOpen(true);
   };
@@ -206,16 +215,16 @@ const SalesPipeline = () => {
       amount: parseFloat(editingDealData.amount) || 0
     });
 
-    toast.success("Deal parameters updated");
+    toast.success("Deal updated successfully");
     setIsEditOpen(false);
     setEditingDealData(null);
   };
 
   const handleDeleteDeal = (id) => {
     if (!id) return;
-    if (confirm('Are you sure you want to purge this tactical asset from the pipeline?')) {
+    if (confirm('Are you sure you want to remove this deal from the pipeline?')) {
       deleteLead(id);
-      toast.success("Asset purged from flow");
+      toast.success("Deal removed from pipeline");
     }
   };
 
@@ -236,7 +245,7 @@ const SalesPipeline = () => {
         <div className="flex items-center gap-3 px-1">
           <div>
             <h1 className="text-base sm:text-xl font-black tracking-tight text-slate-900 dark:text-white uppercase leading-none">Sales <span className="text-primary-600">Pipeline</span></h1>
-            <p className="text-slate-500 dark:text-slate-400 text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] leading-none mt-1">Acquisition Velocity</p>
+            <p className="text-slate-500 dark:text-slate-400 text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] leading-none mt-1">Manage deal flow and conversions</p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -262,7 +271,7 @@ const SalesPipeline = () => {
           </Select>
           <Button onClick={() => setIsAddOpen(true)} className="gap-1.5 h-8 sm:h-9 bg-primary-600 hover:bg-primary-700 rounded-xl shadow-lg shadow-primary-500/20 px-3 sm:px-4">
             <Plus size={14} />
-            <span className="text-[9px] font-black uppercase tracking-widest whitespace-nowrap">Deploy deal</span>
+            <span className="text-[9px] font-black uppercase tracking-widest whitespace-nowrap">Add deal</span>
           </Button>
         </div>
       </div>
@@ -330,7 +339,17 @@ const SalesPipeline = () => {
                               <Edit2 className="mr-2 h-3.5 w-3.5" /> Edit Parameters
                             </DropdownMenuItem>
                             {lead.status === 'Won' && !lead.approvalStatus && (
-                              <DropdownMenuItem onClick={() => requestProjectConversion(lead.id || lead._id)} className="text-[10px] font-black uppercase tracking-widest text-emerald-600 focus:text-emerald-600 rounded-xl px-3 py-2">
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  if (!lead.deadline) {
+                                    toast.error("Project deadline is mandatory. Please set a deadline first.");
+                                    handleEditClick(lead);
+                                    return;
+                                  }
+                                  requestProjectConversion(lead.id || lead._id);
+                                }}
+                                className="text-[10px] font-black uppercase tracking-widest text-emerald-600 focus:text-emerald-600 rounded-xl px-3 py-2"
+                              >
                                 <Building2 className="mr-2 h-3.5 w-3.5" /> Project Deployment
                               </DropdownMenuItem>
                             )}
@@ -413,7 +432,7 @@ const SalesPipeline = () => {
 
                       <div className="grid grid-cols-2 gap-2 mb-4">
                         <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100/50 dark:border-slate-800/50 flex flex-col justify-center">
-                          <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest mb-1">Financial Value</p>
+                          <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest mb-1">Deal Value</p>
                           <div className="flex items-center gap-1 text-primary-600 font-black text-xs">
                             <IndianRupee size={10} className="stroke-[3.5px]" />
                             {Number(lead.amount || 0).toLocaleString()}
@@ -422,7 +441,7 @@ const SalesPipeline = () => {
                         <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100/50 dark:border-slate-800/50 flex flex-col justify-center">
                           <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest mb-1">Target Date</p>
                           <p className="text-[10px] font-black text-slate-700 dark:text-slate-300 uppercase">
-                            {lead.deadline ? format(new Date(lead.deadline), 'MMM d, yyyy') : 'In Motion'}
+                            {lead.deadline ? format(new Date(lead.deadline), 'MMM d, yyyy') : 'No deadline'}
                           </p>
                         </div>
                       </div>
@@ -435,7 +454,7 @@ const SalesPipeline = () => {
                           onClick={() => handleEditClick(lead)}
                         >
                           <Edit2 className="size-3.5 mr-2" />
-                          Recalibrate
+                          Edit Deal
                         </Button>
                         <Button
                           variant="ghost"
@@ -444,7 +463,7 @@ const SalesPipeline = () => {
                           onClick={() => handleDeleteDeal(lead._id || lead.id)}
                         >
                           <Trash2 className="size-3.5 mr-2" />
-                          Purge
+                          Delete
                         </Button>
                       </div>
                     </motion.div>
@@ -468,20 +487,33 @@ const SalesPipeline = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            {selectedLead?.status === 'Won' && (
+              <div className="space-y-2">
+                <Label htmlFor="deadline" className="text-xs font-black uppercase text-slate-500">Target project deadline</Label>
+                <Input
+                  id="deadline"
+                  type="date"
+                  value={outcomeDeadline}
+                  onChange={(e) => setOutcomeDeadline(e.target.value)}
+                  className="rounded-xl border-slate-100 dark:border-slate-800"
+                />
+                <p className="text-[9px] text-amber-600 font-bold uppercase italic">* Mandatory for project conversion</p>
+              </div>
+            )}
             <div className="space-y-2">
-              <Label htmlFor="reason">Reason / Notes</Label>
+              <Label htmlFor="reason" className="text-xs font-black uppercase text-slate-500">Outcome Notes</Label>
               <Textarea
                 id="reason"
-                placeholder={selectedLead?.status === 'Won' ? "What went well?" : "Why did we lose this deal?"}
-                className="min-h-[100px]"
+                placeholder={selectedLead?.status === 'Won' ? "Success parameters..." : "Loss details..."}
+                className="min-h-[100px] rounded-xl border-slate-100 dark:border-slate-800"
                 value={outcomeReason}
                 onChange={(e) => setOutcomeReason(e.target.value)}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setIsOutcomeOpen(false)}>Cancel</Button>
-            <Button onClick={handleSubmitReason} className={selectedLead?.status === 'Won' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700'}>
+            <Button variant="ghost" className="rounded-xl uppercase text-[10px] font-black" onClick={() => setIsOutcomeOpen(false)}>Cancel</Button>
+            <Button onClick={handleSubmitOutcome} className={cn("rounded-xl uppercase text-[10px] font-black", selectedLead?.status === 'Won' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700')}>
               Confirm {selectedLead?.status}
             </Button>
           </DialogFooter>
@@ -494,16 +526,16 @@ const SalesPipeline = () => {
           <div className="p-6 sm:p-8 space-y-6">
             <DialogHeader>
               <DialogTitle className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
-                Initialize <span className="text-primary-600">Deal</span>
+                Add New <span className="text-primary-600">Deal</span>
               </DialogTitle>
               <DialogDescription className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                Establish new opportunity in pipeline
+                Create a new business opportunity
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Entity Name</Label>
+                <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Contact Name</Label>
                 <Input
                   id="name"
                   value={newDealData.name}
@@ -513,7 +545,7 @@ const SalesPipeline = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="company" className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Corporate Entity</Label>
+                <Label htmlFor="company" className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Company Name</Label>
                 <Input
                   id="company"
                   value={newDealData.company}
@@ -524,7 +556,7 @@ const SalesPipeline = () => {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="amount" className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Valuation (₹)</Label>
+                  <Label htmlFor="amount" className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Deal Value (₹)</Label>
                   <Input
                     id="amount"
                     type="number"
@@ -558,7 +590,7 @@ const SalesPipeline = () => {
                 Cancel
               </Button>
               <Button onClick={handleAddDeal} className="h-12 flex-[2] rounded-2xl font-black text-[10px] uppercase tracking-widest bg-primary-600 hover:bg-primary-700 shadow-lg shadow-primary-500/20">
-                Deploy Deal
+                Save Deal
               </Button>
             </div>
           </div>
@@ -571,17 +603,17 @@ const SalesPipeline = () => {
           <div className="p-6 sm:p-8 space-y-6">
             <DialogHeader>
               <DialogTitle className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
-                Recalibrate <span className="text-primary-600">Parameters</span>
+                Edit Deal <span className="text-primary-600">Details</span>
               </DialogTitle>
               <DialogDescription className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                Updating tactical metadata
+                Update deal information
               </DialogDescription>
             </DialogHeader>
 
             {editingDealData && (
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="edit-name" className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Entity Name</Label>
+                  <Label htmlFor="edit-name" className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Contact Name</Label>
                   <Input
                     id="edit-name"
                     value={editingDealData.name}
@@ -590,7 +622,7 @@ const SalesPipeline = () => {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="edit-company" className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Corporate Entity</Label>
+                  <Label htmlFor="edit-company" className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Company Name</Label>
                   <Input
                     id="edit-company"
                     value={editingDealData.company}
@@ -600,7 +632,7 @@ const SalesPipeline = () => {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="edit-amount" className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Valuation (₹)</Label>
+                    <Label htmlFor="edit-amount" className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Deal Value (₹)</Label>
                     <Input
                       id="edit-amount"
                       type="number"
@@ -626,6 +658,16 @@ const SalesPipeline = () => {
                     </Select>
                   </div>
                 </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="edit-deadline" className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Target Deadline</Label>
+                  <Input
+                    id="edit-deadline"
+                    type="date"
+                    value={editingDealData.deadline}
+                    onChange={(e) => setEditingDealData({ ...editingDealData, deadline: e.target.value })}
+                    className="h-11 rounded-2xl border-slate-100 dark:border-slate-800 focus:ring-primary-500/20 bg-slate-50/50 dark:bg-slate-900/50 font-bold"
+                  />
+                </div>
               </div>
             )}
 
@@ -634,7 +676,7 @@ const SalesPipeline = () => {
                 Cancel
               </Button>
               <Button onClick={handleSaveEdit} className="h-12 flex-[2] rounded-2xl font-black text-[10px] uppercase tracking-widest bg-primary-600 hover:bg-primary-700 shadow-lg shadow-primary-500/20">
-                Apply Sync
+                Save Changes
               </Button>
             </div>
           </div>

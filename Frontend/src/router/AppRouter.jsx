@@ -281,6 +281,7 @@ const AppRouter = () => {
                 <Route path="projects/:id" element={<ManagerProjectDetails />} />
                 <Route path="assign-task" element={<AssignTask />} />
                 <Route path="my-tasks" element={<MyTasks />} />
+                <Route path="tasks/:id" element={<TaskDetail />} />
 
                 <Route path="team" element={<TeamManagement />} />
                 <Route path="progress" element={<TeamProgress />} />

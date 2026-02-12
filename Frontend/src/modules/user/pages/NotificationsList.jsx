@@ -25,19 +25,23 @@ import { cn } from '@/shared/utils/cn';
 const NotificationsList = () => {
     const navigate = useNavigate();
     const { user: currentUser } = useAuthStore();
-    const { notifications, markAsRead, markAllAsRead, deleteNotification } = useNotificationStore();
+    const { notifications, fetchNotifications, markAsRead, markAllAsRead, deleteNotification, loading } = useNotificationStore();
     const [filterType, setFilterType] = useState('all'); // all, unread, task, message
     const [searchQuery, setSearchQuery] = useState('');
+
+    React.useEffect(() => {
+        fetchNotifications();
+    }, [fetchNotifications]);
 
     // Filter notifications for the current user
     const userNotifications = useMemo(() => {
         return notifications.filter(n => {
-            // General notifications (no recipientId) or notifications specifically for this user
-            const forMe = !n.recipientId || n.recipientId === currentUser?.id;
+            // Recipient check (backend already filters for recipient, but good for safety)
+            const forMe = !n.recipient || n.recipient === currentUser?.id;
 
             // Search filter
             const matchesSearch = n.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                n.description.toLowerCase().includes(searchQuery.toLowerCase());
+                n.message.toLowerCase().includes(searchQuery.toLowerCase());
 
             // Type filter
             const matchesFilter = filterType === 'all' ||
@@ -49,11 +53,11 @@ const NotificationsList = () => {
     }, [notifications, currentUser, searchQuery, filterType]);
 
     const unreadCount = useMemo(() =>
-        notifications.filter(n => (!n.recipientId || n.recipientId === currentUser?.id) && !n.isRead).length
+        notifications.filter(n => (!n.recipient || n.recipient === currentUser?.id) && !n.isRead).length
         , [notifications, currentUser]);
 
-    const handleMarkAll = () => {
-        markAllAsRead();
+    const handleMarkAll = async () => {
+        await markAllAsRead();
         toast.success('All notifications marked as read');
     };
 
@@ -92,10 +96,12 @@ const NotificationsList = () => {
                     )}>
                         {notification.title}
                     </h4>
-                    <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{notification.time}</span>
+                    <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">
+                        {new Date(notification.createdAt).toLocaleDateString()}
+                    </span>
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                    {notification.description}
+                    {notification.message}
                 </p>
             </div>
 
@@ -104,7 +110,7 @@ const NotificationsList = () => {
                     <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => markAsRead(notification.id)}
+                        onClick={() => markAsRead(notification._id)}
                         className="h-8 w-8 hover:bg-white dark:hover:bg-slate-800 text-primary rounded-xl shadow-sm"
                     >
                         <CheckCheck size={16} />
@@ -113,7 +119,7 @@ const NotificationsList = () => {
                 <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => deleteNotification(notification.id)}
+                    onClick={() => deleteNotification(notification._id)}
                     className="h-8 w-8 hover:bg-white dark:hover:bg-slate-800 text-red-500 rounded-xl shadow-sm"
                 >
                     <Trash2 size={16} />

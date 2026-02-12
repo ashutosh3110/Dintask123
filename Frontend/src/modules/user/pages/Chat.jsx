@@ -27,7 +27,7 @@ import useChatStore from '@/store/chatStore';
 
 const EmployeeChat = () => {
     const { user: currentUser, role: userRole } = useAuthStore();
-    const { employees, fetchEmployees } = useEmployeeStore();
+    const { allEmployees, fetchAllEmployees } = useEmployeeStore();
     const {
         conversations,
         activeConversation,
@@ -48,8 +48,8 @@ const EmployeeChat = () => {
     // Initial load
     useEffect(() => {
         fetchConversations();
-        fetchEmployees();
-    }, [fetchConversations, fetchEmployees]);
+        fetchAllEmployees();
+    }, [fetchConversations, fetchAllEmployees]);
 
     // Map role to DB Model
     const getModelName = (role) => {
@@ -66,11 +66,11 @@ const EmployeeChat = () => {
     // Filter employees for search
     const filteredEmployees = useMemo(() => {
         if (!searchTerm) return [];
-        return employees.filter(e =>
+        return allEmployees.filter(e =>
             e._id !== currentUser?._id &&
             e.name.toLowerCase().includes(searchTerm.toLowerCase())
         );
-    }, [employees, currentUser, searchTerm]);
+    }, [allEmployees, currentUser, searchTerm]);
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -156,7 +156,7 @@ const EmployeeChat = () => {
                             {showAllUsers && !searchTerm && (
                                 <div className="mb-4 animate-in fade-in slide-in-from-top-2 duration-300">
                                     <p className="px-3 text-[9px] font-black text-primary-600 uppercase tracking-widest mb-2">Internal Directory</p>
-                                    {employees.filter(u => u._id !== currentUser?._id).map(emp => (
+                                    {allEmployees.filter(u => u._id !== currentUser?._id).map(emp => (
                                         <button
                                             key={emp._id}
                                             onClick={() => handleStartChat(emp)}

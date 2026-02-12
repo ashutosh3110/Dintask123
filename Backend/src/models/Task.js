@@ -19,7 +19,7 @@ const TaskSchema = new mongoose.Schema({
   }],
   subTasks: [{
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee' },
-    status: { type: String, enum: ['pending', 'in_progress', 'completed'], default: 'pending' },
+    status: { type: String, enum: ['pending', 'in_progress', 'completed', 'review'], default: 'pending' },
     progress: { type: Number, default: 0 }
   }],
   statusNotes: { type: String },

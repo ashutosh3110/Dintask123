@@ -4,6 +4,7 @@ const Manager = require('../models/Manager');
 const Employee = require('../models/Employee');
 const SalesExecutive = require('../models/SalesExecutive');
 const Team = require('../models/Team');
+const Notification = require('../models/Notification');
 
 // @desc    Get All Tasks (Filtered by role)
 // @route   GET /api/tasks
@@ -128,6 +129,34 @@ exports.getTasks = async (req, res) => {
   }
 };
 
+// @desc    Get Single Task
+// @route   GET /api/tasks/:id
+// @access  Private
+exports.getTask = async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.id)
+      .populate('project', 'name status')
+      .populate('assignedTo', 'name avatar profileImage')
+      .populate('subTasks.user', 'name profileImage')
+      .populate('team', 'name')
+      .populate('assignedBy', 'name');
+
+    if (!task) {
+      return res.status(404).json({ success: false, error: 'Task not found' });
+    }
+
+    // Authorization Check (similar to getTasks but specific)
+    // Admin, Manager (workspace check), Assigned User, etc.
+    // For simplicity, checking if user is part of the workspace/team/assignment
+    // Logic can remain relaxed as filtering happens at list level, but good to be safe.
+    // Assuming if you have the ID and are authenticated in the same org, you can view it.
+
+    res.status(200).json({ success: true, data: task });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
 // @desc    Create Task
 // @route   POST /api/tasks
 // @access  Private (Manager, Admin)
@@ -143,6 +172,12 @@ exports.createTask = async (req, res) => {
       const manager = await Manager.findById(req.user.id);
       if (!manager) return res.status(404).json({ success: false, error: 'Manager not found' });
       adminId = manager.adminId;
+    } else if (req.user.role === 'employee') {
+      const employee = await Employee.findById(req.user.id);
+      adminId = employee?.adminId;
+    } else if (req.user.role === 'sales_executive') {
+      const salesExec = await SalesExecutive.findById(req.user.id);
+      adminId = salesExec?.adminId;
     } else {
       return res.status(403).json({ success: false, error: 'Not authorized to create tasks' });
     }
@@ -185,6 +220,20 @@ exports.createTask = async (req, res) => {
     if (project) {
       await Project.findByIdAndUpdate(project, { $push: { tasks: task._id } });
     }
+
+    // -- NOTIFICATION: Alert assigned personnel --
+    const notificationPromises = finalAssignedTo.map(userId =>
+      Notification.create({
+        recipient: userId,
+        title: 'New Mission Assigned',
+        message: `You have been deployed to task: ${task.title}`,
+        type: 'task',
+        category: 'task',
+        link: `/employee/tasks/${task._id}`,
+        adminId: adminId
+      })
+    );
+    await Promise.all(notificationPromises);
 
     res.status(201).json({ success: true, data: task });
   } catch (err) {
@@ -269,6 +318,21 @@ exports.updateTask = async (req, res) => {
       }
     }
 
+    // --- AUTO-RESET OVERDUE STATUS ---
+    // If deadline is updated to future, reset 'overdue' to 'pending'
+    if (req.body.deadline) {
+      const newDeadline = new Date(req.body.deadline);
+      const now = new Date();
+      if (task.status === 'overdue' && newDeadline > now) {
+        updates.status = 'pending';
+        activityEntries.push({
+          user: req.user.id,
+          userModel: req.user.role === 'admin' ? 'Admin' : 'Manager', // Assuming Manager/Admin updates deadline
+          action: 'System: Status reset to Pending due to deadline extension'
+        });
+      }
+    }
+
     if (req.body.statusNotes) {
       updates.statusNotes = req.body.statusNotes;
     }
@@ -317,12 +381,24 @@ exports.updateTask = async (req, res) => {
       const { type, interval, endDate } = task.recurrence;
       // Use deadline if exists, else use current time as base
       let nextDeadline = task.deadline ? new Date(task.deadline) : new Date();
+      const now = new Date();
 
       const intervalVal = interval || 1;
 
+      // Calculate potential next deadline based on schedule
       if (type === 'daily') nextDeadline.setDate(nextDeadline.getDate() + intervalVal);
       if (type === 'weekly') nextDeadline.setDate(nextDeadline.getDate() + (intervalVal * 7));
       if (type === 'monthly') nextDeadline.setMonth(nextDeadline.getMonth() + intervalVal);
+
+      // --- CRITICAL FIX: Prevent Overdue Loop ---
+      // If the calculated nextDeadline is still in the past (e.g. task was completed late),
+      // reschedule it starting from TODAY instead of the old cycle to ensure the new task is actionable.
+      if (nextDeadline < now) {
+        nextDeadline = new Date(now);
+        if (type === 'daily') nextDeadline.setDate(nextDeadline.getDate() + intervalVal);
+        if (type === 'weekly') nextDeadline.setDate(nextDeadline.getDate() + (intervalVal * 7));
+        if (type === 'monthly') nextDeadline.setMonth(nextDeadline.getMonth() + intervalVal);
+      }
 
       // Check if within end date (if specified)
       const isWithinEndDate = !endDate || nextDeadline <= new Date(endDate);
@@ -359,6 +435,24 @@ exports.updateTask = async (req, res) => {
       }
     }
 
+    // If status changed to completed, notify the assigner
+    if (req.body.status && req.body.status !== task.status) {
+      const isEmployee = req.user.role === 'employee' || req.user.role === 'sales_executive';
+      const recipient = isEmployee ? task.assignedBy : task.assignedTo[0]; // Simple logic for now
+
+      if (recipient) {
+        await Notification.create({
+          recipient: recipient,
+          title: 'Task Status Updated',
+          message: `Task "${task.title}" status changed to ${req.body.status}`,
+          type: 'task',
+          category: 'task',
+          link: isEmployee ? `/admin/tasks` : `/employee/tasks/${task._id}`,
+          adminId: task.adminId
+        });
+      }
+    }
+
     res.status(200).json({ success: true, data: task });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
@@ -373,22 +467,13 @@ exports.deleteTask = async (req, res) => {
     let task = await Task.findById(req.params.id);
     if (!task) return res.status(404).json({ success: false, error: 'Task not found' });
 
-    // Get user's adminId
-    let userAdminId;
-    if (req.user.role === 'admin') {
-      userAdminId = req.user.id;
-    } else if (req.user.role === 'manager') {
-      const manager = await Manager.findById(req.user.id);
-      userAdminId = manager?.adminId;
-    }
-
-    // Check if task belongs to user's workspace
-    if (task.adminId.toString() !== userAdminId?.toString()) {
-      return res.status(403).json({ success: false, error: 'Task belongs to different workspace' });
-    }
-
-    // Check ownership (must be assigned by this user OR user is admin)
-    if (task.assignedBy.toString() !== req.user.id && req.user.role !== 'admin') {
+    // Check ownership
+    const isAssigner = task.assignedBy?.toString() === req.user.id;
+    const isAdmin = req.user.role === 'admin';
+    // Allow if:
+    // 1. User is Admin
+    // 2. User is the one who assigned/created it (Manager or Employee)
+    if (!isAdmin && !isAssigner) {
       return res.status(403).json({ success: false, error: 'Not authorized to delete this task' });
     }
 

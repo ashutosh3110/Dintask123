@@ -15,7 +15,10 @@ import {
     Target,
     Layers,
     Shield,
-    Paperclip
+    Paperclip,
+    Repeat,
+    Edit,
+    Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
@@ -116,13 +119,13 @@ const MyTasks = () => {
                 <div className="relative flex-1 group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-primary-500 transition-colors" />
                     <Input
-                        placeholder="Search objectives..."
-                        className="pl-11 h-11 bg-white dark:bg-slate-900 border-none shadow-xl shadow-slate-200/20 dark:shadow-none rounded-2xl font-bold text-xs"
+                        placeholder="SEARCH DIRECTIVES..."
+                        className="pl-11 h-12 bg-white dark:bg-slate-900 border-none shadow-xl shadow-slate-200/20 dark:shadow-none rounded-2xl font-black text-xs uppercase tracking-wider"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <div className="flex items-center gap-1.5 p-1 bg-white dark:bg-slate-900 rounded-2xl shadow-xl shadow-slate-200/20 dark:shadow-none overflow-x-auto no-scrollbar">
+                <div className="flex items-center gap-1.5 p-1.5 bg-white dark:bg-slate-900 rounded-2xl shadow-xl shadow-slate-200/20 dark:shadow-none overflow-x-auto no-scrollbar">
                     {['all', 'pending', 'overdue', 'review', 'completed'].map((status) => (
                         <Button
                             key={status}
@@ -132,8 +135,8 @@ const MyTasks = () => {
                             className={cn(
                                 "h-9 px-4 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all",
                                 statusFilter === status
-                                    ? "bg-primary-600 text-white shadow-lg shadow-primary-500/20"
-                                    : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+                                    ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-lg"
+                                    : "text-slate-400 hover:text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800"
                             )}
                         >
                             {status}
@@ -204,6 +207,12 @@ const MyTasks = () => {
                                                             <CalendarIcon size={12} className="text-primary-500" />
                                                             {format(new Date(task.deadline), "MMM dd, yyyy").toUpperCase()}
                                                         </div>
+                                                        {task.recurrence && task.recurrence.type !== 'none' && (
+                                                            <div className="flex items-center gap-1.5">
+                                                                <Repeat size={12} className="text-indigo-500" />
+                                                                {task.recurrence.type.toUpperCase()}
+                                                            </div>
+                                                        )}
                                                         <div className="flex items-center gap-1.5">
                                                             <Target size={12} className="text-indigo-500" />
                                                             {task.labels?.[0]?.toUpperCase() || 'CORE'}
@@ -220,12 +229,12 @@ const MyTasks = () => {
                                                         )}
                                                     </div>
                                                 </div>
-                                                <div className="flex flex-col items-end gap-3 shrink-0">
+                                                <div className="flex flex-col items-end gap-3 shrink-0 cursor-pointer" onClick={() => navigate(`/manager/tasks/${task.id}`)}>
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
                                                         className="size-8 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-primary-600"
-                                                        onClick={() => navigate(`/manager/projects/${task.project}`)}
+                                                        onClick={() => navigate(`/manager/tasks/${task.id}`)}
                                                     >
                                                         <ChevronRight size={18} />
                                                     </Button>
@@ -265,6 +274,30 @@ const MyTasks = () => {
                                                             FULFILL
                                                         </Button>
                                                     )}
+                                                    <div className="flex items-center gap-2 mt-2">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="size-8 rounded-lg text-slate-400 hover:text-primary-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+                                                            onClick={() => navigate(`/manager/assign-task?edit=${task.id}`)}
+                                                            title="Edit Task"
+                                                        >
+                                                            <Edit size={14} />
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="size-8 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20"
+                                                            onClick={() => {
+                                                                if (confirm("Confirm deletion of this directive? This action is irreversible.")) {
+                                                                    useTaskStore.getState().deleteTask(task.id);
+                                                                }
+                                                            }}
+                                                            title="Delete Task"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                        </Button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

@@ -12,6 +12,7 @@ const useCRMStore = create(
       pendingProjects: [],
       followUps: [], // Added followUps state
       crmStats: null, // Global CRM statistics
+      reportData: null, // Sales report data
       loading: false,
       error: null,
 
@@ -19,10 +20,22 @@ const useCRMStore = create(
       pipelineStages: ['New', 'Contacted', 'Meeting Done', 'Proposal Sent', 'Won', 'Lost'],
 
       // Fetch Leads
-      fetchLeads: async () => {
+      fetchLeads: async (options = {}) => {
         set({ loading: true });
         try {
-          const res = await api('/crm');
+          const { search = '', status = '', priority = '', page = 1, limit = 100 } = options;
+          let url = '/crm';
+          const params = new URLSearchParams();
+          if (search) params.append('search', search);
+          if (status) params.append('status', status);
+          if (priority) params.append('priority', priority);
+          if (page) params.append('page', page);
+          if (limit) params.append('limit', limit);
+
+          const queryString = params.toString();
+          if (queryString) url += `?${queryString}`;
+
+          const res = await api(url);
           if (res.success) {
             set({ leads: res.data, loading: false, error: null });
           }
@@ -213,6 +226,20 @@ const useCRMStore = create(
         } catch (error) {
           set({ error: error.message, loading: false });
           console.error("Failed to fetch follow-ups", error);
+        }
+      },
+
+      // Fetch Sales Report Data
+      fetchSalesReport: async (period = 'month') => {
+        set({ loading: true });
+        try {
+          const res = await api(`/crm/reports?period=${period}`);
+          if (res.success) {
+            set({ reportData: res.data, loading: false });
+          }
+        } catch (error) {
+          set({ error: error.message, loading: false });
+          console.error("Failed to fetch sales report", error);
         }
       },
 
