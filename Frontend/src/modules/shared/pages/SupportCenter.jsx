@@ -18,7 +18,9 @@ import {
     Loader2,
     Paperclip,
     X,
-    Star
+    Star,
+    Trash2,
+    ChevronLeft
 } from 'lucide-react';
 import { Card, CardContent } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
@@ -42,23 +44,13 @@ import socketService from '@/services/socket';
 
 const SupportCenter = () => {
     const { user, role } = useAuthStore();
-    const {
-        tickets,
-        addTicket,
-        updateTicketStatus,
-        fetchTickets,
-        loading,
-        fetchTicketStats,
-        stats,
-        replyToTicket,
-        initializeSocket,
-        uploadFiles,
-        giveFeedback
-    } = useTicketStore();
-    const location = useLocation();
-    const isSalesSupport = location.pathname === '/sales/support';
+    const { tickets, addTicket, updateTicketStatus, fetchTickets, loading, fetchTicketStats, stats, replyToTicket, initializeSocket, uploadFiles, giveFeedback, deleteTicket, pagination } = useTicketStore();
     const fileInputRef = React.useRef(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(10);
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+
     const [activeTab, setActiveTab] = useState(role === 'admin' ? 'received' : 'sent');
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [newTicket, setNewTicket] = useState({
@@ -81,11 +73,29 @@ const SupportCenter = () => {
     const [typingUser, setTypingUser] = useState(null);
     const typingTimeoutRef = React.useRef(null);
 
+    // Debounce search
     React.useEffect(() => {
-        fetchTickets();
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchQuery);
+            setPage(1);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
+    // Reset page when tab changes
+    React.useEffect(() => {
+        setPage(1);
+    }, [activeTab]);
+
+    React.useEffect(() => {
+        const scope = role === 'admin' ? (activeTab === 'received' ? 'company' : 'my') : 'all';
+        fetchTickets({ page, limit, search: debouncedSearch, scope });
+    }, [fetchTickets, page, limit, debouncedSearch, activeTab, role]);
+
+    React.useEffect(() => {
         fetchTicketStats();
         if (user?._id) initializeSocket(user._id);
-    }, [fetchTickets, fetchTicketStats, initializeSocket, user?._id]);
+    }, [fetchTicketStats, initializeSocket, user?._id]);
 
     // Sync selectedTicket with store data for real-time updates
     React.useEffect(() => {
@@ -402,25 +412,16 @@ const SupportCenter = () => {
     const categories = ['Technical', 'Billing', 'Account', 'Feature Request', 'Other'];
     const priorities = ['Low', 'Medium', 'High', 'Urgent'];
 
-    // Filter Logic
-    const filteredTickets = (tickets || []).filter(t => {
-        const matchesSearch = t.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            t.ticketId?.toLowerCase().includes(searchQuery.toLowerCase());
-
-        if (role?.startsWith('superadmin')) {
-            return t.isEscalatedToSuperAdmin && matchesSearch;
-        }
-
-        if (role === 'admin') {
-            if (activeTab === 'received') {
-                return !t.isEscalatedToSuperAdmin && t.creator?._id !== user?.id && matchesSearch;
-            } else {
-                return t.creator?._id === user?.id && matchesSearch;
+    const handleDeleteTicket = async (e, id) => {
+        e.stopPropagation();
+        if (confirm('Are you sure you want to delete this ticket? This action cannot be undone.')) {
+            const success = await deleteTicket(id);
+            if (success && selectedTicket?._id === id) {
+                setSelectedTicket(null);
+                setIsSheetOpen(false);
             }
         }
-
-        return t.creator?._id === user?.id && matchesSearch;
-    });
+    };
 
     const handleCreateTicket = async () => {
         if (!newTicket.subject || !newTicket.description) return;
@@ -621,80 +622,145 @@ const SupportCenter = () => {
                                     <div className="flex justify-center items-center py-20 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-[2rem]">
                                         <Loader2 className="animate-spin text-[#4461f2]" size={32} />
                                     </div>
-                                ) : filteredTickets.length > 0 ? (
-                                    filteredTickets.map((ticket, index) => (
-                                        <motion.div
-                                            layout
-                                            key={ticket._id}
-                                            initial={{ opacity: 0, scale: 0.95 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            transition={{ delay: index * 0.05 }}
-                                            onClick={() => handleTicketSelect(ticket)}
-                                            className={cn(
-                                                "bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/40 dark:border-slate-800/40 p-5 rounded-[2rem] shadow-[0_15px_35px_-8px_rgba(0,0,0,0.06)] hover:shadow-xl hover:scale-[1.01] transition-all duration-300 group cursor-pointer",
-                                                selectedTicket?._id === ticket._id ? "ring-2 ring-[#4461f2] ring-offset-2 dark:ring-offset-slate-950" : ""
-                                            )}
-                                        >
-                                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
-                                                <div className="flex items-start gap-5">
-                                                    <div className={cn(
-                                                        "size-14 rounded-2xl flex flex-col items-center justify-center border-none font-black shadow-inner bg-slate-50 dark:bg-slate-950",
-                                                        ticket.status === 'Resolved' ? "text-emerald-500" : "text-[#4461f2]"
-                                                    )}>
-                                                        <span className="text-[9px] opacity-40 uppercase tracking-tighter">ID</span>
-                                                        <span className="text-[13px] tracking-tighter">{ticket.ticketId?.split('-')[1] || ticket._id.slice(-4).toUpperCase()}</span>
-                                                    </div>
-                                                    <div>
-                                                        <div className="flex items-center gap-3 mb-1.5">
-                                                            <Badge className="bg-[#4461f2]/10 text-[#4461f2] hover:bg-[#4461f2]/20 border-none text-[8px] font-black uppercase tracking-wider px-2 py-0.5">
-                                                                {ticket.category}
-                                                            </Badge>
-                                                            <span className={cn(
-                                                                "text-[9px] font-black uppercase flex items-center gap-1 tracking-wider",
-                                                                getPriorityColor(ticket.priority)
-                                                            )}>
-                                                                <AlertCircle size={10} /> {ticket.priority}
-                                                            </span>
+                                ) : tickets.length > 0 ? (
+                                    <>
+                                        {tickets.map((ticket, index) => (
+                                            <motion.div
+                                                layout
+                                                key={ticket._id}
+                                                initial={{ opacity: 0, scale: 0.95 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                transition={{ delay: index * 0.05 }}
+                                                onClick={() => handleTicketSelect(ticket)}
+                                                className={cn(
+                                                    "bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/40 dark:border-slate-800/40 p-5 rounded-[2rem] shadow-[0_15px_35px_-8px_rgba(0,0,0,0.06)] hover:shadow-xl hover:scale-[1.01] transition-all duration-300 group cursor-pointer",
+                                                    selectedTicket?._id === ticket._id ? "ring-2 ring-[#4461f2] ring-offset-2 dark:ring-offset-slate-950" : ""
+                                                )}
+                                            >
+                                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
+                                                    <div className="flex items-start gap-5">
+                                                        <div className={cn(
+                                                            "size-14 rounded-2xl flex flex-col items-center justify-center border-none font-black shadow-inner bg-slate-50 dark:bg-slate-950",
+                                                            ticket.status === 'Resolved' ? "text-emerald-500" : "text-[#4461f2]"
+                                                        )}>
+                                                            <span className="text-[9px] opacity-40 uppercase tracking-tighter">ID</span>
+                                                            <span className="text-[13px] tracking-tighter">{ticket.ticketId?.split('-')[1] || ticket._id.slice(-4).toUpperCase()}</span>
                                                         </div>
-                                                        <h3 className="font-bold text-slate-900 dark:text-white group-hover:text-[#4461f2] transition-colors uppercase tracking-tight text-[15px]">{ticket.title}</h3>
-                                                        <div className="flex items-center gap-5 mt-2">
-                                                            <div className="flex items-center gap-1.5 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                                                                <User size={12} className="text-[#4461f2]/50" />
-                                                                {role === 'admin' && activeTab === 'received' ? ticket.creator?.name : `To: ${ticket.isEscalatedToSuperAdmin ? 'Super Admin' : 'Admin'}`}
+                                                        <div>
+                                                            <div className="flex items-center gap-3 mb-1.5">
+                                                                <Badge className="bg-[#4461f2]/10 text-[#4461f2] hover:bg-[#4461f2]/20 border-none text-[8px] font-black uppercase tracking-wider px-2 py-0.5">
+                                                                    {ticket.category}
+                                                                </Badge>
+                                                                <span className={cn(
+                                                                    "text-[9px] font-black uppercase flex items-center gap-1 tracking-wider",
+                                                                    getPriorityColor(ticket.priority)
+                                                                )}>
+                                                                    <AlertCircle size={10} /> {ticket.priority}
+                                                                </span>
                                                             </div>
-                                                            <div className="flex items-center gap-1.5 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                                                                <Clock size={12} className="text-[#4461f2]/50" />
-                                                                {new Date(ticket.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                            <h3 className="font-bold text-slate-900 dark:text-white group-hover:text-[#4461f2] transition-colors uppercase tracking-tight text-[15px]">{ticket.title}</h3>
+                                                            <div className="flex items-center gap-5 mt-2">
+                                                                <div className="flex items-center gap-1.5 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                                                                    <User size={12} className="text-[#4461f2]/50" />
+                                                                    {role === 'admin' && activeTab === 'received' ? ticket.creator?.name : `To: ${ticket.isEscalatedToSuperAdmin ? 'Super Admin' : 'Admin'}`}
+                                                                </div>
+                                                                <div className="flex items-center gap-1.5 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                                                                    <Clock size={12} className="text-[#4461f2]/50" />
+                                                                    {new Date(ticket.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                                </div>
                                                             </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-3">
+                                                        {role?.startsWith('superadmin') && (
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="size-10 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10"
+                                                                onClick={(e) => handleDeleteTicket(e, ticket._id)}
+                                                            >
+                                                                <Trash2 size={18} />
+                                                            </Button>
+                                                        )}
+                                                        {role === 'admin' && activeTab === 'received' && ticket.status === 'Open' && (
+                                                            <Button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    updateTicketStatus(ticket._id, 'Resolved');
+                                                                }}
+                                                                className="h-10 px-5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20 border-none transition-all active:scale-95"
+                                                            >
+                                                                Resolve
+                                                            </Button>
+                                                        )}
+                                                        <div className={cn(
+                                                            "px-5 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.1em] border-none shadow-sm",
+                                                            getStatusStyle(ticket.status),
+                                                            ticket.status === 'Resolved' ? "bg-emerald-500/10 text-emerald-600" :
+                                                                ticket.status === 'Open' ? "bg-blue-500/10 text-blue-600" :
+                                                                    "bg-amber-500/10 text-amber-600"
+                                                        )}>
+                                                            {ticket.status}
                                                         </div>
                                                     </div>
                                                 </div>
+                                            </motion.div>
+                                        ))}
 
-                                                <div className="flex items-center gap-3">
-                                                    {role === 'admin' && activeTab === 'received' && ticket.status === 'Open' && (
-                                                        <Button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                updateTicketStatus(ticket._id, 'Resolved');
-                                                            }}
-                                                            className="h-10 px-5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20 border-none transition-all active:scale-95"
-                                                        >
-                                                            Resolve
-                                                        </Button>
-                                                    )}
-                                                    <div className={cn(
-                                                        "px-5 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.1em] border-none shadow-sm",
-                                                        getStatusStyle(ticket.status),
-                                                        ticket.status === 'Resolved' ? "bg-emerald-500/10 text-emerald-600" :
-                                                            ticket.status === 'Open' ? "bg-blue-500/10 text-blue-600" :
-                                                                "bg-amber-500/10 text-amber-600"
-                                                    )}>
-                                                        {ticket.status}
-                                                    </div>
+                                        {/* Pagination Controls */}
+                                        <div className="flex items-center justify-between pt-4">
+                                            <div className="flex items-center gap-2">
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest hidden sm:block">
+                                                    Rows per page
+                                                </p>
+                                                <Select
+                                                    value={limit.toString()}
+                                                    onValueChange={(val) => {
+                                                        setLimit(Number(val));
+                                                        setPage(1);
+                                                    }}
+                                                >
+                                                    <SelectTrigger className="h-8 w-[70px] text-[10px] font-bold uppercase tracking-widest bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {[10, 20, 50, 100].map((l) => (
+                                                            <SelectItem key={l} value={l.toString()} className="text-[10px] font-bold">
+                                                                {l}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+
+                                            <div className="flex items-center gap-4">
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                                    Page {pagination?.page} of {pagination?.pages}
+                                                </p>
+                                                <div className="flex gap-2">
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                                                        disabled={page === 1}
+                                                        className="h-8 w-8 p-0 rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                                                    >
+                                                        <ChevronLeft size={16} />
+                                                    </Button>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => setPage(p => Math.min(pagination?.pages || 1, p + 1))}
+                                                        disabled={page >= (pagination?.pages || 1)}
+                                                        className="h-8 w-8 p-0 rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                                                    >
+                                                        <ChevronRight size={16} />
+                                                    </Button>
                                                 </div>
                                             </div>
-                                        </motion.div>
-                                    ))
+                                        </div>
+                                    </>
                                 ) : (
                                     <div className="text-center py-20 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-[2.5rem] border-2 border-dashed border-slate-200 dark:border-slate-800">
                                         <MessageSquare size={54} className="mx-auto text-slate-300 dark:text-slate-700 mb-5 opacity-50" />

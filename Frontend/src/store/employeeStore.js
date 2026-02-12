@@ -88,11 +88,26 @@ const useEmployeeStore = create((set, get) => ({
     },
 
 
-    fetchPendingRequests: async () => {
+    pendingPagination: {
+        page: 1,
+        limit: 10,
+        total: 0,
+        pages: 1
+    },
+
+    fetchPendingRequests: async (params = {}) => {
         try {
-            const res = await api('/admin/join-requests');
+            const queryParams = new URLSearchParams();
+            if (params.page) queryParams.append('page', params.page);
+            if (params.limit) queryParams.append('limit', params.limit);
+            if (params.search) queryParams.append('search', params.search);
+
+            const res = await api(`/admin/join-requests?${queryParams.toString()}`);
             if (res.success) {
-                set({ pendingRequests: res.data || [] });
+                set({
+                    pendingRequests: res.data || [],
+                    pendingPagination: res.pagination || { page: 1, limit: 10, total: 0, pages: 1 }
+                });
             }
         } catch (error) {
             console.error("Fetch Pending Requests Error", error);

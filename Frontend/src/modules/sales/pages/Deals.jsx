@@ -426,6 +426,10 @@ const Deals = () => {
                                                             className="h-7 px-3 text-[9px] font-black uppercase tracking-widest text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm shadow-emerald-500/20"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
+                                                                if (!deal.amount || deal.amount <= 0) {
+                                                                    toast.error("Project budget cannot be zero. Please update the deal amount.");
+                                                                    return;
+                                                                }
                                                                 requestProjectConversion(deal._id || deal.id);
                                                             }}
                                                         >

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { toast } from 'sonner';
-import { Users, Plus, TrendingUp } from 'lucide-react';
+import { Users, Plus, TrendingUp, Edit2, Trash2 } from 'lucide-react';
 import { cn } from '@/shared/utils/cn';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
@@ -21,10 +21,18 @@ import useAuthStore from '@/store/authStore';
 
 const Clients = () => {
     const { user } = useAuthStore();
-    const { leads, addLead } = useCRMStore();
+    const { leads, addLead, editLead, deleteLead } = useCRMStore();
 
     const [isAddClientOpen, setIsAddClientOpen] = useState(false);
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [selectedClient, setSelectedClient] = useState(null);
     const [newClientData, setNewClientData] = useState({
+        name: '',
+        company: '',
+        email: '',
+        phone: ''
+    });
+    const [editClientData, setEditClientData] = useState({
         name: '',
         company: '',
         email: '',
@@ -56,9 +64,36 @@ const Clients = () => {
             source: 'Manual'
         };
         addLead(newClient);
-        toast.success('Client integrated successfully');
         setIsAddClientOpen(false);
         setNewClientData({ name: '', company: '', email: '', phone: '' });
+    };
+
+    const handleEditClick = (client) => {
+        setSelectedClient(client);
+        setEditClientData({
+            name: client.name,
+            company: client.company,
+            email: client.email,
+            phone: client.phone
+        });
+        setIsEditOpen(true);
+    };
+
+    const handleUpdateClient = () => {
+        if (!editClientData.name || !editClientData.company) {
+            toast.error("Name and Company are required");
+            return;
+        }
+
+        editLead(selectedClient._id || selectedClient.id, editClientData);
+        setIsEditOpen(false);
+        setSelectedClient(null);
+    };
+
+    const handleDeleteClient = (client) => {
+        if (window.confirm(`Are you sure you want to delete client "${client.name}"?`)) {
+            deleteLead(client._id || client.id);
+        }
     };
 
     return (
@@ -70,10 +105,10 @@ const Clients = () => {
                     <div className="flex items-center gap-3">
                         <div>
                             <h1 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase leading-none">
-                                Client <span className="text-primary-600">Infrastructure</span>
+                                Client <span className="text-primary-600">Database</span>
                             </h1>
                             <p className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest italic mt-1 leading-none">
-                                Accelerating high-value partnerships
+                                Manage and grow your client relationships
                             </p>
                         </div>
                     </div>
@@ -82,15 +117,15 @@ const Clients = () => {
                         onClick={() => setIsAddClientOpen(true)}
                     >
                         <Plus size={14} className="sm:size-4" />
-                        <span>Onboard Client</span>
+                        <span>Add New Client</span>
                     </Button>
                 </div>
 
                 {/* High-Density Stats Bar */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pb-2 px-1">
                     {[
-                        { label: 'Total Base', value: stats.total, icon: <Users size={16} />, color: 'primary', border: 'border-primary-100', shadow: 'shadow-primary-200/50', gradient: 'bg-gradient-to-br from-white to-primary-50/30' },
-                        { label: 'Active Links', value: stats.active, icon: <TrendingUp size={16} />, color: 'emerald', border: 'border-emerald-100', shadow: 'shadow-emerald-200/50', gradient: 'bg-gradient-to-br from-white to-emerald-50/30' },
+                        { label: 'Total Clients', value: stats.total, icon: <Users size={16} />, color: 'primary', border: 'border-primary-100', shadow: 'shadow-primary-200/50', gradient: 'bg-gradient-to-br from-white to-primary-50/30' },
+                        { label: 'Active Clients', value: stats.active, icon: <TrendingUp size={16} />, color: 'emerald', border: 'border-emerald-100', shadow: 'shadow-emerald-200/50', gradient: 'bg-gradient-to-br from-white to-emerald-50/30' },
                         { label: 'Potential', value: stats.potential, icon: <Users size={16} />, color: 'indigo', border: 'border-indigo-100', shadow: 'shadow-indigo-200/50', gradient: 'bg-gradient-to-br from-white to-indigo-50/30' },
                         { label: 'Growth rate', value: stats.growth, icon: <TrendingUp size={16} />, color: 'blue', border: 'border-blue-100', shadow: 'shadow-blue-200/50', gradient: 'bg-gradient-to-br from-white to-blue-50/30' }
                     ].map((stat, i) => (
@@ -127,16 +162,16 @@ const Clients = () => {
 
             <Card className="border-2 border-primary-100 shadow-xl shadow-primary-200/30 dark:border-primary-900 dark:shadow-none bg-gradient-to-br from-white to-primary-50/30 dark:from-slate-900 dark:to-primary-900/10 rounded-2xl overflow-hidden">
                 <CardHeader className="py-2.5 sm:py-3 px-4 sm:px-6 border-b border-slate-50 dark:border-slate-800">
-                    <CardTitle className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Database core</CardTitle>
+                    <CardTitle className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Client List</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                     <div className="overflow-x-auto scrollbar-hide">
                         <Table>
                             <TableHeader>
                                 <TableRow className="hover:bg-transparent border-slate-50 dark:border-slate-800">
-                                    <TableHead className="px-4 sm:px-6 py-3 text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-400">ID / Force</TableHead>
-                                    <TableHead className="px-4 sm:px-6 py-3 text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-400">Organization</TableHead>
-                                    <TableHead className="hidden md:table-cell px-4 sm:px-6 py-3 text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-400">Comm Link</TableHead>
+                                    <TableHead className="px-4 sm:px-6 py-3 text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-400">Client Name</TableHead>
+                                    <TableHead className="px-4 sm:px-6 py-3 text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-400">Company</TableHead>
+                                    <TableHead className="hidden md:table-cell px-4 sm:px-6 py-3 text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-400">Email Address</TableHead>
                                     <TableHead className="px-4 sm:px-6 py-3 text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-400">Status</TableHead>
                                     <TableHead className="px-4 sm:px-6 py-3 text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-400 text-right">Actions</TableHead>
                                 </TableRow>
@@ -166,13 +201,28 @@ const Clients = () => {
                                                 "rounded-lg border-none px-2 py-0.5 font-black text-[8px] uppercase tracking-widest",
                                                 client.status === 'Won' ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" : "bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300"
                                             )}>
-                                                {client.status === 'Won' ? 'Strategic' : 'Tactical'}
+                                                {client.status === 'Won' ? 'Active' : 'Potential'}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="px-6 py-3 text-right">
-                                            <Button variant="ghost" size="icon" className="size-8 rounded-lg hover:bg-white dark:hover:bg-slate-800">
-                                                <Plus size={14} className="text-slate-400 group-hover:text-primary-600 transition-all" />
-                                            </Button>
+                                            <div className="flex items-center justify-end gap-1">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="size-8 rounded-lg hover:bg-white dark:hover:bg-slate-800 text-slate-400 hover:text-primary-600 transition-all"
+                                                    onClick={() => handleEditClick(client)}
+                                                >
+                                                    <Edit2 size={14} />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="size-8 rounded-lg hover:bg-white dark:hover:bg-slate-800 text-slate-400 hover:text-red-600 transition-all"
+                                                    onClick={() => handleDeleteClient(client)}
+                                                >
+                                                    <Trash2 size={14} />
+                                                </Button>
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -182,18 +232,18 @@ const Clients = () => {
                 </CardContent>
             </Card>
 
-            {/* Onboard Client Dialog */}
+            {/* Add Client Dialog */}
             <Dialog open={isAddClientOpen} onOpenChange={setIsAddClientOpen}>
                 <DialogContent className="sm:max-w-[440px] rounded-[1.5rem] border-none shadow-2xl p-0 overflow-hidden">
                     <div className="bg-slate-900 p-6 text-white relative">
-                        <DialogTitle className="text-xl font-black uppercase tracking-tight">Onboard Client</DialogTitle>
+                        <DialogTitle className="text-xl font-black uppercase tracking-tight">Add New Client</DialogTitle>
                         <DialogDescription className="text-slate-400 font-bold text-[9px] uppercase tracking-widest mt-1 italic">
-                            Register new strategic partner node
+                            Enter details of the new client
                         </DialogDescription>
                     </div>
                     <div className="p-6 space-y-4 bg-white dark:bg-slate-900">
                         <div className="space-y-1.5">
-                            <Label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Client Authority</Label>
+                            <Label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Client Name</Label>
                             <Input
                                 placeholder="Full Name"
                                 className="h-10 bg-slate-50 border-none rounded-xl font-bold text-sm px-4"
@@ -202,7 +252,7 @@ const Clients = () => {
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <Label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Organization</Label>
+                            <Label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Company Name</Label>
                             <Input
                                 placeholder="Entity Name"
                                 className="h-10 bg-slate-50 border-none rounded-xl font-bold text-sm px-4"
@@ -212,7 +262,7 @@ const Clients = () => {
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1.5">
-                                <Label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Comm Channel</Label>
+                                <Label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Email Address</Label>
                                 <Input
                                     placeholder="Email"
                                     className="h-10 bg-slate-50 border-none rounded-xl font-bold text-sm px-4"
@@ -221,7 +271,7 @@ const Clients = () => {
                                 />
                             </div>
                             <div className="space-y-1.5">
-                                <Label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Direct Link</Label>
+                                <Label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Phone Number</Label>
                                 <Input
                                     placeholder="Phone"
                                     className="h-10 bg-slate-50 border-none rounded-xl font-bold text-sm px-4"
@@ -231,8 +281,64 @@ const Clients = () => {
                             </div>
                         </div>
                         <DialogFooter className="pt-4 flex gap-2">
-                            <Button variant="ghost" className="flex-1 h-10 rounded-xl font-black text-[9px] uppercase tracking-widest" onClick={() => setIsAddClientOpen(false)}>Abort</Button>
-                            <Button className="flex-1 h-10 rounded-xl bg-primary-600 hover:bg-primary-700 font-black text-[9px] uppercase tracking-widest text-white shadow-lg" onClick={handleAddClient}>Initialize Sync</Button>
+                            <Button variant="ghost" className="flex-1 h-10 rounded-xl font-black text-[9px] uppercase tracking-widest" onClick={() => setIsAddClientOpen(false)}>Cancel</Button>
+                            <Button className="flex-1 h-10 rounded-xl bg-primary-600 hover:bg-primary-700 font-black text-[9px] uppercase tracking-widest text-white shadow-lg" onClick={handleAddClient}>Save Client</Button>
+                        </DialogFooter>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Edit Client Dialog */}
+            <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+                <DialogContent className="sm:max-w-[440px] rounded-[1.5rem] border-none shadow-2xl p-0 overflow-hidden">
+                    <div className="bg-slate-900 p-6 text-white relative">
+                        <DialogTitle className="text-xl font-black uppercase tracking-tight">Update Client</DialogTitle>
+                        <DialogDescription className="text-slate-400 font-bold text-[9px] uppercase tracking-widest mt-1 italic">
+                            Modify client database record
+                        </DialogDescription>
+                    </div>
+                    <div className="p-6 space-y-4 bg-white dark:bg-slate-900">
+                        <div className="space-y-1.5">
+                            <Label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Client Name</Label>
+                            <Input
+                                placeholder="Full Name"
+                                className="h-10 bg-slate-50 border-none rounded-xl font-bold text-sm px-4"
+                                value={editClientData.name}
+                                onChange={(e) => setEditClientData({ ...editClientData, name: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <Label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Company Name</Label>
+                            <Input
+                                placeholder="Entity Name"
+                                className="h-10 bg-slate-50 border-none rounded-xl font-bold text-sm px-4"
+                                value={editClientData.company}
+                                onChange={(e) => setEditClientData({ ...editClientData, company: e.target.value })}
+                            />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                                <Label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Email Address</Label>
+                                <Input
+                                    placeholder="Email"
+                                    className="h-10 bg-slate-50 border-none rounded-xl font-bold text-sm px-4"
+                                    value={editClientData.email}
+                                    onChange={(e) => setEditClientData({ ...editClientData, email: e.target.value })}
+                                />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Phone Number</Label>
+                                <Input
+                                    placeholder="Phone"
+                                    className="h-10 bg-slate-50 border-none rounded-xl font-bold text-sm px-4"
+                                    value={editClientData.phone}
+                                    onChange={(e) => setEditClientData({ ...editClientData, phone: e.target.value })}
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter className="pt-4 flex gap-2">
+                            <Button variant="ghost" className="flex-1 h-10 rounded-xl font-black text-[9px] uppercase tracking-widest" onClick={() => setIsEditOpen(false)}>Cancel</Button>
+                            <Button className="flex-1 h-10 rounded-xl bg-primary-600 hover:bg-primary-700 font-black text-[9px] uppercase tracking-widest text-white shadow-lg" onClick={handleUpdateClient}>Update Database</Button>
                         </DialogFooter>
                     </div>
                 </DialogContent>

@@ -13,7 +13,8 @@ import {
     ArrowLeft,
     Zap,
     Target,
-    Layers
+    Layers,
+    Clock
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
@@ -84,7 +85,10 @@ const AssignTask = () => {
         assignedTo: 'none',
         labels: '',
         projectId: 'none',
-        teamId: 'none'
+        teamId: 'none',
+        recurrenceType: 'none',
+        recurrenceInterval: '1',
+        recurrenceEndDate: ''
     });
 
     const handleInputChange = (e) => {
@@ -114,7 +118,12 @@ const AssignTask = () => {
                 assignedTo: formData.assignedTo !== 'none' ? [formData.assignedTo] : [],
                 team: formData.teamId === 'none' ? undefined : formData.teamId,
                 project: formData.projectId === 'none' ? undefined : formData.projectId,
-                labels: formData.labels.split(',').map(l => l.trim()).filter(l => l)
+                labels: formData.labels.split(',').map(l => l.trim()).filter(l => l),
+                recurrence: {
+                    type: formData.recurrenceType,
+                    interval: parseInt(formData.recurrenceInterval) || 1,
+                    endDate: formData.recurrenceEndDate ? new Date(formData.recurrenceEndDate) : null
+                }
             };
 
             console.log("Deploying Task Payload:", newTaskPayload);
@@ -355,6 +364,7 @@ const AssignTask = () => {
                             </Button>
                         </CardContent>
                     </Card>
+
                 </div>
             </div>
 
