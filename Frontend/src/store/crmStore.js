@@ -92,10 +92,8 @@ const useCRMStore = create(
           });
           if (res.success) {
             const newLead = res.data;
-            set((state) => ({
-              leads: [...state.leads, newLead],
-              loading: false
-            }));
+            get().fetchLeads();
+            get().fetchCRMStats();
             toast.success("Lead added successfully");
             return newLead;
           }
@@ -113,10 +111,8 @@ const useCRMStore = create(
             body: leadData
           });
           if (res.success) {
-            const updatedLead = res.data;
-            set((state) => ({
-              leads: state.leads.map(l => l._id === leadId ? updatedLead : l)
-            }));
+            get().fetchLeads();
+            get().fetchCRMStats();
             toast.success("Lead updated");
           }
         } catch (error) {
@@ -131,9 +127,8 @@ const useCRMStore = create(
             method: 'DELETE'
           });
           if (res.success) {
-            set((state) => ({
-              leads: state.leads.filter(l => l._id !== leadId)
-            }));
+            get().fetchLeads();
+            get().fetchCRMStats();
             toast.success("Lead deleted successfully");
           }
         } catch (error) {
@@ -149,9 +144,8 @@ const useCRMStore = create(
             body: { ids: leadIds }
           });
           if (res.success) {
-            set((state) => ({
-              leads: state.leads.filter(l => !leadIds.includes(l._id || l.id))
-            }));
+            get().fetchLeads();
+            get().fetchCRMStats();
             toast.success(res.message || "Leads deleted successfully");
           }
         } catch (error) {
@@ -167,10 +161,7 @@ const useCRMStore = create(
             body: { employeeId }
           });
           if (res.success) {
-            const updatedLead = res.data;
-            set((state) => ({
-              leads: state.leads.map(l => l._id === leadId ? updatedLead : l)
-            }));
+            get().fetchLeads();
             toast.success("Lead assigned");
           }
         } catch (error) {
@@ -185,11 +176,9 @@ const useCRMStore = create(
             method: 'PUT'
           });
           if (res.success) {
-            set((state) => ({
-              leads: state.leads.map(l => l._id === leadId ? { ...l, approvalStatus: 'pending_project' } : l)
-            }));
+            get().fetchLeads();
+            get().fetchPendingProjects();
             toast.success("Project requested");
-            get().fetchPendingProjects(); // Refresh pending
           }
         } catch (error) {
           toast.error(error.message || "Failed to request project");
@@ -204,10 +193,8 @@ const useCRMStore = create(
             body: { managerId }
           });
           if (res.success) {
-            set((state) => ({
-              leads: state.leads.map(l => l._id === leadId ? { ...l, approvalStatus: 'approved_project', projectRef: res.data._id } : l),
-              pendingProjects: state.pendingProjects.filter(p => p._id !== leadId)
-            }));
+            get().fetchLeads();
+            get().fetchPendingProjects();
             toast.success("Project approved and assigned");
           }
         } catch (error) {
@@ -251,9 +238,7 @@ const useCRMStore = create(
             body: followUpData
           });
           if (res.success) {
-            set((state) => ({
-              followUps: [...state.followUps, res.data]
-            }));
+            get().fetchFollowUps();
             toast.success("Follow-up scheduled");
             return res.data;
           }
@@ -270,9 +255,7 @@ const useCRMStore = create(
             body: followUpData
           });
           if (res.success) {
-            set((state) => ({
-              followUps: state.followUps.map(f => (f._id === id || f.id === id) ? res.data : f)
-            }));
+            get().fetchFollowUps();
             toast.success("Follow-up updated");
           }
         } catch (error) {
@@ -287,9 +270,7 @@ const useCRMStore = create(
             method: 'DELETE'
           });
           if (res.success) {
-            set((state) => ({
-              followUps: state.followUps.filter(f => (f._id !== id && f.id !== id))
-            }));
+            get().fetchFollowUps();
             toast.success("Follow-up deleted");
           }
         } catch (error) {

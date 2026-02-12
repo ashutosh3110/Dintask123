@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { toast } from 'sonner';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
@@ -86,14 +87,31 @@ const FollowUps = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     if (!formData.leadId) {
-      alert("Please select a valid lead.");
+      toast.error("Lead Anchor Required: Please select a valid target lead.");
+      return;
+    }
+
+    if (!time) {
+      toast.error("Temporal Window Required: Please specify the sync time.");
       return;
     }
 
     const scheduledAt = new Date(selectedDate);
     const [hours, minutes] = time.split(':').map(Number);
     scheduledAt.setHours(hours, minutes, 0, 0);
+
+    if (isNaN(scheduledAt.getTime())) {
+      toast.error("Invalid Temporal Format: Please check your date and time.");
+      return;
+    }
+
+    // Only allow future schedules
+    if (scheduledAt < new Date()) {
+      toast.error("Temporal Anomaly: Cannot schedule synchronization in the past.");
+      return;
+    }
 
     const followUpData = {
       ...formData,
@@ -228,7 +246,12 @@ const FollowUps = () => {
                 <div className="space-y-2">
                   <Label>Date</Label>
                   <div className="border rounded-lg p-2 flex justify-center">
-                    <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} />
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={setSelectedDate}
+                      disabled={{ before: new Date() }}
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">

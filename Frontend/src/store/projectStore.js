@@ -63,6 +63,7 @@ const useProjectStore = create((set, get) => ({
           projects: state.projects.map(p => p._id === id ? { ...p, status } : p),
           currentProject: state.currentProject?._id === id ? { ...state.currentProject, status } : state.currentProject
         }));
+        get().fetchProjects(); // Re-fetch to sync lists and stats
         toast.success("Project status updated");
       }
     } catch (error) {
@@ -77,6 +78,7 @@ const useProjectStore = create((set, get) => ({
         set(state => ({
           projects: state.projects.filter(p => (p._id || p.id) !== id)
         }));
+        get().fetchProjects(); // Re-fetch to sync lists and stats
         toast.success("Project and associated tasks purged successfully");
         return true;
       }

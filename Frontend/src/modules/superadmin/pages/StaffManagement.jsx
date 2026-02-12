@@ -124,6 +124,18 @@ const StaffManagement = () => {
 
   const handleAddStaff = async (e) => {
     e.preventDefault();
+
+    // Client-side validation
+    const { name, email, password } = formData;
+    if (!name.trim()) return toast.error("Name is required");
+    if (!email.trim()) return toast.error("Email is required");
+    if (!password) return toast.error("Password is required");
+
+    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    if (!emailRegex.test(email)) return toast.error("Invalid email format");
+
+    if (password.length < 6) return toast.error("Password must be at least 6 characters");
+
     const success = await addStaff(formData);
     if (success) {
       toast.success("Staff member added successfully");
@@ -136,6 +148,17 @@ const StaffManagement = () => {
 
   const handleEditStaff = async (e) => {
     e.preventDefault();
+
+    // Client-side validation
+    const { name, email, password } = formData;
+    if (!name.trim()) return toast.error("Name cannot be empty");
+    if (!email.trim()) return toast.error("Email cannot be empty");
+
+    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    if (!emailRegex.test(email)) return toast.error("Invalid email format");
+
+    if (password && password.length < 6) return toast.error("Password must be at least 6 characters");
+
     const success = await updateStaff(selectedStaff._id, formData);
     if (success) {
       toast.success("Staff details updated");

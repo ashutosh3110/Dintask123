@@ -50,6 +50,9 @@ const useSubscriptionStore = create((set, get) => ({
         method: 'POST',
         body: paymentData
       });
+      if (response.success) {
+        get().fetchBillingHistory();
+      }
       return response;
     } catch (err) {
       console.error('Payment verification failed:', err);

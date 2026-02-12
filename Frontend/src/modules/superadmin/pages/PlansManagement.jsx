@@ -84,8 +84,30 @@ const PlansManagement = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!planForm.name || planForm.price === '' || planForm.userLimit === '' || planForm.duration === '') {
+        const { name, price, userLimit, duration } = planForm;
+
+        if (!name.trim()) {
+            toast.error("Plan Name is required");
+            return;
+        }
+
+        if (price === '' || userLimit === '' || duration === '') {
             toast.error("Please fill in all required parameters");
+            return;
+        }
+
+        if (Number(price) < 0) {
+            toast.error("Price must be a non-negative number");
+            return;
+        }
+
+        if (Number(userLimit) < 1) {
+            toast.error("Node Capacity must be at least 1");
+            return;
+        }
+
+        if (Number(duration) < 1) {
+            toast.error("Validity must be at least 1 day");
             return;
         }
 

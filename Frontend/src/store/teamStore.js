@@ -34,6 +34,7 @@ const useTeamStore = create((set, get) => ({
                     teams: [...state.teams, res.data],
                     loading: false,
                 }));
+                get().fetchTeams(); // Re-fetch to sync
                 toast.success('Team created successfully');
                 return res.data;
             }
@@ -55,6 +56,7 @@ const useTeamStore = create((set, get) => ({
                     teams: state.teams.map((t) => (t._id === teamId ? res.data : t)),
                     loading: false,
                 }));
+                get().fetchTeams(); // Re-fetch to sync
                 toast.success('Team updated successfully');
             }
         } catch (error) {
@@ -72,6 +74,7 @@ const useTeamStore = create((set, get) => ({
                 set((state) => ({
                     teams: state.teams.filter((t) => t._id !== teamId),
                 }));
+                get().fetchTeams(); // Re-fetch to sync
                 toast.success('Team deleted successfully');
             }
         } catch (error) {

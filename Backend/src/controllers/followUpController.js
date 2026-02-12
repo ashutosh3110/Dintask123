@@ -41,16 +41,35 @@ exports.getFollowUps = async (req, res) => {
 // @access  Private
 exports.createFollowUp = async (req, res) => {
     try {
-        // Determine adminId based on role
-        if (req.user.role === 'admin') {
-            req.body.adminId = req.user.id;
-        } else {
-            req.body.adminId = req.user.adminId;
+        const { leadId, type, scheduledAt } = req.body;
+
+        if (!leadId) {
+            return res.status(400).json({ success: false, error: 'Please select a valid Lead for tracking' });
+        }
+
+        if (!type || !['Call', 'Meeting', 'Email', 'WhatsApp'].includes(type)) {
+            return res.status(400).json({ success: false, error: 'Invalid interaction type selected' });
+        }
+
+        if (!scheduledAt) {
+            return res.status(400).json({ success: false, error: 'Mandatory: Please specify the temporal window for this sync' });
+        }
+
+        const syncDate = new Date(scheduledAt);
+        if (isNaN(syncDate.getTime())) {
+            return res.status(400).json({ success: false, error: 'Invalid temporal format' });
+        }
+
+        // Only enforce future dates for NEW "Scheduled" follow-ups
+        // Note: For migrations or manual logging of past events, we might relax this, 
+        // but for fresh commands, we want to ensure focus on future ops.
+        if (req.body.status === 'Scheduled' && syncDate < new Date()) {
+            return res.status(400).json({ success: false, error: 'Temporal Anomaly: Cannot schedule synchronization in the past' });
         }
 
         // If Sales Executive, verify the lead belongs to them
         if (req.user.role === 'sales' || req.user.role === 'sales_executive') {
-            const lead = await Lead.findById(req.body.leadId);
+            const lead = await Lead.findById(leadId);
             if (!lead) {
                 return res.status(404).json({ success: false, error: 'Lead not found' });
             }

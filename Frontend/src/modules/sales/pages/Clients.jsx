@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { toast } from 'sonner';
-import { Users, Plus, TrendingUp, Edit2, Trash2 } from 'lucide-react';
+import { Users, TrendingUp, Edit2, Trash2 } from 'lucide-react';
 import { cn } from '@/shared/utils/cn';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
@@ -23,15 +23,8 @@ const Clients = () => {
     const { user } = useAuthStore();
     const { leads, addLead, editLead, deleteLead } = useCRMStore();
 
-    const [isAddClientOpen, setIsAddClientOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [selectedClient, setSelectedClient] = useState(null);
-    const [newClientData, setNewClientData] = useState({
-        name: '',
-        company: '',
-        email: '',
-        phone: ''
-    });
     const [editClientData, setEditClientData] = useState({
         name: '',
         company: '',
@@ -50,23 +43,6 @@ const Clients = () => {
         };
     }, [myClients]);
 
-    const handleAddClient = () => {
-        if (!newClientData.name || !newClientData.company) {
-            toast.error("Name and Company are required");
-            return;
-        }
-
-        const newClient = {
-            ...newClientData,
-            status: 'Won',
-            owner: user?.id || '1',
-            createdAt: new Date().toISOString(),
-            source: 'Manual'
-        };
-        addLead(newClient);
-        setIsAddClientOpen(false);
-        setNewClientData({ name: '', company: '', email: '', phone: '' });
-    };
 
     const handleEditClick = (client) => {
         setSelectedClient(client);
@@ -112,13 +88,6 @@ const Clients = () => {
                             </p>
                         </div>
                     </div>
-                    <Button
-                        className="h-9 px-4 sm:px-6 gap-2 shadow-lg shadow-primary-500/20 bg-primary-600 hover:bg-primary-700 rounded-xl font-black text-[9px] sm:text-[10px] uppercase tracking-widest w-full sm:w-auto"
-                        onClick={() => setIsAddClientOpen(true)}
-                    >
-                        <Plus size={14} className="sm:size-4" />
-                        <span>Add New Client</span>
-                    </Button>
                 </div>
 
                 {/* High-Density Stats Bar */}
@@ -232,61 +201,6 @@ const Clients = () => {
                 </CardContent>
             </Card>
 
-            {/* Add Client Dialog */}
-            <Dialog open={isAddClientOpen} onOpenChange={setIsAddClientOpen}>
-                <DialogContent className="sm:max-w-[440px] rounded-[1.5rem] border-none shadow-2xl p-0 overflow-hidden">
-                    <div className="bg-slate-900 p-6 text-white relative">
-                        <DialogTitle className="text-xl font-black uppercase tracking-tight">Add New Client</DialogTitle>
-                        <DialogDescription className="text-slate-400 font-bold text-[9px] uppercase tracking-widest mt-1 italic">
-                            Enter details of the new client
-                        </DialogDescription>
-                    </div>
-                    <div className="p-6 space-y-4 bg-white dark:bg-slate-900">
-                        <div className="space-y-1.5">
-                            <Label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Client Name</Label>
-                            <Input
-                                placeholder="Full Name"
-                                className="h-10 bg-slate-50 border-none rounded-xl font-bold text-sm px-4"
-                                value={newClientData.name}
-                                onChange={(e) => setNewClientData({ ...newClientData, name: e.target.value })}
-                            />
-                        </div>
-                        <div className="space-y-1.5">
-                            <Label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Company Name</Label>
-                            <Input
-                                placeholder="Entity Name"
-                                className="h-10 bg-slate-50 border-none rounded-xl font-bold text-sm px-4"
-                                value={newClientData.company}
-                                onChange={(e) => setNewClientData({ ...newClientData, company: e.target.value })}
-                            />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1.5">
-                                <Label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Email Address</Label>
-                                <Input
-                                    placeholder="Email"
-                                    className="h-10 bg-slate-50 border-none rounded-xl font-bold text-sm px-4"
-                                    value={newClientData.email}
-                                    onChange={(e) => setNewClientData({ ...newClientData, email: e.target.value })}
-                                />
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Phone Number</Label>
-                                <Input
-                                    placeholder="Phone"
-                                    className="h-10 bg-slate-50 border-none rounded-xl font-bold text-sm px-4"
-                                    value={newClientData.phone}
-                                    onChange={(e) => setNewClientData({ ...newClientData, phone: e.target.value })}
-                                />
-                            </div>
-                        </div>
-                        <DialogFooter className="pt-4 flex gap-2">
-                            <Button variant="ghost" className="flex-1 h-10 rounded-xl font-black text-[9px] uppercase tracking-widest" onClick={() => setIsAddClientOpen(false)}>Cancel</Button>
-                            <Button className="flex-1 h-10 rounded-xl bg-primary-600 hover:bg-primary-700 font-black text-[9px] uppercase tracking-widest text-white shadow-lg" onClick={handleAddClient}>Save Client</Button>
-                        </DialogFooter>
-                    </div>
-                </DialogContent>
-            </Dialog>
 
             {/* Edit Client Dialog */}
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>

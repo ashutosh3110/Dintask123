@@ -54,12 +54,16 @@ const useTicketStore = create((set, get) => ({
 
     deleteTicket: async (id) => {
         try {
-            await api(`/support-tickets/${id}`, { method: 'DELETE' });
-            set(state => ({
-                tickets: state.tickets.filter(t => t._id !== id)
-            }));
-            toast.success('Ticket deleted successfully');
-            return true;
+            const res = await api(`/support-tickets/${id}`, { method: 'DELETE' });
+            if (res.success) {
+                set(state => ({
+                    tickets: state.tickets.filter(t => t._id !== id)
+                }));
+                get().fetchTickets(get().pagination);
+                get().fetchTicketStats();
+                toast.success('Ticket deleted successfully');
+                return true;
+            }
         } catch (err) {
             console.error("Delete Ticket Error:", err);
             toast.error(err.message || 'Failed to delete ticket');
@@ -84,12 +88,16 @@ const useTicketStore = create((set, get) => ({
                 body: payload
             });
 
-            set((state) => ({
-                tickets: [res.data, ...state.tickets],
-                loading: false
-            }));
-            toast.success('Ticket created successfully');
-            return true;
+            if (res.success) {
+                set((state) => ({
+                    tickets: [res.data, ...state.tickets],
+                    loading: false
+                }));
+                get().fetchTickets(get().pagination);
+                get().fetchTicketStats();
+                toast.success('Ticket created successfully');
+                return true;
+            }
         } catch (err) {
             console.error("Create Ticket Error:", err);
             toast.error(err.message || 'Failed to create ticket');
@@ -112,6 +120,8 @@ const useTicketStore = create((set, get) => ({
                 method: 'PUT',
                 body: { status }
             });
+            get().fetchTickets(get().pagination);
+            get().fetchTicketStats();
             toast.success(`Ticket marked as ${status}`);
         } catch (err) {
             console.error("Update Ticket Error:", err);
