@@ -144,6 +144,17 @@ exports.createAdmin = async (req, res, next) => {
   try {
     const { companyName, name, email, subscriptionPlan, password } = req.body;
 
+    // Validation
+    if (!companyName || !name || !email) {
+      return next(new ErrorResponse('Please provide company name, owner name and email', 400));
+    }
+
+    // Email format validation
+    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    if (!emailRegex.test(email)) {
+      return next(new ErrorResponse('Please provide a valid email', 400));
+    }
+
     // Check if admin already exists
     const existingAdmin = await Admin.findOne({ email });
     if (existingAdmin) {
@@ -1298,6 +1309,22 @@ exports.createStaff = async (req, res, next) => {
   try {
     const { name, email, password, phoneNumber } = req.body;
 
+    // Validation
+    if (!name || !email || !password) {
+      return next(new ErrorResponse('Please provide name, email and password', 400));
+    }
+
+    // Email format validation
+    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    if (!emailRegex.test(email)) {
+      return next(new ErrorResponse('Please provide a valid email', 400));
+    }
+
+    // Password length validation
+    if (password.length < 6) {
+      return next(new ErrorResponse('Password must be at least 6 characters', 400));
+    }
+
     const existingUser = await SuperAdmin.findOne({ email });
     if (existingUser) {
       return next(new ErrorResponse('Staff with this email already exists', 400));
@@ -1329,6 +1356,28 @@ exports.updateStaff = async (req, res, next) => {
 
     if (!staff || staff.role !== 'superadmin_staff') {
       return next(new ErrorResponse('Staff not found', 404));
+    }
+
+    // Validation for update
+    if (req.body.email) {
+      const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+      if (!emailRegex.test(req.body.email)) {
+        return next(new ErrorResponse('Please provide a valid email', 400));
+      }
+
+      // Check if email is already taken by another user
+      const existingUser = await SuperAdmin.findOne({ email: req.body.email, _id: { $ne: req.params.id } });
+      if (existingUser) {
+        return next(new ErrorResponse('Email is already in use', 400));
+      }
+    }
+
+    if (req.body.name === '') {
+      return next(new ErrorResponse('Name cannot be empty', 400));
+    }
+
+    if (req.body.password && req.body.password.length < 6) {
+      return next(new ErrorResponse('Password must be at least 6 characters', 400));
     }
 
     staff = await SuperAdmin.findByIdAndUpdate(req.params.id, req.body, {

@@ -225,9 +225,10 @@ exports.createTask = async (req, res) => {
     const notificationPromises = finalAssignedTo.map(userId =>
       Notification.create({
         recipient: userId,
+        sender: req.user.id,
         title: 'New Mission Assigned',
         message: `You have been deployed to task: ${task.title}`,
-        type: 'task',
+        type: 'task_assigned',
         category: 'task',
         link: `/employee/tasks/${task._id}`,
         adminId: adminId
@@ -443,9 +444,10 @@ exports.updateTask = async (req, res) => {
       if (recipient) {
         await Notification.create({
           recipient: recipient,
+          sender: req.user.id,
           title: 'Task Status Updated',
           message: `Task "${task.title}" status changed to ${req.body.status}`,
-          type: 'task',
+          type: 'task_assigned',
           category: 'task',
           link: isEmployee ? `/admin/tasks` : `/employee/tasks/${task._id}`,
           adminId: task.adminId

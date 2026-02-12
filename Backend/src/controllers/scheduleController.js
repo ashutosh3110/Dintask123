@@ -36,7 +36,34 @@ exports.getSchedules = async (req, res) => {
 // @access  Private/Admin
 exports.createSchedule = async (req, res) => {
   try {
-    const { date, time, endTime } = req.body;
+    const { title, date, time, endTime, type } = req.body;
+
+    if (!title || title.trim().length < 3) {
+      return res.status(400).json({ success: false, message: 'Title is required (min 3 chars)' });
+    }
+
+    if (!date) {
+      return res.status(400).json({ success: false, message: 'Date is required' });
+    }
+
+    if (!time || !endTime) {
+      return res.status(400).json({ success: false, message: 'Start and end times are required' });
+    }
+
+    if (endTime <= time) {
+      return res.status(400).json({ success: false, message: 'End time must be after start time' });
+    }
+
+    if (!type || !['meeting', 'call', 'review'].includes(type)) {
+      return res.status(400).json({ success: false, message: 'Invalid event type selected' });
+    }
+
+    const syncDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (syncDate < today) {
+      return res.status(400).json({ success: false, message: 'Cannot schedule events in the past' });
+    }
 
     // Check for overlapping events on the same date
     const overlappingEvent = await Schedule.findOne({
