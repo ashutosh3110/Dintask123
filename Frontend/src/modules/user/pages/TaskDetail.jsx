@@ -202,32 +202,42 @@ const TaskDetail = () => {
 
                     {/* Main Column */}
                     <div className="lg:col-span-8 space-y-4 md:space-y-6">
+                        {/* Back Button */}
+                        <div className="mb-2">
+                            <Button
+                                variant="ghost"
+                                onClick={() => navigate(-1)}
+                                className="pl-0 hover:bg-transparent hover:text-primary gap-2 text-slate-400 transition-colors"
+                            >
+                                <ArrowLeft size={20} />
+                                <span className="text-xs font-black uppercase tracking-widest">Back to Command</span>
+                            </Button>
+                        </div>
+
                         {/* Header Section */}
                         <div className="mb-2">
-                            <div className="flex flex-wrap gap-2 mb-3">
-                                <div className={cn("flex h-6 md:h-7 items-center justify-center rounded-full px-2.5 md:px-3", pConfig.color)}>
-                                    <p className="text-[10px] md:text-xs font-bold uppercase tracking-wider">{pConfig.label}</p>
+                            <div className="flex flex-wrap gap-2.5 mb-4">
+                                <div className={cn("flex h-7 items-center justify-center rounded-full px-3 border-2 border-transparent", pConfig.color)}>
+                                    <p className="text-[10px] font-black uppercase tracking-wider">{pConfig.label}</p>
                                 </div>
                                 {task.team && (
-                                    <div className={cn("flex h-6 md:h-7 items-center justify-center rounded-full px-2.5 md:px-3 bg-indigo-100 dark:bg-indigo-900 shadow-sm border border-indigo-200 dark:border-indigo-800")}>
-                                        <p className="text-indigo-600 dark:text-indigo-400 text-[10px] md:text-xs font-black uppercase tracking-wider">TEAM: {task.team.name}</p>
+                                    <div className={cn("flex h-7 items-center justify-center rounded-full px-3 bg-indigo-50 dark:bg-indigo-900/30 border-2 border-indigo-100 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400")}>
+                                        <p className="text-[10px] font-black uppercase tracking-wider">TEAM: {task.team.name}</p>
                                     </div>
                                 )}
-                                {task.status === 'overdue' && (
-                                    <div className={cn("flex h-6 md:h-7 items-center justify-center rounded-full px-2.5 md:px-3 bg-red-600 text-white shadow-lg shadow-red-500/20")}>
-                                        <p className="text-[10px] md:text-xs font-black uppercase tracking-wider">OVERDUE</p>
-                                    </div>
-                                )}
-                                <div className={cn("flex h-6 md:h-7 items-center justify-center rounded-full px-2.5 md:px-3",
-                                    task.status === 'overdue' ? "bg-red-50 text-red-600" : "bg-slate-100 dark:bg-slate-800"
+                                <div className={cn("flex h-7 items-center justify-center rounded-full px-3 border-2",
+                                    task.status === 'overdue' ? "bg-rose-50 text-rose-600 border-rose-100" :
+                                        task.status === 'pending' ? "bg-amber-50 text-amber-600 border-amber-100" :
+                                            task.status === 'in_progress' ? "bg-sky-50 text-sky-600 border-sky-100" :
+                                                task.status === 'review' ? "bg-purple-50 text-purple-600 border-purple-100" :
+                                                    task.status === 'completed' ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
+                                                        "bg-slate-50 text-slate-500 border-slate-100"
                                 )}>
-                                    <p className={cn("text-[10px] md:text-xs font-bold uppercase tracking-wider",
-                                        task.status === 'overdue' ? "text-red-700 font-extrabold" : "text-slate-600 dark:text-slate-300"
-                                    )}>{task.status.replace('_', ' ')}</p>
+                                    <p className="text-[10px] font-black uppercase tracking-wider">{task.status.replace('_', ' ')}</p>
                                 </div>
                                 {task.labels && task.labels.map((label, i) => (
-                                    <div key={i} className="flex h-6 md:h-7 items-center justify-center rounded-full bg-primary/10 px-2.5 md:px-3">
-                                        <p className="text-primary text-[10px] md:text-xs font-bold uppercase tracking-wider">{label}</p>
+                                    <div key={i} className="flex h-7 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/20 px-3 border-2 border-blue-100 dark:border-blue-800">
+                                        <p className="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-wider">{label}</p>
                                     </div>
                                 ))}
                             </div>
@@ -266,28 +276,28 @@ const TaskDetail = () => {
                                 </h3>
                                 <div className="space-y-4">
                                     {task.subTasks?.map((subTask, idx) => (
-                                        <div key={idx} className="flex items-center gap-4 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800">
-                                            <Avatar className="h-10 w-10 border-2 border-white dark:border-slate-800 shadow-sm">
+                                        <div key={idx} className="flex items-center gap-4 p-4 bg-gradient-to-br from-indigo-50/80 to-blue-50/80 dark:from-indigo-900/10 dark:to-blue-900/10 rounded-2xl border border-indigo-100/50 dark:border-indigo-800/30">
+                                            <Avatar className="h-12 w-12 border-2 border-white dark:border-slate-800 shadow-sm ring-2 ring-indigo-100 dark:ring-indigo-900/50">
                                                 <AvatarImage src={subTask.user?.profileImage || subTask.user?.avatar} />
-                                                <AvatarFallback className="text-[10px] font-black">{subTask.user?.name?.charAt(0)}</AvatarFallback>
+                                                <AvatarFallback className="text-xs font-black bg-indigo-100 text-indigo-600">{subTask.user?.name?.charAt(0)}</AvatarFallback>
                                             </Avatar>
                                             <div className="flex-1 min-w-0">
-                                                <div className="flex justify-between mb-1.5">
-                                                    <span className="text-xs font-black text-slate-700 dark:text-gray-200 uppercase truncate">
+                                                <div className="flex justify-between mb-2">
+                                                    <span className="text-sm font-black text-slate-800 dark:text-gray-100 uppercase truncate tracking-tight">
                                                         {subTask.user?.name || 'Unknown Agent'}
                                                     </span>
                                                     <Badge variant="outline" className={cn(
-                                                        "text-[8px] font-black uppercase tracking-wider h-5",
-                                                        subTask.status === 'completed' ? "bg-emerald-50 text-emerald-600 border-emerald-200" :
-                                                            subTask.status === 'review' ? "bg-blue-50 text-blue-600 border-blue-200" :
-                                                                subTask.status === 'in_progress' ? "bg-amber-50 text-amber-600 border-amber-200" :
-                                                                    "bg-slate-100 text-slate-500 border-slate-200"
+                                                        "text-[9px] font-black uppercase tracking-widest h-6 px-2.5",
+                                                        subTask.status === 'completed' ? "bg-emerald-100 text-emerald-700 border-emerald-200" :
+                                                            subTask.status === 'review' ? "bg-blue-100 text-blue-700 border-blue-200" :
+                                                                subTask.status === 'in_progress' ? "bg-amber-100 text-amber-700 border-amber-200" :
+                                                                    "bg-white/60 text-slate-500 border-slate-200/60"
                                                     )}>
                                                         {subTask.status?.replace('_', ' ') || 'Pending'}
                                                     </Badge>
                                                 </div>
                                                 <div className="flex items-center gap-3">
-                                                    <div className="flex-1 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                                    <div className="flex-1 h-2 bg-white/60 dark:bg-slate-800/60 rounded-full overflow-hidden">
                                                         <div
                                                             className={cn("h-full rounded-full transition-all duration-500",
                                                                 subTask.status === 'completed' ? "bg-emerald-500" : "bg-primary"
@@ -383,17 +393,19 @@ const TaskDetail = () => {
                                         <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 shadow-sm relative group">
                                             <Shield size={18} />
                                         </div>
-                                        <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Admin</span>
+                                        <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Manager</span>
                                     </div>
-                                    <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800 relative">
+                                    <div className="h-px flex-1 bg-gradient-to-r from-amber-200 to-blue-200 dark:from-amber-900/50 dark:to-blue-900/50 relative">
                                         <div className="absolute inset-x-0 -top-1.5 flex items-center justify-center">
-                                            <ChevronRight size={12} className="text-slate-300 dark:text-slate-700" />
+                                            <ChevronRight size={12} className="text-slate-400 dark:text-slate-600" />
                                         </div>
                                     </div>
                                     <div className="flex flex-col items-center gap-1">
                                         <div className={cn(
-                                            "h-10 w-10 rounded-full flex items-center justify-center shadow-sm border-2 bg-white dark:bg-slate-800 border-white dark:border-slate-800 text-slate-600 dark:text-slate-400",
-                                            task.team && "border-indigo-400 bg-indigo-50 text-indigo-600 dark:bg-indigo-900/40"
+                                            "h-10 w-10 rounded-full flex items-center justify-center shadow-sm",
+                                            task.team
+                                                ? "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400"
+                                                : "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
                                         )}>
                                             {task.team ? <Users size={18} /> : <User size={18} />}
                                         </div>

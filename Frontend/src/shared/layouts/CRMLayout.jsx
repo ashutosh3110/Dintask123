@@ -148,7 +148,7 @@ const CRMLayout = ({ role }) => {
             </div>
 
             {/* Mobile Header & Sidebar */}
-            <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-100 dark:border-slate-800 z-50 px-4 flex items-center justify-between shadow-sm">
+            <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 z-50 px-4 flex items-center justify-between shadow-sm">
                 <div className="flex items-center gap-1">
                     <span className="font-black text-slate-900 dark:text-white tracking-tight uppercase text-xs">CRM<span className="text-primary-600 ml-1">Suite</span></span>
                 </div>

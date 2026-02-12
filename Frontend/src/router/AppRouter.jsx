@@ -253,9 +253,8 @@ const AppRouter = () => {
                 <Route path="users" element={<GlobalUsersOverview />} />
                 <Route path="inquiries" element={<Inquiries />} />
                 <Route path="support" element={<SupportCenter />} />
-                <Route path="history" element={<SubscriptionHistory />} />
-                <Route path="settings" element={<SuperAdminSettings />} />
                 <Route path="notifications" element={<SuperAdminNotifications />} />
+                <Route path="settings" element={<SuperAdminSettings />} />
 
 
                 <Route path="system-intel" element={<IntelManager />} />
@@ -274,7 +273,6 @@ const AppRouter = () => {
 
 
             {/* --- MANAGER ROUTES --- */}
-            {/* Main Manager Panel */}
             <Route path="/manager" element={<ProtectedRoute allowedRoles={['manager']}><ManagerLayout /></ProtectedRoute>}>
                 <Route index element={<ManagerDashboard />} />
                 <Route path="projects" element={<ManagerProjects />} />

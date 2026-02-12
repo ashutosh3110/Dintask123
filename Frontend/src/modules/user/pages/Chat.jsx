@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { useNavigate, NavLink, useLocation } from 'react-router-dom';
 import {
     Search,
     Send,
@@ -11,7 +12,13 @@ import {
     Video,
     Info,
     CheckCheck,
-    Clock
+    Clock,
+    Home,
+    CheckSquare,
+    LayoutDashboard,
+    Calendar,
+    StickyNote,
+    LifeBuoy
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
@@ -26,6 +33,17 @@ import useEmployeeStore from '@/store/employeeStore';
 import useChatStore from '@/store/chatStore';
 
 const EmployeeChat = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const navItems = [
+        { name: 'Home', path: '/employee', icon: LayoutDashboard },
+        { name: 'Calendar', path: '/employee/calendar', icon: Calendar },
+        { name: 'Chat', path: '/employee/chat', icon: MessageSquare },
+        { name: 'Notes', path: '/employee/notes', icon: StickyNote },
+        { name: 'Support', path: '/employee/support', icon: LifeBuoy },
+    ];
+
     const { user: currentUser, role: userRole } = useAuthStore();
     const { allEmployees, fetchAllEmployees } = useEmployeeStore();
     const {
@@ -109,7 +127,7 @@ const EmployeeChat = () => {
     };
 
     return (
-        <div className="flex flex-col h-[calc(100vh-100px)] lg:h-[calc(100vh-120px)] bg-white dark:bg-slate-900 rounded-2xl lg:rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
+        <div className="flex flex-col h-full w-full bg-white dark:bg-slate-900 overflow-hidden">
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar */}
                 <div className={cn(
@@ -118,10 +136,15 @@ const EmployeeChat = () => {
                 )}>
                     <div className="p-4 lg:p-6 border-b border-slate-50 dark:border-slate-800">
                         <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-3">
-                                <div className="lg:hidden w-8 h-8 rounded-lg overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 shrink-0">
-                                    <img src="/dintask-logo.png" alt="DinTask" className="h-full w-full object-cover" />
-                                </div>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => navigate('/employee')}
+                                    className="h-8 w-8 rounded-lg text-slate-400 hover:text-primary-600"
+                                >
+                                    <ArrowLeft size={18} />
+                                </Button>
                                 <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white leading-none uppercase tracking-tight">Team Messenger</h1>
                             </div>
                             <Button
@@ -137,10 +160,10 @@ const EmployeeChat = () => {
                             </Button>
                         </div>
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-                            <Input
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 group-focus-within:text-[#4461f2] transition-colors" />
+                            <input
                                 placeholder="Search team..."
-                                className="h-9 pl-9 bg-slate-50 dark:bg-slate-800/50 border-none rounded-xl text-xs font-bold"
+                                className="w-full h-10 pl-10 pr-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-full text-xs font-bold outline-none transition-all focus:border-[#4461f2] dark:focus:border-[#4461f2] dark:text-white"
                                 value={searchTerm}
                                 onChange={(e) => {
                                     setSearchTerm(e.target.value);
@@ -150,7 +173,7 @@ const EmployeeChat = () => {
                         </div>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto">
+                    <div className="flex-1 overflow-y-auto pb-20">
                         <div className="p-2 space-y-1">
                             {/* Full Connection List */}
                             {showAllUsers && !searchTerm && (
@@ -263,6 +286,65 @@ const EmployeeChat = () => {
                             )}
                         </div>
                     </div>
+
+                    {/* Enhanced Docked Bottom Navigation */}
+                    <AnimatePresence>
+                        <motion.nav
+                            initial={{ y: 100, x: '-50%' }}
+                            animate={{ y: 0, x: '-50%' }}
+                            exit={{ y: 100, x: '-50%' }}
+                            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                            className="fixed bottom-0 left-1/2 w-full max-w-[480px] h-[60px] bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl z-50 px-4 flex items-center justify-around border-t border-slate-200/50 dark:border-slate-800/50 shadow-[0_-8px_30px_rgb(0,0,0,0.04)] lg:hidden"
+                        >
+                            {navItems.map((item) => {
+                                const isActive = location.pathname === item.path || (item.path === '/employee' && location.pathname === '/employee/');
+
+                                return (
+                                    <NavLink
+                                        key={item.path}
+                                        to={item.path}
+                                        className="relative h-full flex flex-col items-center justify-center outline-none flex-1 group"
+                                    >
+                                        <motion.div
+                                            whileTap={{ scale: 0.9 }}
+                                            className="flex flex-col items-center justify-center relative z-10"
+                                        >
+                                            <div className={cn(
+                                                "relative flex items-center justify-center transition-all duration-500",
+                                                isActive ? "text-[#4461f2]" : "text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300"
+                                            )}>
+                                                {/* Glow Background for Active Icon */}
+                                                {isActive && (
+                                                    <motion.div
+                                                        layoutId="icon_glow"
+                                                        className="absolute inset-0 bg-blue-500/10 blur-xl rounded-full scale-150 z-0"
+                                                        transition={{ type: 'spring', bounce: 0.2, duration: 0.8 }}
+                                                    />
+                                                )}
+
+                                                <item.icon
+                                                    size={isActive ? 24 : 22}
+                                                    strokeWidth={isActive ? 2.5 : 1.8}
+                                                    className={cn(
+                                                        "transition-all duration-500 relative z-10",
+                                                        isActive ? "-translate-y-1 scale-105 drop-shadow-[0_0_8px_rgba(68,97,242,0.4)]" : "group-hover:scale-110"
+                                                    )}
+                                                />
+                                            </div>
+                                            <span className={cn(
+                                                "text-[9px] font-black mt-0.5 tracking-[0.05em] uppercase transition-all duration-300 relative z-10",
+                                                isActive
+                                                    ? "text-[#4461f2] opacity-100 -translate-y-1"
+                                                    : "text-slate-400 opacity-60 translate-y-0 group-hover:opacity-100"
+                                            )}>
+                                                {item.name}
+                                            </span>
+                                        </motion.div>
+                                    </NavLink>
+                                );
+                            })}
+                        </motion.nav>
+                    </AnimatePresence>
                 </div>
 
                 {/* Chat Area */}
@@ -297,17 +379,6 @@ const EmployeeChat = () => {
                                             Online
                                         </p>
                                     </div>
-                                </div>
-                                <div className="flex items-center gap-1 sm:gap-2">
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary-600">
-                                        <Phone size={16} />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary-600">
-                                        <Video size={16} />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary-600">
-                                        <MoreVertical size={16} />
-                                    </Button>
                                 </div>
                             </div>
 

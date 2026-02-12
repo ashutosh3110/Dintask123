@@ -130,51 +130,53 @@ const NotificationsList = () => {
 
     return (
         <div className="min-h-screen bg-[#f8fafc] dark:bg-[#020617] pb-20">
-            {/* Elegant Desktop Header */}
-            <div className="bg-white dark:bg-slate-900/50 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60 sticky top-0 z-30">
-                <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => navigate(-1)}
-                            className="rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800"
-                        >
-                            <ArrowLeft size={20} />
-                        </Button>
-                        <div>
-                            <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-                                Notifications
-                                {unreadCount > 0 && (
-                                    <span className="bg-primary text-white text-[10px] px-2 py-0.5 rounded-full ring-4 ring-primary/10">
-                                        {unreadCount} New
-                                    </span>
-                                )}
-                            </h1>
-                        </div>
-                    </div>
+            {/* Calendar-Style Brand Background Integration */}
+            <div className="relative h-64 overflow-hidden">
+                <div className="absolute inset-0 z-0">
+                    <img
+                        src="/WLCOMPAGE .png"
+                        alt="Background"
+                        className="w-full h-full object-cover object-center pointer-events-none"
+                    />
+                    <div className="absolute inset-0 bg-slate-950/40 dark:bg-black/60 pointer-events-none" />
+                </div>
 
-                    <div className="flex items-center gap-3">
-                        <div className="hidden md:flex relative w-64 group">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary transition-colors" />
-                            <Input
-                                placeholder="Search notifications..."
-                                className="pl-10 h-10 bg-slate-100/50 dark:bg-slate-800/50 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 transition-all"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
-                        {unreadCount > 0 && (
+                <div className="relative z-10 max-w-6xl mx-auto px-6 h-full flex flex-col justify-center">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
                             <Button
-                                onClick={handleMarkAll}
-                                className="bg-primary hover:bg-primary-600 text-[10px] font-black uppercase tracking-widest px-6 h-10 rounded-2xl shadow-lg shadow-primary/20 transition-all active:scale-95"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => navigate(-1)}
+                                className="rounded-2xl bg-white/10 hover:bg-white/20 text-white border-none"
                             >
-                                Mark all as read
+                                <ArrowLeft size={20} />
                             </Button>
-                        )}
-                        <Button variant="ghost" size="icon" className="rounded-2xl opacity-50">
-                            <MoreHorizontal size={20} />
-                        </Button>
+                            <div>
+                                <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-2">
+                                    Notifications
+                                    {unreadCount > 0 && (
+                                        <span className="bg-[#4461f2] text-white text-[10px] px-2 py-0.5 rounded-full ring-4 ring-blue-500/20 font-black">
+                                            {unreadCount} NEW
+                                        </span>
+                                    )}
+                                </h1>
+                                <p className="text-white/60 text-[11px] font-bold uppercase tracking-widest mt-1">
+                                    Your system alerts & activity
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                            {unreadCount > 0 && (
+                                <Button
+                                    onClick={handleMarkAll}
+                                    className="bg-white hover:bg-slate-100 text-[#4461f2] text-[10px] font-black uppercase tracking-widest px-6 h-12 rounded-2xl shadow-xl transition-all active:scale-95 border-none"
+                                >
+                                    Mark all as read
+                                </Button>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

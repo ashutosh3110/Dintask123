@@ -42,8 +42,7 @@ const TopNav = ({ onMenuClick, isSidebarCollapsed }) => {
 
     return (
         <header className={cn(
-            "h-16 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md fixed top-0 right-0 z-40 transition-all duration-300 left-0",
-            isSidebarCollapsed ? "lg:left-20" : "lg:left-64"
+            "h-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 w-full z-40 transition-all duration-300"
         )}>
             <div className="flex h-full items-center justify-between px-4 lg:px-8">
                 <div className="flex items-center gap-4">

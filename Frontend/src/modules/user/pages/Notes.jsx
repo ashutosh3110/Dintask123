@@ -87,57 +87,58 @@ const Notes = () => {
 
     return (
         <div className="min-h-screen w-full bg-white dark:bg-slate-950 relative flex flex-col items-center justify-start font-sans overflow-x-hidden pb-20">
-            {/* Enhanced Background Visibility */}
-            <div className="absolute inset-0 h-[320px] z-0 overflow-hidden">
-                <img
-                    src="/WLCOMPAGE .png"
-                    alt="Background"
-                    className="w-full h-full object-cover object-center opacity-70 dark:opacity-30 translate-y-[-10%]"
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-white/80 to-white dark:from-slate-950/40 dark:via-slate-950/80 dark:to-slate-950" />
-            </div>
-
-            {/* Notes Content */}
-            <div className="w-full max-w-[600px] mt-12 px-6 relative z-10 space-y-6">
-                {/* Header Row */}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                            My Notes
-                        </h1>
-                        <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mt-1">
-                            Capture thoughts & reminders
-                        </p>
-                    </div>
-                    <motion.div {...scaleOnTap}>
-                        <Button
-                            size="icon"
-                            className="size-12 rounded-2xl bg-[#4461f2] hover:bg-[#3451e2] text-white shadow-lg shadow-[#4461f2]/20 transition-all border-none"
-                            onClick={handleOpenAddPage}
-                        >
-                            <Plus size={24} />
-                        </Button>
-                    </motion.div>
+            {/* -- Premium Header Section -- */}
+            <div className="relative w-full overflow-hidden flex justify-center">
+                <div className="absolute inset-0 z-0">
+                    <img
+                        src="/WLCOMPAGE .png"
+                        alt="Background"
+                        className="w-full h-full object-cover object-center pointer-events-none"
+                    />
+                    <div className="absolute inset-0 bg-slate-950/40 dark:bg-black/60 pointer-events-none" />
                 </div>
 
-                {/* Search Bar */}
-                <div className="relative group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-[#4461f2] transition-colors" />
-                    <Input
-                        placeholder="Search your notes..."
-                        className="h-12 pl-11 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm focus:ring-4 focus:ring-[#4461f2]/10 transition-all font-bold text-sm"
+                <div className="relative z-10 w-full max-w-[600px] px-6 pt-10 pb-8">
+                    <div className="flex items-start justify-between">
+                        <div className="flex flex-col">
+                            <h1 className="text-2xl font-black text-white tracking-tight leading-none">
+                                My Notes
+                            </h1>
+                            <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest mt-2">
+                                Thoughts & Reminders
+                            </p>
+                        </div>
+                        <motion.button
+                            {...scaleOnTap}
+                            onClick={handleOpenAddPage}
+                            className="text-white/80 hover:text-white transition-colors"
+                        >
+                            <Plus size={28} strokeWidth={2.5} />
+                        </motion.button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Content Area */}
+            <div className="w-full max-w-[600px] px-6 mt-4 relative z-20 space-y-4">
+                {/* Enhanced Compact Search Bar */}
+                <div className="relative group mx-auto w-full">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 group-focus-within:text-[#4461f2] transition-colors" />
+                    <input
+                        placeholder="Quick search..."
+                        className="w-full h-10 pl-10 pr-4 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-full shadow-[0_4px_12px_-4px_rgba(0,0,0,0.05)] border transition-all font-bold text-xs outline-none focus:border-[#4461f2] dark:focus:border-[#4461f2] dark:text-white"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
 
-                {/* Notes Feed */}
-                <div ref={listRef} className="space-y-4">
+                {/* Compact Notes Feed */}
+                <div ref={listRef} className="space-y-3">
                     <AnimatePresence mode="popLayout">
                         {loading && notes.length === 0 ? (
-                            <div className="space-y-4">
+                            <div className="space-y-3">
                                 {[1, 2, 3].map(i => (
-                                    <div key={i} className="h-32 w-full bg-slate-50 dark:bg-slate-900 rounded-[1.5rem] animate-pulse" />
+                                    <div key={i} className="h-24 w-full bg-slate-50 dark:bg-slate-900 rounded-2xl animate-pulse" />
                                 ))}
                             </div>
                         ) : filteredNotes.length === 0 ? (
@@ -145,11 +146,11 @@ const Notes = () => {
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
-                                className="h-64 flex flex-col items-center justify-center text-slate-400 text-center px-8 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-[2.5rem] border-2 border-dashed border-slate-100 dark:border-slate-800"
+                                className="h-48 flex flex-col items-center justify-center text-slate-400 text-center px-8 bg-white dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm"
                             >
-                                <StickyNote size={48} className="opacity-10 mb-4 text-[#4461f2]" />
-                                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-300">No notes found</h3>
-                                <p className="text-[10px] mt-1 font-medium">Capture your first thought or search again.</p>
+                                <StickyNote size={32} className="opacity-20 mb-3 text-[#4461f2]" />
+                                <h3 className="text-xs font-bold text-slate-900 dark:text-slate-300">Nothing here</h3>
+                                <p className="text-[9px] mt-1 font-medium opacity-60 uppercase tracking-widest">Start jotting down</p>
                             </motion.div>
                         ) : (
                             filteredNotes.map((note, index) => (
@@ -160,63 +161,67 @@ const Notes = () => {
                                     layout
                                 >
                                     <Card className={cn(
-                                        "border-none shadow-[0_15px_35px_-8px_rgba(0,0,0,0.06)] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-[1.5rem] overflow-hidden group hover:shadow-lg transition-all duration-300",
-                                        note.isPinned && "ring-2 ring-primary-500/20 shadow-primary-500/5"
+                                        "border border-slate-100 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900 rounded-2xl overflow-hidden group hover:shadow-md hover:border-slate-200 dark:hover:border-slate-700 transition-all duration-300",
+                                        note.isPinned && "ring-1 ring-blue-500/20"
                                     )}>
-                                        <CardContent className="p-4">
-                                            <div className="flex justify-between items-start mb-1">
-                                                <div className="flex items-center gap-2">
-                                                    <Badge className="text-[7px] font-black uppercase tracking-[0.1em] px-1.5 py-0.5 bg-[#4461f2]/10 text-[#4461f2] border-none rounded-md">
-                                                        {note.category}
-                                                    </Badge>
-                                                    {note.isPinned && (
-                                                        <Pin size={10} className="text-primary-600 fill-primary-600" />
-                                                    )}
-                                                </div>
-                                                <div className="flex items-center gap-1">
+                                        <CardContent className="p-3">
+                                            <div className="flex justify-between items-start mb-0.5">
+                                                <Badge className="text-[7px] font-black uppercase tracking-[0.1em] px-1.5 py-0.5 bg-[#4461f2]/5 text-[#4461f2] border-none rounded-md">
+                                                    {note.category}
+                                                </Badge>
+                                                <div className="flex items-center gap-0.5">
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
                                                         className={cn(
-                                                            "h-5 w-5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity",
-                                                            note.isPinned ? "text-primary-600" : "text-slate-300"
+                                                            "h-6 w-6 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity",
+                                                            note.isPinned ? "text-[#4461f2]" : "text-slate-300"
                                                         )}
                                                         onClick={() => togglePin(note._id || note.id)}
                                                     >
-                                                        <Pin size={10} className={note.isPinned ? "fill-primary-600" : ""} />
+                                                        <Pin size={10} className={note.isPinned ? "fill-[#4461f2]" : ""} />
                                                     </Button>
                                                     <DropdownMenu>
                                                         <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" size="icon" className="h-5 w-5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+                                                            <Button variant="ghost" size="icon" className="h-6 w-6 rounded-lg">
                                                                 <MoreVertical size={12} className="text-slate-400" />
                                                             </Button>
                                                         </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end" className="rounded-2xl border-slate-100 dark:border-slate-800 p-1.5 shadow-xl">
+                                                        <DropdownMenuContent align="end" className="rounded-xl border-slate-100 dark:border-slate-800 p-1 shadow-lg">
                                                             <DropdownMenuItem
-                                                                className="gap-3 text-xs font-bold rounded-xl cursor-pointer py-1.5"
+                                                                className="gap-2 text-[10px] font-black rounded-lg cursor-pointer py-1.5 uppercase"
                                                                 onClick={() => handleEditClick(note)}
                                                             >
-                                                                <Edit2 size={12} className="text-blue-500" /> Edit Note
+                                                                <Edit2 size={10} className="text-blue-500" /> Edit
                                                             </DropdownMenuItem>
                                                             <DropdownMenuItem
-                                                                className="gap-3 text-xs font-bold text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/10 rounded-xl cursor-pointer py-1.5"
+                                                                className="gap-2 text-[10px] font-black text-rose-500 focus:text-rose-500 focus:bg-rose-50 dark:focus:bg-rose-900/10 rounded-lg cursor-pointer py-1.5 uppercase"
                                                                 onClick={() => handleDeleteNote(note._id || note.id)}
                                                             >
-                                                                <Trash2 size={12} /> Delete
+                                                                <Trash2 size={10} /> Delete
                                                             </DropdownMenuItem>
                                                         </DropdownMenuContent>
                                                     </DropdownMenu>
                                                 </div>
                                             </div>
-                                            <h4 className="text-sm font-black text-slate-900 dark:text-white mb-0.5 leading-tight">
-                                                <HighlightText text={note.title || ''} highlight={searchTerm} />
-                                            </h4>
-                                            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium line-clamp-3 leading-relaxed mb-1.5 whitespace-pre-wrap">
-                                                <HighlightText text={note.content || ''} highlight={searchTerm} />
-                                            </p>
-                                            <div className="flex items-center gap-1.5 text-[8px] text-slate-400 font-bold uppercase tracking-wider italic">
-                                                <Clock size={10} className="text-slate-300" />
-                                                {note.createdAt ? format(new Date(note.createdAt), 'MMM dd, p') : 'Just now'}
+
+                                            <div className="flex flex-col gap-0.5 pointer-events-none">
+                                                <h4 className="text-xs font-black text-slate-800 dark:text-white leading-tight tracking-tight">
+                                                    <HighlightText text={note.title || ''} highlight={searchTerm} />
+                                                </h4>
+                                                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium line-clamp-2 leading-relaxed whitespace-pre-wrap">
+                                                    <HighlightText text={note.content || ''} highlight={searchTerm} />
+                                                </p>
+                                            </div>
+
+                                            <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-50 dark:border-slate-800/50">
+                                                <div className="flex items-center gap-1 text-[8px] text-slate-400 font-black uppercase tracking-widest leading-none">
+                                                    <Clock size={8} className="text-slate-300" />
+                                                    {note.createdAt ? format(new Date(note.createdAt), 'MMM dd') : 'Recent'}
+                                                </div>
+                                                {note.isPinned && (
+                                                    <Pin size={8} className="text-[#4461f2]/50 fill-[#4461f2]/50" />
+                                                )}
                                             </div>
                                         </CardContent>
                                     </Card>

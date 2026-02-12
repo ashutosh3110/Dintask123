@@ -193,13 +193,13 @@ const SupportCenter = () => {
 
     const renderDetailContent = () => {
         return (
-            <div className="h-full flex flex-col bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border border-white/40 dark:border-slate-800/40 rounded-[2.5rem] overflow-hidden shadow-2xl">
+            <div className="h-full flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-white/40 dark:border-slate-800/40 rounded-[2rem] overflow-hidden shadow-2xl">
                 {/* Header */}
-                <div className="p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50">
+                <div className="p-5 sm:p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 shrink-0">
                     <div className="flex justify-between items-start mb-4">
                         {role?.startsWith('superadmin') ? (
                             <Select value={selectedTicket.status} onValueChange={handleStatusChange}>
-                                <SelectTrigger className={cn("h-7 w-auto min-w-[100px] text-[10px] font-black uppercase tracking-widest border-none px-3", getStatusStyle(selectedTicket.status))}>
+                                <SelectTrigger className={cn("h-7 w-auto min-w-[90px] text-[10px] font-black uppercase tracking-widest border-none px-3", getStatusStyle(selectedTicket.status))}>
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -214,9 +214,17 @@ const SupportCenter = () => {
                                 {selectedTicket.status}
                             </Badge>
                         )}
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                            {selectedTicket.createdAt && new Date(selectedTicket.createdAt).toLocaleDateString()}
-                        </span>
+                        <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                {selectedTicket.createdAt && new Date(selectedTicket.createdAt).toLocaleDateString()}
+                            </span>
+                            <button
+                                onClick={() => setIsSheetOpen(false)}
+                                className="p-1.5 -mr-2 bg-white dark:bg-slate-800 rounded-full text-slate-900 dark:text-white shadow-sm border border-slate-100 dark:border-slate-700 lg:hidden transition-colors"
+                            >
+                                <X size={14} strokeWidth={3} />
+                            </button>
+                        </div>
                     </div>
                     <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight leading-snug mb-2">
                         {selectedTicket.title}
@@ -227,7 +235,7 @@ const SupportCenter = () => {
                 </div>
 
                 {/* Content Scroll */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 sm:space-y-6">
                     <div className="space-y-2">
                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Description</label>
                         <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl text-xs font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
@@ -372,7 +380,7 @@ const SupportCenter = () => {
                 </div>
 
                 {/* Input Area */}
-                <div className="p-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
+                <div className="p-3 sm:p-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 shrink-0">
                     <AnimatePresence>
                         {typingUser && (
                             <motion.div
@@ -393,7 +401,7 @@ const SupportCenter = () => {
                     <div className="relative">
                         <Textarea
                             placeholder="Type your reply..."
-                            className="min-h-[80px] w-full resize-none pr-12 text-xs bg-slate-50 dark:bg-slate-950 border-none rounded-2xl focus:ring-2 focus:ring-[#4461f2]/20"
+                            className="min-h-[60px] sm:min-h-[80px] w-full resize-none pr-12 text-xs bg-slate-50 dark:bg-slate-950 border-none rounded-2xl focus:ring-2 focus:ring-[#4461f2]/20 py-3"
                             value={replyMessage}
                             onChange={handleTextareaChange}
                         />
@@ -464,159 +472,172 @@ const SupportCenter = () => {
 
     return (
         <div className="min-h-screen w-full bg-white dark:bg-slate-950 relative flex flex-col items-center justify-start font-sans overflow-x-hidden pb-12">
-            {/* Background image removed for clean white background */}
+            {/* -- Premium Header Section with Background -- */}
+            <div className="relative w-full overflow-hidden flex justify-center">
+                {/* Background Image Layer */}
+                <div className="absolute inset-0 z-0">
+                    <img
+                        src="/WLCOMPAGE .png"
+                        alt="Background"
+                        className="w-full h-full object-cover object-center pointer-events-none"
+                    />
+                    <div className="absolute inset-0 bg-slate-950/40 dark:bg-black/60 pointer-events-none" />
+                </div>
 
-
-            <div className="w-full max-w-[1100px] mt-12 px-6 relative z-10 space-y-8">
-                <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div>
-                        <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
+                <div className="relative z-10 w-full max-w-[1100px] px-6 pt-8 pb-6">
+                    <div className="flex flex-col">
+                        <h1 className="text-4xl font-black text-white tracking-tight flex items-center gap-3">
                             Support <span className="text-[#4461f2]">Center</span>
                         </h1>
-                        <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mt-1.5 flex items-center gap-2">
+                        <p className="text-[11px] font-black text-white/70 uppercase tracking-widest mt-1.5 flex items-center gap-2">
                             <LifeBuoy size={14} className="text-[#4461f2]" />
                             {role?.startsWith('superadmin') ? 'Managing Administrator Escalations' :
                                 role === 'admin' ? 'Unified Support Hub & Platform Requests' :
                                     'Raise tickets for technical & account issues'}
                         </p>
                     </div>
+                </div>
+            </div>
 
-                    <div className="flex items-center gap-3">
-                        {!role?.startsWith('superadmin') && (
-                            <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-                                <DialogTrigger asChild>
-                                    <Button className="h-12 px-6 rounded-2xl bg-[#4461f2] hover:bg-[#3451e2] text-white font-black text-[10px] uppercase tracking-widest gap-3 shadow-lg shadow-[#4461f2]/20 border-none transition-all active:scale-95">
-                                        <Plus size={18} /> Raise New Ticket
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent className="max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-3xl border-white/20 dark:border-slate-800/40 rounded-[2.5rem] p-8 shadow-2xl">
-                                    <DialogHeader>
-                                        <DialogTitle className="text-2xl font-black italic tracking-tight uppercase dark:text-white">Raise <span className="text-[#4461f2]">Ticket</span></DialogTitle>
-                                    </DialogHeader>
-                                    <div className="space-y-6 mt-6">
-                                        <div className="space-y-2">
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Subject</p>
-                                            <Input
-                                                placeholder="What is the issue?"
-                                                value={newTicket.subject}
-                                                onChange={(e) => setNewTicket({ ...newTicket, subject: e.target.value })}
-                                                className="h-12 border-none bg-slate-50 dark:bg-slate-950 rounded-xl font-bold text-sm px-5"
-                                            />
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Category</p>
+            {/* Main Content Area */}
+            <div className="w-full max-w-[1100px] px-6 mt-4 relative z-10 space-y-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-start gap-6">
+                    {role === 'admin' ? (
+                        <div className="flex gap-2 p-1.5 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl rounded-2xl w-fit shadow-sm border border-white/20 dark:border-slate-800/40">
+                            <button
+                                onClick={() => setActiveTab('received')}
+                                className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'received' ? 'bg-[#4461f2] text-white shadow-lg shadow-[#4461f2]/20' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`}
+                            >
+                                Team Support Requests
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('sent')}
+                                className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'sent' ? 'bg-[#4461f2] text-white shadow-lg shadow-[#4461f2]/20' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`}
+                            >
+                                My Support Tickets
+                            </button>
+                        </div>
+                    ) : (
+                        null
+                    )}
+
+                    {!role?.startsWith('superadmin') && (
+                        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+                            <DialogTrigger asChild>
+                                <Button className="h-9 px-5 rounded-xl bg-[#4461f2] hover:bg-[#3451e2] text-white font-black text-[9px] uppercase tracking-widest gap-2 shadow-lg shadow-[#4461f2]/20 border-none transition-all active:scale-95">
+                                    <Plus size={16} strokeWidth={3} /> Raise Ticket
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="w-[90vw] max-w-[380px] max-h-[85vh] overflow-y-auto flex flex-col bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2rem] p-5 shadow-2xl gap-0 scrollbar-hide">
+                                <DialogHeader className="mb-4 shrink-0">
+                                    <DialogTitle className="text-xl font-black italic tracking-tight uppercase dark:text-white text-center">Raise <span className="text-[#4461f2]">Ticket</span></DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-4">
+                                    <div className="space-y-1.5">
+                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Subject</p>
+                                        <Input
+                                            placeholder="What is the issue?"
+                                            value={newTicket.subject}
+                                            onChange={(e) => setNewTicket({ ...newTicket, subject: e.target.value })}
+                                            className="h-10 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 rounded-xl font-bold text-xs px-4 focus:ring-2 focus:ring-[#4461f2]/20 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="space-y-1.5">
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Category</p>
+                                            <div className="relative">
                                                 <select
-                                                    className="w-full h-12 bg-slate-50 dark:bg-slate-950 rounded-xl px-5 text-sm font-bold appearance-none outline-none border-none dark:text-white"
+                                                    className="w-full h-10 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 text-xs font-bold appearance-none outline-none focus:ring-2 focus:ring-[#4461f2]/20 transition-all dark:text-white"
                                                     value={newTicket.category}
                                                     onChange={(e) => setNewTicket({ ...newTicket, category: e.target.value })}
                                                 >
                                                     {categories.map(c => <option key={c} value={c}>{c}</option>)}
                                                 </select>
+                                                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-50">
+                                                    <ChevronRight size={12} className="rotate-90" />
+                                                </div>
                                             </div>
-                                            <div className="space-y-2">
-                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Priority</p>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Priority</p>
+                                            <div className="relative">
                                                 <select
-                                                    className="w-full h-12 bg-slate-50 dark:bg-slate-950 rounded-xl px-5 text-sm font-bold appearance-none outline-none border-none dark:text-white"
+                                                    className="w-full h-10 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 text-xs font-bold appearance-none outline-none focus:ring-2 focus:ring-[#4461f2]/20 transition-all dark:text-white"
                                                     value={newTicket.priority}
                                                     onChange={(e) => setNewTicket({ ...newTicket, priority: e.target.value })}
                                                 >
                                                     {priorities.map(p => <option key={p} value={p}>{p}</option>)}
                                                 </select>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Description</p>
-                                            <textarea
-                                                rows={4}
-                                                placeholder="Explain the issue in detail..."
-                                                className="w-full p-5 bg-slate-50 dark:bg-slate-950 rounded-xl border-none font-bold text-sm outline-none resize-none dark:text-white"
-                                                value={newTicket.description}
-                                                onChange={(e) => setNewTicket({ ...newTicket, description: e.target.value })}
-                                            />
-                                        </div>
-
-                                        <div className="space-y-3">
-                                            <div className="flex items-center justify-between">
-                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Attachments</p>
-                                                <button
-                                                    onClick={() => fileInputRef.current?.click()}
-                                                    className="text-[10px] font-black text-[#4461f2] uppercase tracking-widest hover:underline"
-                                                >
-                                                    Add Files
-                                                </button>
-                                            </div>
-                                            <input
-                                                type="file"
-                                                ref={fileInputRef}
-                                                className="hidden"
-                                                multiple
-                                                onChange={(e) => {
-                                                    const files = Array.from(e.target.files);
-                                                    setSelectedFiles(prev => [...prev, ...files].slice(0, 5));
-                                                }}
-                                            />
-                                            {selectedFiles.length > 0 && (
-                                                <div className="flex flex-wrap gap-2">
-                                                    {selectedFiles.map((file, i) => (
-                                                        <div key={i} className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-100 dark:border-slate-800">
-                                                            <Paperclip size={10} className="text-slate-400" />
-                                                            <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 truncate max-w-[100px]">{file.name}</span>
-                                                            <button
-                                                                onClick={() => setSelectedFiles(prev => prev.filter((_, idx) => idx !== i))}
-                                                                className="p-0.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full"
-                                                            >
-                                                                <X size={10} className="text-slate-400" />
-                                                            </button>
-                                                        </div>
-                                                    ))}
+                                                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-50">
+                                                    <ChevronRight size={12} className="rotate-90" />
                                                 </div>
-                                            )}
+                                            </div>
                                         </div>
-
-                                        <Button
-                                            onClick={handleCreateTicket}
-                                            disabled={loading || isUploading}
-                                            className="w-full h-12 bg-[#4461f2] hover:bg-[#3451e2] text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-lg shadow-[#4461f2]/20 border-none transition-all"
-                                        >
-                                            {loading || isUploading ? (isUploading ? 'UPLOADING FILES...' : 'SENDING...') : `SEND TO ${role === 'admin' ? 'SUPER ADMIN' : 'ADMIN'}`}
-                                        </Button>
                                     </div>
-                                </DialogContent>
-                            </Dialog>
-                        )}
-                    </div>
-                </header>
+                                    <div className="space-y-1.5">
+                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Description</p>
+                                        <textarea
+                                            rows={3}
+                                            placeholder="Explain the issue in detail..."
+                                            className="w-full p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl font-bold text-xs outline-none resize-none dark:text-white focus:ring-2 focus:ring-[#4461f2]/20 transition-all"
+                                            value={newTicket.description}
+                                            onChange={(e) => setNewTicket({ ...newTicket, description: e.target.value })}
+                                        />
+                                    </div>
 
-                {role === 'admin' && (
-                    <div className="flex gap-2 p-1.5 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl rounded-2xl w-fit shadow-sm border border-white/20 dark:border-slate-800/40">
-                        <button
-                            onClick={() => setActiveTab('received')}
-                            className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'received' ? 'bg-[#4461f2] text-white shadow-lg shadow-[#4461f2]/20' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`}
-                        >
-                            Team Support Requests
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('sent')}
-                            className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'sent' ? 'bg-[#4461f2] text-white shadow-lg shadow-[#4461f2]/20' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'}`}
-                        >
-                            My Support Tickets
-                        </button>
-                    </div>
-                )}
+                                    <div className="space-y-2 pt-1">
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Attachments</p>
+                                            <button
+                                                onClick={() => fileInputRef.current?.click()}
+                                                className="text-[9px] font-black text-[#4461f2] uppercase tracking-widest hover:underline flex items-center gap-1"
+                                            >
+                                                <Plus size={10} /> Add Files
+                                            </button>
+                                        </div>
+                                        <input
+                                            type="file"
+                                            ref={fileInputRef}
+                                            className="hidden"
+                                            multiple
+                                            onChange={(e) => {
+                                                const files = Array.from(e.target.files);
+                                                setSelectedFiles(prev => [...prev, ...files].slice(0, 5));
+                                            }}
+                                        />
+                                        {selectedFiles.length > 0 && (
+                                            <div className="flex flex-wrap gap-2">
+                                                {selectedFiles.map((file, i) => (
+                                                    <div key={i} className="flex items-center gap-2 px-2 py-1 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-100 dark:border-slate-800">
+                                                        <Paperclip size={10} className="text-slate-400" />
+                                                        <span className="text-[9px] font-bold text-slate-600 dark:text-slate-300 truncate max-w-[80px]">{file.name}</span>
+                                                        <button
+                                                            onClick={() => setSelectedFiles(prev => prev.filter((_, idx) => idx !== i))}
+                                                            className="p-0.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full"
+                                                        >
+                                                            <X size={10} className="text-slate-400" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <Button
+                                        onClick={handleCreateTicket}
+                                        disabled={loading || isUploading}
+                                        className="w-full h-10 bg-[#4461f2] hover:bg-[#3451e2] text-white font-black text-[9px] uppercase tracking-widest rounded-xl shadow-lg shadow-[#4461f2]/20 border-none transition-all mt-1"
+                                    >
+                                        {loading || isUploading ? (isUploading ? 'UPLOADING...' : 'SEND TICKET') : 'SUBMIT TICKET'}
+                                    </Button>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
+                    )}
+                </div>
 
                 <div className="grid lg:grid-cols-12 gap-8">
                     <div className="lg:col-span-8 space-y-6">
-                        <div className="relative group">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#4461f2] transition-colors" size={18} />
-                            <input
-                                type="text"
-                                placeholder="Search by subject or ID..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full h-14 pl-12 pr-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-none rounded-[1.5rem] shadow-sm text-sm font-bold focus:ring-4 focus:ring-[#4461f2]/10 transition-all placeholder:text-slate-400 dark:text-white"
-                            />
-                        </div>
 
                         <div className="space-y-4">
                             <AnimatePresence mode='popLayout'>
@@ -798,12 +819,12 @@ const SupportCenter = () => {
                         </AnimatePresence>
                     </div>
                 </div>
-            </div>
+            </div >
 
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                <SheetContent className="w-full sm:max-w-md p-0 border-none bg-transparent lg:hidden">
+                <SheetContent className="w-full sm:max-w-md bg-transparent p-4 border-none shadow-none lg:hidden flex flex-col justify-end [&>button]:hidden">
                     {selectedTicket && (
-                        <div className="h-full pt-10">
+                        <div className="h-[70vh] w-full max-w-[380px] mx-auto rounded-[2rem] overflow-hidden shadow-2xl ring-1 ring-black/5">
                             {renderDetailContent()}
                         </div>
                     )}
