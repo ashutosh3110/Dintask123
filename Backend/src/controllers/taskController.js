@@ -182,6 +182,16 @@ exports.createTask = async (req, res) => {
       return res.status(403).json({ success: false, error: 'Not authorized to create tasks' });
     }
 
+    // -- VALIDATION: Tactical Deadline Security --
+    if (req.body.deadline) {
+      const deadline = new Date(req.body.deadline);
+      const now = new Date();
+      // Allow a small buffer (e.g., 1 minute) to avoid issues with slight clock drift
+      if (deadline < new Date(now.getTime() - 60000)) {
+        return res.status(400).json({ success: false, error: 'Tactical deployment failure: Deadline cannot be set in the temporal past' });
+      }
+    }
+
     // Prepare assignment list (individuals only)
     let finalAssignedTo = Array.isArray(assignedTo) ? [...assignedTo] : (assignedTo ? [assignedTo] : []);
 
@@ -268,6 +278,15 @@ exports.updateTask = async (req, res) => {
     // Check if task belongs to user's workspace
     if (task.adminId.toString() !== userAdminId?.toString()) {
       return res.status(403).json({ success: false, error: 'Not authorized to update this task' });
+    }
+
+    // -- VALIDATION: Tactical Deadline Security --
+    if (req.body.deadline) {
+      const deadline = new Date(req.body.deadline);
+      const now = new Date();
+      if (deadline < new Date(now.getTime() - 60000)) {
+        return res.status(400).json({ success: false, error: 'Tactical update failure: Deadline cannot be set in the temporal past' });
+      }
     }
 
     // --- GATEKEEPER PROTOCOL: Status Transition Security ---

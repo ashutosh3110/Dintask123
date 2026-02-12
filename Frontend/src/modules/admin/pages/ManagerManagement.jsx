@@ -47,6 +47,7 @@ const ManagerManagement = () => {
         managers,
         fetchManagers,
         addManager,
+        updateManager,
         deleteManager,
         managerPagination,
         loading: managerLoading
@@ -144,12 +145,23 @@ const ManagerManagement = () => {
         setIsEditModalOpen(true);
     };
 
-    const handleUpdateManager = (e) => {
+    const handleUpdateManager = async (e) => {
         e.preventDefault();
         if (editingManager) {
-            setIsEditModalOpen(false);
-            setEditingManager(null);
-            toast.info("Update functionality coming soon");
+            try {
+                const success = await updateManager(editingManager._id, {
+                    name: editingManager.name,
+                    email: editingManager.email
+                });
+                if (success) {
+                    setIsEditModalOpen(false);
+                    setEditingManager(null);
+                    // Refresh current page
+                    fetchManagers({ page, limit, search: searchTerm });
+                }
+            } catch (error) {
+                console.error("Update Manager Error:", error);
+            }
         }
     };
 
@@ -579,6 +591,16 @@ const ManagerManagement = () => {
                                 <Input
                                     value={editingManager.name}
                                     onChange={(e) => setEditingManager({ ...editingManager, name: e.target.value })}
+                                    className="rounded-xl h-11"
+                                    required
+                                />
+                            </div>
+                            <div className="grid gap-2 text-left">
+                                <label className="text-xs font-bold text-slate-500 uppercase">Email Address</label>
+                                <Input
+                                    type="email"
+                                    value={editingManager.email}
+                                    onChange={(e) => setEditingManager({ ...editingManager, email: e.target.value })}
                                     className="rounded-xl h-11"
                                     required
                                 />

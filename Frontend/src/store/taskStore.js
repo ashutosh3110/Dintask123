@@ -67,6 +67,12 @@ const useTaskStore = create((set, get) => ({
 
             if (res.success) {
                 get().fetchTasks();
+
+                // Background re-fetch for global state synchronization
+                import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+                    .catch(err => console.error("Background sync error:", err));
+
+                toast.success('Task updated successfully');
             } else {
                 toast.error("Failed to update task");
                 get().fetchTasks(); // Revert

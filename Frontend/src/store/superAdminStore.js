@@ -523,6 +523,14 @@ const useSuperAdminStore = create(
                     });
                     if (response.success) {
                         get().fetchAdmins();
+
+                        // Background re-fetches for global state synchronization
+                        Promise.all([
+                            get().fetchDashboardStats(),
+                            get().fetchRoleDistribution(),
+                            get().fetchUserGrowth()
+                        ]).catch(err => console.error("Background sync error:", err));
+
                         return true;
                     }
                 } catch (err) {
@@ -536,6 +544,14 @@ const useSuperAdminStore = create(
                     const response = await apiRequest(`/superadmin/admins/${id}`, { method: 'DELETE' });
                     if (response.success) {
                         get().fetchAdmins();
+
+                        // Background re-fetches for global state synchronization
+                        Promise.all([
+                            get().fetchDashboardStats(),
+                            get().fetchRoleDistribution(),
+                            get().fetchUserGrowth()
+                        ]).catch(err => console.error("Background sync error:", err));
+
                         return true;
                     }
                 } catch (err) {
@@ -558,6 +574,14 @@ const useSuperAdminStore = create(
                     });
                     if (response.success) {
                         get().fetchAdmins();
+
+                        // Background re-fetches for global state synchronization
+                        Promise.all([
+                            get().fetchDashboardStats(),
+                            get().fetchRoleDistribution(),
+                            get().fetchUserGrowth()
+                        ]).catch(err => console.error("Background sync error:", err));
+
                         return { success: true };
                     }
                 } catch (err) {
@@ -588,6 +612,14 @@ const useSuperAdminStore = create(
                     });
                     if (response.success) {
                         get().fetchPlans();
+
+                        // Background re-fetches for global state synchronization
+                        Promise.all([
+                            get().fetchDashboardStats(),
+                            get().fetchRoleDistribution(),
+                            get().fetchUserGrowth()
+                        ]).catch(err => console.error("Background sync error:", err));
+
                         return true;
                     }
                 } catch (err) {
@@ -604,6 +636,14 @@ const useSuperAdminStore = create(
                     });
                     if (response.success) {
                         get().fetchPlans();
+
+                        // Background re-fetches for global state synchronization
+                        Promise.all([
+                            get().fetchDashboardStats(),
+                            get().fetchRoleDistribution(),
+                            get().fetchUserGrowth()
+                        ]).catch(err => console.error("Background sync error:", err));
+
                         return true;
                     }
                 } catch (err) {
@@ -617,6 +657,14 @@ const useSuperAdminStore = create(
                     const response = await apiRequest(`/superadmin/plans/${id}`, { method: 'DELETE' });
                     if (response.success) {
                         get().fetchPlans();
+
+                        // Background re-fetches for global state synchronization
+                        Promise.all([
+                            get().fetchDashboardStats(),
+                            get().fetchRoleDistribution(),
+                            get().fetchUserGrowth()
+                        ]).catch(err => console.error("Background sync error:", err));
+
                         return true;
                     }
                 } catch (err) {
@@ -633,6 +681,14 @@ const useSuperAdminStore = create(
                     });
                     if (response.success) {
                         get().fetchAdmins();
+
+                        // Background re-fetches for global state synchronization
+                        Promise.all([
+                            get().fetchDashboardStats(),
+                            get().fetchRoleDistribution(),
+                            get().fetchUserGrowth()
+                        ]).catch(err => console.error("Background sync error:", err));
+
                         return true;
                     }
                 } catch (err) {
@@ -659,6 +715,14 @@ const useSuperAdminStore = create(
 
                     if (response.success) {
                         get().fetchInquiries();
+
+                        // Background re-fetches for global state synchronization
+                        Promise.all([
+                            get().fetchDashboardStats(),
+                            get().fetchRoleDistribution(),
+                            get().fetchUserGrowth()
+                        ]).catch(err => console.error("Background sync error:", err));
+
                         return true;
                     }
                 } catch (err) {
@@ -810,6 +874,12 @@ const useSuperAdminStore = create(
                     });
                     if (response.success) {
                         get().fetchStaff();
+                        // Background re-fetches for global state synchronization
+                        Promise.all([
+                            get().fetchDashboardStats(),
+                            get().fetchRoleDistribution(),
+                            get().fetchUserGrowth()
+                        ]).catch(err => console.error("Background sync error:", err));
                         return true;
                     }
                 } catch (err) {
@@ -826,6 +896,14 @@ const useSuperAdminStore = create(
                     });
                     if (response.success) {
                         get().fetchStaff();
+
+                        // Background re-fetches for global state synchronization
+                        Promise.all([
+                            get().fetchDashboardStats(),
+                            get().fetchRoleDistribution(),
+                            get().fetchUserGrowth()
+                        ]).catch(err => console.error("Background sync error:", err));
+
                         return true;
                     }
                 } catch (err) {
@@ -841,6 +919,14 @@ const useSuperAdminStore = create(
                     });
                     if (response.success) {
                         get().fetchStaff();
+
+                        // Background re-fetches for global state synchronization
+                        Promise.all([
+                            get().fetchDashboardStats(),
+                            get().fetchRoleDistribution(),
+                            get().fetchUserGrowth()
+                        ]).catch(err => console.error("Background sync error:", err));
+
                         return true;
                     }
                 } catch (err) {

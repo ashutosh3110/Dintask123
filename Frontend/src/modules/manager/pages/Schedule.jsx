@@ -122,6 +122,12 @@ const ManagerSchedule = () => {
     }, [allEvents]);
 
     const handleDateClick = (arg) => {
+        const todayStr = format(new Date(), 'yyyy-MM-dd');
+        if (arg.dateStr < todayStr) {
+            toast.error("Temporal Lock: Cannot schedule operations in the past.");
+            return;
+        }
+
         const eventsOnDate = allEvents.filter(e => e.start.startsWith(arg.dateStr));
         setSelectedDate(arg.dateStr);
         if (eventsOnDate.length > 0) {

@@ -34,8 +34,13 @@ const useTeamStore = create((set, get) => ({
                     teams: [...state.teams, res.data],
                     loading: false,
                 }));
-                get().fetchTeams(); // Re-fetch to sync
-                toast.success('Team created successfully');
+                get().fetchTeams();
+
+                // Background re-fetch for global state synchronization
+                import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+                    .catch(err => console.error("Background sync error:", err));
+
+                toast.success(res.message || 'Team created successfully');
                 return res.data;
             }
         } catch (error) {
@@ -56,7 +61,12 @@ const useTeamStore = create((set, get) => ({
                     teams: state.teams.map((t) => (t._id === teamId ? res.data : t)),
                     loading: false,
                 }));
-                get().fetchTeams(); // Re-fetch to sync
+                get().fetchTeams();
+
+                // Background re-fetch for global state synchronization
+                import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+                    .catch(err => console.error("Background sync error:", err));
+
                 toast.success('Team updated successfully');
             }
         } catch (error) {
@@ -74,7 +84,12 @@ const useTeamStore = create((set, get) => ({
                 set((state) => ({
                     teams: state.teams.filter((t) => t._id !== teamId),
                 }));
-                get().fetchTeams(); // Re-fetch to sync
+                get().fetchTeams();
+
+                // Background re-fetch for global state synchronization
+                import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+                    .catch(err => console.error("Background sync error:", err));
+
                 toast.success('Team deleted successfully');
             }
         } catch (error) {

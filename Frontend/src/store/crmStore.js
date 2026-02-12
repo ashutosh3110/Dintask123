@@ -94,6 +94,11 @@ const useCRMStore = create(
             const newLead = res.data;
             get().fetchLeads();
             get().fetchCRMStats();
+
+            // Background re-fetch for global state synchronization
+            import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+              .catch(err => console.error("Background sync error:", err));
+
             toast.success("Lead added successfully");
             return newLead;
           }
@@ -113,6 +118,11 @@ const useCRMStore = create(
           if (res.success) {
             get().fetchLeads();
             get().fetchCRMStats();
+
+            // Background re-fetch for global state synchronization
+            import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+              .catch(err => console.error("Background sync error:", err));
+
             toast.success("Lead updated");
           }
         } catch (error) {
@@ -129,6 +139,11 @@ const useCRMStore = create(
           if (res.success) {
             get().fetchLeads();
             get().fetchCRMStats();
+
+            // Background re-fetch for global state synchronization
+            import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+              .catch(err => console.error("Background sync error:", err));
+
             toast.success("Lead deleted successfully");
           }
         } catch (error) {
@@ -146,6 +161,11 @@ const useCRMStore = create(
           if (res.success) {
             get().fetchLeads();
             get().fetchCRMStats();
+
+            // Background re-fetch for global state synchronization
+            import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+              .catch(err => console.error("Background sync error:", err));
+
             toast.success(res.message || "Leads deleted successfully");
           }
         } catch (error) {
@@ -162,6 +182,11 @@ const useCRMStore = create(
           });
           if (res.success) {
             get().fetchLeads();
+
+            // Background re-fetch for global state synchronization
+            import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+              .catch(err => console.error("Background sync error:", err));
+
             toast.success("Lead assigned");
           }
         } catch (error) {
@@ -178,6 +203,11 @@ const useCRMStore = create(
           if (res.success) {
             get().fetchLeads();
             get().fetchPendingProjects();
+
+            // Background re-fetch for global state synchronization
+            import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+              .catch(err => console.error("Background sync error:", err));
+
             toast.success("Project requested");
           }
         } catch (error) {
@@ -195,6 +225,11 @@ const useCRMStore = create(
           if (res.success) {
             get().fetchLeads();
             get().fetchPendingProjects();
+
+            // Background re-fetch for global state synchronization
+            import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+              .catch(err => console.error("Background sync error:", err));
+
             toast.success("Project approved and assigned");
           }
         } catch (error) {
@@ -239,6 +274,11 @@ const useCRMStore = create(
           });
           if (res.success) {
             get().fetchFollowUps();
+
+            // Background re-fetch for global state synchronization
+            import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+              .catch(err => console.error("Background sync error:", err));
+
             toast.success("Follow-up scheduled");
             return res.data;
           }
@@ -256,6 +296,11 @@ const useCRMStore = create(
           });
           if (res.success) {
             get().fetchFollowUps();
+
+            // Background re-fetch for global state synchronization
+            import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+              .catch(err => console.error("Background sync error:", err));
+
             toast.success("Follow-up updated");
           }
         } catch (error) {
@@ -271,6 +316,11 @@ const useCRMStore = create(
           });
           if (res.success) {
             get().fetchFollowUps();
+
+            // Background re-fetch for global state synchronization
+            import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+              .catch(err => console.error("Background sync error:", err));
+
             toast.success("Follow-up deleted");
           }
         } catch (error) {

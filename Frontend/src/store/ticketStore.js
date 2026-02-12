@@ -61,6 +61,11 @@ const useTicketStore = create((set, get) => ({
                 }));
                 get().fetchTickets(get().pagination);
                 get().fetchTicketStats();
+
+                // Background re-fetch for global state synchronization
+                import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+                    .catch(err => console.error("Background sync error:", err));
+
                 toast.success('Ticket deleted successfully');
                 return true;
             }
@@ -95,6 +100,11 @@ const useTicketStore = create((set, get) => ({
                 }));
                 get().fetchTickets(get().pagination);
                 get().fetchTicketStats();
+
+                // Background re-fetch for global state synchronization
+                import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+                    .catch(err => console.error("Background sync error:", err));
+
                 toast.success('Ticket created successfully');
                 return true;
             }
@@ -122,6 +132,11 @@ const useTicketStore = create((set, get) => ({
             });
             get().fetchTickets(get().pagination);
             get().fetchTicketStats();
+
+            // Background re-fetch for global state synchronization
+            import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+                .catch(err => console.error("Background sync error:", err));
+
             toast.success(`Ticket marked as ${status}`);
         } catch (err) {
             console.error("Update Ticket Error:", err);
