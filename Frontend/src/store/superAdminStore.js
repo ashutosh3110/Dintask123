@@ -191,6 +191,39 @@ const useSuperAdminStore = create(
                 return false;
             },
 
+            tacticalModules: [],
+            fetchTacticalModules: async () => {
+                try {
+                    const response = await apiRequest('/tactical-modules');
+                    if (response.success) {
+                        set({ tacticalModules: response.data });
+                    }
+                } catch (err) {
+                    console.error('Failed to fetch tactical modules:', err);
+                }
+            },
+
+            updateTacticalModule: async (moduleId, formData) => {
+                try {
+                    const response = await apiRequest(`/tactical-modules/${moduleId}`, {
+                        method: 'PUT',
+                        body: formData
+                    });
+
+                    if (response.success) {
+                        set((state) => ({
+                            tacticalModules: state.tacticalModules.map((mod) =>
+                                mod.moduleId === moduleId ? response.data : mod
+                            )
+                        }));
+                        return true;
+                    }
+                } catch (err) {
+                    console.error('Failed to update tactical module:', err);
+                }
+                return false;
+            },
+
             footerCtaContent: null,
             fetchFooterCtaContent: async () => {
                 try {

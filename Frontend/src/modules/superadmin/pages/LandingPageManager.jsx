@@ -7,7 +7,7 @@ import { Input } from '@/shared/components/ui/input';
 import { Textarea } from '@/shared/components/ui/textarea';
 import { Label } from '@/shared/components/ui/label';
 import { toast } from 'sonner';
-import { FileEdit, LayoutTemplate, Save, Loader2, Star, Layers, ArrowRight, HelpCircle, ChevronDown, Monitor, CheckCircle2, CreditCard } from 'lucide-react';
+import { FileEdit, LayoutTemplate, Save, Loader2, Star, Layers, ArrowRight, ArrowLeft, HelpCircle, ChevronDown, Monitor, CheckCircle2, CreditCard } from 'lucide-react';
 import useSuperAdminStore from '@/store/superAdminStore';
 import { Badge } from '@/shared/components/ui/badge';
 import { cn } from '@/shared/utils/cn';
@@ -32,7 +32,10 @@ const LandingPageManager = () => {
         updateFooterCtaContent,
         pricingPlans,
         fetchPricingPlans,
-        updatePricingPlan
+        updatePricingPlan,
+        tacticalModules,
+        fetchTacticalModules,
+        updateTacticalModule
     } = useSuperAdminStore();
 
     const [activeSection, setActiveSection] = useState('hero');
@@ -88,11 +91,26 @@ const LandingPageManager = () => {
         previewUrls: ['', '', '', '']
     });
 
+    // Module Edit State
+    const [editingModule, setEditingModule] = useState(null); // moduleId
+    const [moduleForm, setModuleForm] = useState({
+        title: '',
+        description: '',
+        targetAudience: '',
+        themeColor: 'blue',
+        icon: '',
+        detailedFeatures: '', // string (comma or newline separated for edit)
+        tags: '', // string
+        image: '',
+        previewUrl: ''
+    });
+
     useEffect(() => {
         fetchLandingPageContent();
         fetchPlatformContent();
         fetchFaqsContent();
         fetchTacticalContent();
+        fetchTacticalModules(); // Fetch modules
         fetchFooterCtaContent();
         fetchPricingPlans();
     }, []);
@@ -336,6 +354,69 @@ const LandingPageManager = () => {
         }
     };
 
+    const handleModuleEdit = (module) => {
+        setEditingModule(module.moduleId);
+        setModuleForm({
+            title: module.title,
+            description: module.description,
+            targetAudience: module.targetAudience,
+            themeColor: module.themeColor,
+            icon: module.icon,
+            detailedFeatures: module.detailedFeatures.join('\n'), // Use newline for textarea
+            tags: module.tags.join(', '),
+            image: '', // Reset file input
+            previewUrl: module.image
+        });
+    };
+
+    const handleModuleFormChange = (e) => {
+        const { name, value, files } = e.target;
+        if (name === 'image' && files && files[0]) {
+            setModuleForm(prev => ({ ...prev, image: files[0], previewUrl: URL.createObjectURL(files[0]) }));
+        } else {
+            setModuleForm(prev => ({ ...prev, [name]: value }));
+        }
+    };
+
+    const handleModuleSubmit = async () => {
+        if (!editingModule) return;
+        setLoading(true);
+        try {
+            const formData = new FormData();
+            formData.append('title', moduleForm.title);
+            formData.append('description', moduleForm.description);
+            formData.append('targetAudience', moduleForm.targetAudience);
+            formData.append('themeColor', moduleForm.themeColor);
+            formData.append('icon', moduleForm.icon);
+
+            // Convert newline-separated to JSON array
+            const featuresArray = moduleForm.detailedFeatures.split('\n').filter(s => s.trim());
+            formData.append('detailedFeatures', JSON.stringify(featuresArray));
+
+            // Convert comma-separated to JSON array
+            const tagsArray = moduleForm.tags.split(',').map(s => s.trim()).filter(Boolean);
+            formData.append('tags', JSON.stringify(tagsArray));
+
+            if (moduleForm.image instanceof File) {
+                formData.append('image', moduleForm.image);
+            }
+
+            const success = await updateTacticalModule(editingModule, formData);
+            if (success) {
+                toast.success('Module updated successfully!');
+                setEditingModule(null); // Close editor
+                fetchTacticalModules(); // Refresh list
+            } else {
+                toast.error('Failed to update module.');
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error('An error occurred.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleFooterCtaSubmit = async () => {
         setLoading(true);
         try {
@@ -367,9 +448,9 @@ const LandingPageManager = () => {
             initial="initial"
             animate="animate"
             variants={staggerContainer}
-            className="space-y-6 pb-12 max-w-7xl mx-auto px-4"
+            className="space-y-4 pb-8 max-w-7xl mx-auto px-4"
         >
-            <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
+            <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
                 <div className="space-y-1">
                     <h1 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
                         Landing Page Manager <LayoutTemplate className="text-primary-600" size={24} />
@@ -380,7 +461,7 @@ const LandingPageManager = () => {
                 </div>
 
                 {/* Section Navigation */}
-                <div className="flex flex-wrap bg-slate-100 dark:bg-slate-900 p-1 rounded-xl gap-1">
+                <div className="grid grid-cols-2 md:flex flex-wrap bg-slate-100 dark:bg-slate-900 p-1 rounded-xl gap-1">
                     <button onClick={() => setActiveSection('hero')} className={cn("px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all", activeSection === 'hero' ? "bg-white dark:bg-slate-800 text-primary-600 shadow-sm" : "text-slate-400 hover:text-slate-600")}>Hero</button>
                     <button onClick={() => setActiveSection('platform')} className={cn("px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all", activeSection === 'platform' ? "bg-white dark:bg-slate-800 text-primary-600 shadow-sm" : "text-slate-400 hover:text-slate-600")}>DinTask One</button>
                     <button onClick={() => setActiveSection('tactical')} className={cn("px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all", activeSection === 'tactical' ? "bg-white dark:bg-slate-800 text-primary-600 shadow-sm" : "text-slate-400 hover:text-slate-600")}>Tactical</button>
@@ -395,9 +476,9 @@ const LandingPageManager = () => {
                 {activeSection === 'hero' ? (
                     <motion.div key="hero" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* Hero Editor */}
-                        <Card className="border-2 border-slate-100 shadow-xl bg-white dark:bg-slate-900 rounded-[2rem] h-fit">
-                            <CardHeader className="border-b border-slate-50 dark:border-slate-800 px-8 py-6 flex flex-row items-center justify-between">
-                                <div className="flex items-center gap-3">
+                        <Card className="border-2 border-slate-100 shadow-lg bg-white dark:bg-slate-900 rounded-3xl h-fit">
+                            <CardHeader className="border-b border-slate-50 dark:border-slate-800 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <div className="flex items-center gap-3 w-full sm:w-auto">
                                     <div className="p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl">
                                         <Star className="text-yellow-500" size={20} />
                                     </div>
@@ -406,12 +487,12 @@ const LandingPageManager = () => {
                                         <CardDescription className="text-xs font-bold">Main entry point</CardDescription>
                                     </div>
                                 </div>
-                                <Button onClick={handleHeroSubmit} disabled={loading} size="sm" className="font-bold uppercase">
+                                <Button onClick={handleHeroSubmit} disabled={loading} size="sm" className="w-full sm:w-auto font-bold uppercase">
                                     {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
                                     <span className="ml-2">Save</span>
                                 </Button>
                             </CardHeader>
-                            <CardContent className="p-8 space-y-6">
+                            <CardContent className="p-6 space-y-4">
                                 <div className="space-y-4">
                                     <div className="space-y-2">
                                         <Label className="text-xs font-black uppercase tracking-widest text-slate-500">Badge Text</Label>
@@ -440,21 +521,21 @@ const LandingPageManager = () => {
                         </Card>
 
                         {/* Hero Preview */}
-                        <div className="rounded-[2rem] overflow-hidden border-2 border-slate-100 shadow-xl bg-gradient-to-br from-[#FFEE8C] to-white p-12 text-center space-y-8 flex flex-col justify-center min-h-[500px]">
-                            <span className="inline-block px-4 py-1.5 rounded-full bg-yellow-200/50 text-xs font-black uppercase tracking-widest text-slate-800 mx-auto border border-yellow-400/20">
+                        <div className="rounded-3xl overflow-hidden border-2 border-slate-100 shadow-xl bg-gradient-to-br from-[#FFEE8C] to-white p-8 text-center space-y-6 flex flex-col justify-center min-h-[400px]">
+                            <span className="inline-block px-3 py-1 rounded-full bg-yellow-200/50 text-[10px] font-black uppercase tracking-widest text-slate-800 mx-auto border border-yellow-400/20">
                                 {heroForm.badge || 'BADGE TEXT'}
                             </span>
-                            <h1 className="text-4xl lg:text-5xl font-black text-slate-900 tracking-tighter leading-tight">
+                            <h1 className="text-3xl lg:text-5xl font-black text-slate-900 tracking-tighter leading-tight">
                                 {heroForm.title || 'Your Headline Here'}
                             </h1>
-                            <p className="text-lg text-slate-600 font-medium leading-relaxed max-w-lg mx-auto">
+                            <p className="text-base text-slate-600 font-medium leading-relaxed max-w-lg mx-auto">
                                 {heroForm.subtitle || 'Your subtitle description goes here.'}
                             </p>
-                            <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
-                                <div className="px-8 py-4 bg-slate-900 text-white rounded-lg font-bold uppercase tracking-widest text-sm shadow-xl shadow-slate-900/20">
+                            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                                <div className="px-6 py-3 bg-slate-900 text-white rounded-lg font-bold uppercase tracking-widest text-xs shadow-xl shadow-slate-900/20">
                                     {heroForm.ctaPrimary || 'Button 1'}
                                 </div>
-                                <div className="px-8 py-4 bg-transparent text-slate-900 rounded-full font-bold uppercase tracking-widest text-sm border-2 border-slate-900">
+                                <div className="px-6 py-3 bg-transparent text-slate-900 rounded-full font-bold uppercase tracking-widest text-xs border-2 border-slate-900">
                                     {heroForm.ctaSecondary || 'Button 2'}
                                 </div>
                             </div>
@@ -464,8 +545,8 @@ const LandingPageManager = () => {
                     <motion.div key="platform" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* Platform Editor */}
                         <Card className="border-2 border-slate-100 shadow-xl bg-white dark:bg-slate-900 rounded-[2rem] h-fit">
-                            <CardHeader className="border-b border-slate-50 dark:border-slate-800 px-8 py-6 flex flex-row items-center justify-between">
-                                <div className="flex items-center gap-3">
+                            <CardHeader className="border-b border-slate-50 dark:border-slate-800 px-4 py-4 md:px-8 md:py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <div className="flex items-center gap-3 w-full sm:w-auto">
                                     <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl">
                                         <Layers className="text-indigo-500" size={20} />
                                     </div>
@@ -474,12 +555,12 @@ const LandingPageManager = () => {
                                         <CardDescription className="text-xs font-bold">Customize the showcase section</CardDescription>
                                     </div>
                                 </div>
-                                <Button onClick={handlePlatformSubmit} disabled={loading} size="sm" className="font-bold uppercase">
+                                <Button onClick={handlePlatformSubmit} disabled={loading} size="sm" className="w-full sm:w-auto font-bold uppercase">
                                     {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
                                     <span className="ml-2">Save</span>
                                 </Button>
                             </CardHeader>
-                            <CardContent className="p-8 space-y-6">
+                            <CardContent className="p-4 md:p-8 space-y-6">
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-2">
@@ -539,31 +620,31 @@ const LandingPageManager = () => {
                         </Card>
 
                         {/* Platform Preview */}
-                        <div className="rounded-[2rem] overflow-hidden border-2 border-slate-100 shadow-xl bg-gradient-to-b from-[#FFEE8C] to-white p-8 lg:p-12 flex flex-col justify-center min-h-[500px]">
-                            <div className="grid gap-12">
+                        <div className="rounded-3xl overflow-hidden border-2 border-slate-100 shadow-xl bg-gradient-to-b from-[#FFEE8C] to-white p-8 flex flex-col justify-center min-h-[400px]">
+                            <div className="grid gap-6 md:gap-12">
                                 {/* Left Side */}
                                 <div className="text-left space-y-6">
                                     <Badge className="bg-black/10 text-black border-none px-4 py-1 rounded-full font-black text-[10px] uppercase tracking-widest">
                                         {platformForm.badge || 'BADGE'}
                                     </Badge>
-                                    <h2 className="text-5xl font-black leading-none tracking-tight text-slate-900">
+                                    <h2 className="text-3xl lg:text-4xl font-black leading-none tracking-tight text-slate-900">
                                         {platformForm.title || 'Title Here'}
                                     </h2>
-                                    <p className="text-lg font-black text-slate-800 uppercase tracking-tight">
+                                    <p className="text-base font-black text-slate-800 uppercase tracking-tight">
                                         {platformForm.subtitle || 'Subtitle Here'}
                                     </p>
                                     <p className="text-sm text-slate-700 font-medium leading-relaxed max-w-sm">
                                         {platformForm.description || 'Description goes here.'}
                                     </p>
-                                    <div className="h-12 w-fit px-8 bg-black text-white rounded-xl font-black text-sm shadow-xl flex items-center gap-3">
-                                        {platformForm.ctaText || 'BUTTON'} <ArrowRight size={16} />
+                                    <div className="h-10 w-fit px-6 bg-black text-white rounded-lg font-black text-xs shadow-xl flex items-center gap-2">
+                                        {platformForm.ctaText || 'BUTTON'} <ArrowRight size={14} />
                                     </div>
                                 </div>
 
                                 {/* Right Side (Quote) */}
-                                <div className="pl-8 border-l border-slate-900/20 py-4">
+                                <div className="pl-4 md:pl-8 border-l border-slate-900/20 py-4">
                                     <span className="text-7xl font-serif text-slate-900 absolute opacity-10 -ml-12 -mt-8">“</span>
-                                    <blockquote className="text-xl font-black text-slate-900 italic leading-tight mb-6 relative">
+                                    <blockquote className="text-lg font-black text-slate-900 italic leading-tight mb-4 relative">
                                         "{platformForm.quote || 'Quote text here'}"
                                     </blockquote>
                                     <div className="flex items-center gap-4">
@@ -580,92 +661,154 @@ const LandingPageManager = () => {
                         </div>
                     </motion.div>
                 ) : activeSection === 'tactical' ? (
-                    <motion.div key="tactical" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        {/* Tactical Editor */}
-                        <Card className="border-2 border-slate-100 shadow-xl bg-white dark:bg-slate-900 rounded-[2rem] h-fit">
-                            <CardHeader className="border-b border-slate-50 dark:border-slate-800 px-8 py-6 flex flex-row items-center justify-between">
-                                <div className="flex items-center gap-3">
+                    <motion.div key="tactical" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-8">
+                        {/* Tactical Section Headers */}
+                        <Card className="border-2 border-slate-100 shadow-lg bg-white dark:bg-slate-900 rounded-3xl h-fit">
+                            <CardHeader className="border-b border-slate-50 dark:border-slate-800 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <div className="flex items-center gap-3 w-full sm:w-auto">
                                     <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded-xl">
                                         <Monitor className="text-green-500" size={20} />
                                     </div>
                                     <div>
                                         <CardTitle className="text-lg font-black uppercase tracking-tight">Tactical Interface</CardTitle>
-                                        <CardDescription className="text-xs font-bold">Manage showcase images</CardDescription>
+                                        <CardDescription className="text-xs font-bold">Manage section headers</CardDescription>
                                     </div>
                                 </div>
-                                <Button onClick={handleTacticalSubmit} disabled={loading} size="sm" className="font-bold uppercase">
+                                <Button onClick={handleTacticalSubmit} disabled={loading} size="sm" className="w-full sm:w-auto font-bold uppercase">
                                     {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
-                                    <span className="ml-2">Save</span>
+                                    <span className="ml-2">Save Headers</span>
                                 </Button>
                             </CardHeader>
-                            <CardContent className="p-8 space-y-6">
-                                <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label className="text-xs font-black uppercase tracking-widest text-slate-500">Subtitle (Badge)</Label>
-                                        <Input name="subtitle" value={tacticalForm.subtitle} onChange={handleTacticalChange} className="font-bold" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label className="text-xs font-black uppercase tracking-widest text-slate-500">Headline</Label>
-                                        <Input name="title" value={tacticalForm.title} onChange={handleTacticalChange} className="font-black text-lg" />
-                                    </div>
-
-                                    <div className="space-y-4 pt-4 border-t border-slate-100">
-                                        <Label className="text-xs font-black uppercase tracking-widest text-slate-500">Showcase Images (Max 3)</Label>
-                                        {[0, 1, 2].map((index) => (
-                                            <div key={index} className="space-y-2 p-3 bg-slate-50 rounded-xl border border-slate-100">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-xs font-bold text-slate-600">Image {index + 1}</span>
-                                                    {tacticalForm.previewUrls[index] && (
-                                                        <span className="text-[10px] text-green-500 font-bold uppercase tracking-widest">Selected</span>
-                                                    )}
-                                                </div>
-                                                <Input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={(e) => handleTacticalImageChange(index, e.target.files[0])}
-                                                    className="text-xs"
-                                                />
-                                            </div>
-                                        ))}
-                                    </div>
+                            <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-black uppercase tracking-widest text-slate-500">Subtitle (Badge)</Label>
+                                    <Input name="subtitle" value={tacticalForm.subtitle} onChange={handleTacticalChange} className="font-bold" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-black uppercase tracking-widest text-slate-500">Headline</Label>
+                                    <Input name="title" value={tacticalForm.title} onChange={handleTacticalChange} className="font-black text-lg" />
                                 </div>
                             </CardContent>
                         </Card>
 
-                        {/* Tactical Preview */}
-                        <div className="rounded-[2rem] overflow-hidden border-2 border-slate-100 shadow-xl bg-gradient-to-tr from-slate-900 to-slate-800 p-8 lg:p-12 flex flex-col justify-center min-h-[500px] text-center">
-                            <Badge className="bg-[#FFEE8C] text-slate-900 border-none px-4 py-1.5 rounded-full font-bold text-[10px] uppercase tracking-widest mb-6 mx-auto w-fit">
-                                {tacticalForm.subtitle || 'SUBTITLE'}
-                            </Badge>
-                            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-8 tracking-tight">
-                                {tacticalForm.title || 'Title Here'}
-                            </h2>
-
-                            <div className="relative w-full max-w-lg mx-auto aspect-video bg-slate-950 rounded-xl border border-slate-700 overflow-hidden shadow-2xl">
-                                {tacticalForm.previewUrls[0] ? (
-                                    <img src={tacticalForm.previewUrls[0]} alt="Tactical Preview" className="w-full h-full object-cover opacity-90" />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-slate-600 font-bold text-xs uppercase tracking-widest">No Image 1</div>
-                                )}
-                            </div>
-
-                            <div className="flex justify-center gap-4 mt-8">
-                                {[0, 1, 2].map(idx => (
-                                    <div key={idx} className="w-16 h-10 rounded border border-slate-600 overflow-hidden bg-slate-900">
-                                        {tacticalForm.previewUrls[idx] ? (
-                                            <img src={tacticalForm.previewUrls[idx]} alt={`Thumb ${idx}`} className="w-full h-full object-cover" />
-                                        ) : null}
+                        {/* Modules Management */}
+                        {editingModule ? (
+                            <Card className="border-2 border-slate-100 shadow-lg bg-white dark:bg-slate-900 rounded-3xl">
+                                <CardHeader className="border-b border-slate-50 dark:border-slate-800 px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                                        <Button onClick={() => setEditingModule(null)} variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                                            <ArrowLeft size={16} />
+                                        </Button>
+                                        <CardTitle className="text-sm md:text-lg font-black uppercase tracking-tight truncate line-clamp-1">
+                                            Edit: {moduleForm.title}
+                                        </CardTitle>
                                     </div>
-                                ))}
+                                    <Button onClick={handleModuleSubmit} disabled={loading} size="sm" className="w-full sm:w-auto font-bold uppercase bg-primary-600 text-xs h-8">
+                                        {loading ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />}
+                                        <span className="ml-2">Save Module</span>
+                                    </Button>
+                                </CardHeader>
+                                <CardContent className="p-4 md:p-8 space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-4">
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-black uppercase tracking-widest text-slate-500">Title</Label>
+                                                <Input name="title" value={moduleForm.title} onChange={handleModuleFormChange} />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-black uppercase tracking-widest text-slate-500">Description</Label>
+                                                <Textarea name="description" value={moduleForm.description} onChange={handleModuleFormChange} className="h-32" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-black uppercase tracking-widest text-slate-500">Target Audience</Label>
+                                                <Input name="targetAudience" value={moduleForm.targetAudience} onChange={handleModuleFormChange} />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-black uppercase tracking-widest text-slate-500">Theme Color</Label>
+                                                <select
+                                                    name="themeColor"
+                                                    value={moduleForm.themeColor}
+                                                    onChange={handleModuleFormChange}
+                                                    className="w-full rounded-md border border-slate-200 p-2 text-sm bg-white dark:bg-slate-950 dark:border-slate-800"
+                                                >
+                                                    {['blue', 'purple', 'amber', 'emerald', 'yellow', 'orange', 'red', 'green', 'indigo', 'pink'].map(c => (
+                                                        <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-black uppercase tracking-widest text-slate-500">Lucide Icon Name</Label>
+                                                <Input name="icon" value={moduleForm.icon} onChange={handleModuleFormChange} placeholder="e.g. ShieldCheck" />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-black uppercase tracking-widest text-slate-500">Module Image</Label>
+                                                <div className="border border-slate-200 rounded-xl overflow-hidden aspect-video bg-slate-100 flex items-center justify-center relative group">
+                                                    {moduleForm.previewUrl ? (
+                                                        <img src={moduleForm.previewUrl} alt="Preview" className="w-full h-full object-contain" />
+                                                    ) : (
+                                                        <div className="text-slate-400 text-xs font-bold uppercase">No Image</div>
+                                                    )}
+                                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                        <Label htmlFor="module-image-upload" className="cursor-pointer bg-white text-black px-4 py-2 rounded-full font-bold text-xs uppercase hover:bg-slate-100 transition-colors">
+                                                            Change Image
+                                                        </Label>
+                                                        <Input
+                                                            id="module-image-upload"
+                                                            type="file"
+                                                            name="image"
+                                                            accept="image/*"
+                                                            onChange={handleModuleFormChange}
+                                                            className="hidden"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-black uppercase tracking-widest text-slate-500">Detailed Features (One per line)</Label>
+                                                <Textarea name="detailedFeatures" value={moduleForm.detailedFeatures} onChange={handleModuleFormChange} className="h-32" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-black uppercase tracking-widest text-slate-500">Tags (Comma separated)</Label>
+                                                <Input name="tags" value={moduleForm.tags} onChange={handleModuleFormChange} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ) : (
+                            <div className="space-y-6">
+                                <div className="flex items-center justify-between px-2">
+                                    <h3 className="text-lg font-black uppercase tracking-tight text-slate-900 dark:text-white">Modules</h3>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                    {tacticalModules.map((mod) => (
+                                        <Card key={mod.moduleId} className="border-2 border-slate-100 shadow-md hover:shadow-lg transition-all cursor-pointer group bg-white dark:bg-slate-900 rounded-2xl overflow-hidden" onClick={() => handleModuleEdit(mod)}>
+                                            <div className="h-28 bg-slate-100 relative overflow-hidden flex items-center justify-center p-4">
+                                                <img src={mod.image} alt={mod.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
+                                                <div className={`absolute top-3 right-3 p-1.5 rounded-full bg-${mod.themeColor}-100 text-${mod.themeColor}-600`}>
+                                                    {/* Icon placeholder or actual icon if I had dynamic component */}
+                                                    <div className={`w-3 h-3 bg-${mod.themeColor}-500 rounded-full`} />
+                                                </div>
+                                            </div>
+                                            <CardContent className="p-4">
+                                                <h4 className="font-bold text-sm text-slate-900 dark:text-white mb-1">{mod.title}</h4>
+                                                <p className="text-[10px] text-slate-500 line-clamp-2 leading-relaxed">{mod.description}</p>
+                                                <Button size="sm" variant="secondary" className="w-full mt-3 font-bold uppercase text-[10px] h-7">Edit</Button>
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </motion.div>
                 ) : activeSection === 'faqs' ? (
                     <motion.div key="faqs" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* FAQs Editor */}
-                        <Card className="border-2 border-slate-100 shadow-xl bg-white dark:bg-slate-900 rounded-[2rem] h-fit">
-                            <CardHeader className="border-b border-slate-50 dark:border-slate-800 px-8 py-6 flex flex-row items-center justify-between">
-                                <div className="flex items-center gap-3">
+                        <Card className="border-2 border-slate-100 shadow-lg bg-white dark:bg-slate-900 rounded-3xl h-fit">
+                            <CardHeader className="border-b border-slate-50 dark:border-slate-800 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <div className="flex items-center gap-3 w-full sm:w-auto">
                                     <div className="p-2 bg-teal-50 dark:bg-teal-900/20 rounded-xl">
                                         <HelpCircle className="text-teal-500" size={20} />
                                     </div>
@@ -674,12 +817,12 @@ const LandingPageManager = () => {
                                         <CardDescription className="text-xs font-bold">Manage frequently asked questions</CardDescription>
                                     </div>
                                 </div>
-                                <Button onClick={handleFaqsSubmit} disabled={loading} size="sm" className="font-bold uppercase">
+                                <Button onClick={handleFaqsSubmit} disabled={loading} size="sm" className="w-full sm:w-auto font-bold uppercase">
                                     {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
                                     <span className="ml-2">Save</span>
                                 </Button>
                             </CardHeader>
-                            <CardContent className="p-8 space-y-6">
+                            <CardContent className="p-6 space-y-4">
                                 {faqsForm.map((faq, index) => (
                                     <div key={index} className="space-y-4 p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
                                         <div className="flex items-center justify-between mb-2">
@@ -699,9 +842,9 @@ const LandingPageManager = () => {
                         </Card>
 
                         {/* FAQs Preview */}
-                        <div className="rounded-[2rem] overflow-hidden border-2 border-slate-100 shadow-xl bg-white p-8 lg:p-12 min-h-[500px] flex flex-col items-center justify-center bg-gradient-to-b from-[#FFEE8C] via-[#FFF9C4] to-white">
+                        <div className="rounded-3xl overflow-hidden border-2 border-slate-100 shadow-xl bg-white p-8 min-h-[400px] flex flex-col items-center justify-center bg-gradient-to-b from-[#FFEE8C] via-[#FFF9C4] to-white">
                             <div className="text-center mb-8">
-                                <h2 className="text-3xl font-bold text-slate-900 tracking-tight">
+                                <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
                                     Frequently asked questions.
                                 </h2>
                             </div>
@@ -726,22 +869,22 @@ const LandingPageManager = () => {
                     <motion.div key="pricing" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-8">
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             {pricingForm.map((plan, index) => (
-                                <Card key={plan._id || index} className="border-2 border-slate-100 shadow-xl bg-white dark:bg-slate-900 rounded-[2rem] h-fit">
-                                    <CardHeader className="border-b border-slate-50 dark:border-slate-800 px-6 py-4 flex flex-row items-center justify-between">
+                                <Card key={plan._id || index} className="border-2 border-slate-100 shadow-lg bg-white dark:bg-slate-900 rounded-3xl h-fit">
+                                    <CardHeader className="border-b border-slate-50 dark:border-slate-800 px-5 py-3 flex flex-row items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <div className="p-1.5 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                                                 <CreditCard className="text-blue-500" size={16} />
                                             </div>
                                             <div>
-                                                <CardTitle className="text-sm font-black uppercase tracking-tight">{plan.name}</CardTitle>
+                                                <CardTitle className="text-xs font-black uppercase tracking-tight">{plan.name}</CardTitle>
                                             </div>
                                         </div>
-                                        <Button onClick={() => handlePricingSubmit(index)} disabled={loading} size="sm" className="h-8 text-xs font-bold uppercase">
+                                        <Button onClick={() => handlePricingSubmit(index)} disabled={loading} size="sm" className="h-7 text-[10px] font-bold uppercase">
                                             {loading ? <Loader2 className="animate-spin" size={12} /> : <Save size={12} />}
                                             <span className="ml-1">Save</span>
                                         </Button>
                                     </CardHeader>
-                                    <CardContent className="p-6 space-y-4">
+                                    <CardContent className="p-4 space-y-3">
                                         <div className="space-y-1">
                                             <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Badge</Label>
                                             <Input value={plan.badge} onChange={(e) => handlePricingChange(index, 'badge', e.target.value)} className="font-bold text-xs" />
@@ -788,9 +931,9 @@ const LandingPageManager = () => {
                 ) : activeSection === 'footerCta' ? (
                     <motion.div key="footerCta" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* Footer CTA Editor */}
-                        <Card className="border-2 border-slate-100 shadow-xl bg-white dark:bg-slate-900 rounded-[2rem] h-fit">
-                            <CardHeader className="border-b border-slate-50 dark:border-slate-800 px-8 py-6 flex flex-row items-center justify-between">
-                                <div className="flex items-center gap-3">
+                        <Card className="border-2 border-slate-100 shadow-lg bg-white dark:bg-slate-900 rounded-3xl h-fit">
+                            <CardHeader className="border-b border-slate-50 dark:border-slate-800 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <div className="flex items-center gap-3 w-full sm:w-auto">
                                     <div className="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
                                         <CheckCircle2 className="text-purple-500" size={20} />
                                     </div>
@@ -799,12 +942,12 @@ const LandingPageManager = () => {
                                         <CardDescription className="text-xs font-bold">Manage final call to action</CardDescription>
                                     </div>
                                 </div>
-                                <Button onClick={handleFooterCtaSubmit} disabled={loading} size="sm" className="font-bold uppercase">
+                                <Button onClick={handleFooterCtaSubmit} disabled={loading} size="sm" className="w-full sm:w-auto font-bold uppercase">
                                     {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
                                     <span className="ml-2">Save</span>
                                 </Button>
                             </CardHeader>
-                            <CardContent className="p-8 space-y-6">
+                            <CardContent className="p-6 space-y-4">
                                 <div className="space-y-4">
                                     <div className="space-y-2">
                                         <Label className="text-xs font-black uppercase tracking-widest text-slate-500">Headline</Label>
@@ -848,8 +991,8 @@ const LandingPageManager = () => {
                         </Card>
 
                         {/* Footer CTA Preview */}
-                        <div className="rounded-[2rem] overflow-hidden border-2 border-slate-100 shadow-xl bg-slate-900 p-8 flex flex-col items-center justify-center text-center min-h-[500px]">
-                            <h2 className="text-3xl font-black text-white mb-4">
+                        <div className="rounded-3xl overflow-hidden border-2 border-slate-100 shadow-xl bg-slate-900 p-8 flex flex-col items-center justify-center text-center min-h-[400px]">
+                            <h2 className="text-2xl md:text-3xl font-black text-white mb-4">
                                 {footerCtaForm.title || 'Ready to experience?'}
                             </h2>
                             <p className="text-slate-400 mb-8 max-w-sm text-sm">

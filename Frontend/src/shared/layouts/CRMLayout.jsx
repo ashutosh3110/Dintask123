@@ -34,13 +34,13 @@ const CRMLayout = ({ role }) => {
     const SidebarContent = () => (
         <div className={cn(
             "h-full flex flex-col border-r shadow-[2px_0_12px_rgba(0,0,0,0.01)]",
-            role === 'sales' ? "bg-[#3063a0] border-white/10" : "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800"
+            (role === 'sales' || role === 'admin') ? "bg-[#3063a0] border-white/10" : "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800"
         )}>
             <div className="p-4 sm:p-5">
                 <div className="flex items-center gap-1 mb-6 px-1">
                     <div>
-                        <h1 className={cn("text-lg font-black leading-none tracking-tight", role === 'sales' ? "text-white" : "text-slate-900 dark:text-white")}>DinTask</h1>
-                        <p className={cn("text-[9px] font-black tracking-widest uppercase mt-1 opacity-90", role === 'sales' ? "text-blue-200" : "text-primary-600")}>CRM SUITE</p>
+                        <h1 className={cn("text-lg font-black leading-none tracking-tight", (role === 'sales' || role === 'admin') ? "text-white" : "text-slate-900 dark:text-white")}>DinTask</h1>
+                        <p className={cn("text-[9px] font-black tracking-widest uppercase mt-1 opacity-90", (role === 'sales' || role === 'admin') ? "text-blue-200" : "text-primary-600")}>CRM SUITE</p>
                     </div>
                 </div>
 
@@ -49,7 +49,7 @@ const CRMLayout = ({ role }) => {
                         variant="ghost"
                         className={cn(
                             "w-full justify-start gap-2.5 h-9 font-black rounded-xl transition-all duration-200 group border",
-                            role === 'sales'
+                            (role === 'sales' || role === 'admin')
                                 ? "text-blue-50 border-white/10 hover:bg-white/10 hover:text-white"
                                 : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/80 border-slate-100 dark:border-slate-800"
                         )}
@@ -57,10 +57,10 @@ const CRMLayout = ({ role }) => {
                     >
                         <div className={cn(
                             "rounded-lg p-1 transition-colors",
-                            role === 'sales' ? "bg-white/10" : "bg-slate-100 dark:bg-slate-700 group-hover:bg-primary-50 dark:group-hover:bg-primary-900/20"
+                            (role === 'sales' || role === 'admin') ? "bg-white/10" : "bg-slate-100 dark:bg-slate-700 group-hover:bg-primary-50 dark:group-hover:bg-primary-900/20"
                         )}>
                             <ArrowLeft size={12} className={cn(
-                                role === 'sales' ? "text-white" : "text-slate-500 dark:text-slate-400 group-hover:text-primary-600"
+                                (role === 'sales' || role === 'admin') ? "text-white" : "text-slate-500 dark:text-slate-400 group-hover:text-primary-600"
                             )} />
                         </div>
                         <span className="truncate text-[10px] uppercase tracking-wider">Back to Main</span>
@@ -80,15 +80,15 @@ const CRMLayout = ({ role }) => {
                                 className={cn(
                                     "w-full flex items-center gap-3 px-3.5 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden",
                                     isActive
-                                        ? role === 'sales'
+                                        ? (role === 'sales' || role === 'admin')
                                             ? "bg-white/20 text-white shadow-lg border border-white/20"
                                             : "bg-primary-600 text-white shadow-md shadow-primary-500/20"
-                                        : role === 'sales'
+                                        : (role === 'sales' || role === 'admin')
                                             ? "text-blue-50 hover:bg-white/10 hover:text-white hover:translate-x-1"
                                             : "text-slate-500 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 hover:text-primary-600 hover:translate-x-1"
                                 )}
                             >
-                                {isActive && role !== 'sales' && (
+                                {isActive && (role !== 'sales' && role !== 'admin') && (
                                     <motion.div
                                         layoutId="activeTab"
                                         className="absolute inset-0 bg-gradient-to-r from-primary-600 to-primary-500 z-0"
@@ -117,19 +117,19 @@ const CRMLayout = ({ role }) => {
 
             <div className={cn(
                 "mt-auto p-4 border-t",
-                role === 'sales' ? "border-white/10" : "border-slate-100 dark:border-slate-800/50"
+                (role === 'sales' || role === 'admin') ? "border-white/10" : "border-slate-100 dark:border-slate-800/50"
             )}>
                 <div className={cn(
                     "rounded-xl p-4 border transition-all",
-                    role === 'sales'
+                    (role === 'sales' || role === 'admin')
                         ? "bg-white/5 border-white/10 hover:bg-white/10"
                         : "bg-slate-50/50 dark:bg-slate-800/30 border-slate-100 dark:border-slate-800 hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
                 )}>
-                    <p className={cn("text-[10px] font-black mb-1 uppercase tracking-widest", role === 'sales' ? "text-white" : "text-slate-900 dark:text-white")}>Support Area</p>
-                    <p className={cn("text-[9px] mb-3 font-medium leading-relaxed", role === 'sales' ? "text-blue-100/70" : "text-slate-400")}>Advanced CRM features documentation</p>
+                    <p className={cn("text-[10px] font-black mb-1 uppercase tracking-widest", (role === 'sales' || role === 'admin') ? "text-white" : "text-slate-900 dark:text-white")}>Support Area</p>
+                    <p className={cn("text-[9px] mb-3 font-medium leading-relaxed", (role === 'sales' || role === 'admin') ? "text-blue-100/70" : "text-slate-400")}>Advanced CRM features documentation</p>
                     <Button size="sm" variant="outline" className={cn(
                         "w-full text-[9px] font-black uppercase tracking-widest h-7 rounded-lg",
-                        role === 'sales'
+                        (role === 'sales' || role === 'admin')
                             ? "bg-white/10 border-white/20 text-white hover:bg-white/20"
                             : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
                     )}>

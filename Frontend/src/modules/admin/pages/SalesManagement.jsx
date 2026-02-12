@@ -259,19 +259,38 @@ const SalesManagement = () => {
                 <TabsContent value="team" className="space-y-4 sm:space-y-6">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
                         {[
-                            { label: 'Total Reps', value: crmStats?.totalReps || 0, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-                            { label: 'Active Deals', value: crmStats?.activeDeals || 0, icon: Briefcase, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-                            { label: 'Revenue', value: `₹${((crmStats?.totalRevenue || 0) / 1000).toFixed(0)}K`, icon: IndianRupee, color: 'text-purple-600', bg: 'bg-purple-50' },
-                            { label: 'Conversion', value: `${crmStats?.conversionRate || 0}%`, icon: TrendingUp, color: 'text-amber-600', bg: 'bg-amber-50' }
+                            { label: 'Total Reps', value: (crmStats?.totalReps || 0).toString(), icon: Users, color: 'text-blue-600', bg: 'bg-blue-100', border: 'border-blue-100 dark:border-blue-900', shadow: 'shadow-lg shadow-blue-200/50 dark:shadow-none', gradient: 'bg-gradient-to-br from-white to-blue-50 dark:from-slate-900 dark:to-blue-900/20', trend: "Force" },
+                            { label: 'Active Deals', value: (crmStats?.activeDeals || 0).toString(), icon: Briefcase, color: 'text-emerald-600', bg: 'bg-emerald-100', border: 'border-emerald-100 dark:border-emerald-900', shadow: 'shadow-lg shadow-emerald-200/50 dark:shadow-none', gradient: 'bg-gradient-to-br from-white to-emerald-50 dark:from-slate-900 dark:to-emerald-900/20', trend: "Live" },
+                            { label: 'Projected Revenue', value: `₹${((crmStats?.totalRevenue || 0) / 1000).toFixed(0)}K`, icon: IndianRupee, color: 'text-purple-600', bg: 'bg-purple-100', border: 'border-purple-100 dark:border-purple-900', shadow: 'shadow-lg shadow-purple-200/50 dark:shadow-none', gradient: 'bg-gradient-to-br from-white to-purple-50 dark:from-slate-900 dark:to-purple-900/20', trend: "Value" },
+                            { label: 'Conversion Performance', value: `${crmStats?.conversionRate || 0}%`, icon: TrendingUp, color: 'text-amber-600', bg: 'bg-amber-100', border: 'border-amber-100 dark:border-amber-900', shadow: 'shadow-lg shadow-amber-200/50 dark:shadow-none', gradient: 'bg-gradient-to-br from-white to-amber-50 dark:from-slate-900 dark:to-amber-900/20', trend: "Success" }
                         ].map((stat, i) => (
-                            <Card key={i} className="border-none shadow-sm shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-900 overflow-hidden">
-                                <CardContent className="p-3 sm:p-4 flex items-center gap-2.5 sm:gap-4">
-                                    <div className={cn("p-2 sm:p-3 rounded-xl sm:rounded-2xl shrink-0", stat.bg)}>
-                                        <stat.icon size={16} className={stat.color} />
+                            <Card key={i} className={cn(
+                                "border-2 rounded-2xl overflow-hidden group transition-all duration-300 hover:-translate-y-1",
+                                stat.border,
+                                stat.shadow,
+                                stat.gradient
+                            )}>
+                                <CardContent className="p-4 sm:p-5 flex items-center justify-between">
+                                    <div className="space-y-3 sm:space-y-4">
+                                        <div className={cn(
+                                            "size-9 sm:size-10 rounded-xl flex items-center justify-center transition-all group-hover:scale-105 duration-500 shadow-inner",
+                                            stat.bg
+                                        )}>
+                                            <stat.icon className={cn("size-4.5 sm:size-5", stat.color)} />
+                                        </div>
+                                        <div className="space-y-0.5 sm:space-y-1 text-left">
+                                            <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{stat.label}</p>
+                                            <p className={cn("text-lg sm:text-2xl font-black tracking-tight leading-none", stat.color)}>{stat.value}</p>
+                                            <div className="flex items-center gap-1 pt-1">
+                                                <div className={cn("flex items-center justify-center size-3.5 rounded-full", stat.bg)}>
+                                                    <TrendingUp size={10} className={stat.color} />
+                                                </div>
+                                                <span className={cn("text-[8px] sm:text-[9px] font-black uppercase tracking-tighter", stat.color)}>{stat.trend}</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="text-left min-w-0">
-                                        <p className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">{stat.label}</p>
-                                        <p className="text-sm sm:text-xl font-black text-slate-900 dark:text-white truncate">{stat.value}</p>
+                                    <div className={cn("hidden sm:block size-16 -mr-2 opacity-10 transform rotate-12 transition-transform group-hover:rotate-0 duration-700", stat.color)}>
+                                        <stat.icon size={64} />
                                     </div>
                                 </CardContent>
                             </Card>
