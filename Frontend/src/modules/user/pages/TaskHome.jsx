@@ -105,7 +105,7 @@ const TaskHome = () => {
                     </div>
 
                     {/* Stats Pills - Compact Mobile Design */}
-                    <div className="grid grid-cols-3 gap-3 mb-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
                         <motion.div
                             variants={fadeInUp}
                             initial="hidden"
@@ -120,6 +120,16 @@ const TaskHome = () => {
                             initial="hidden"
                             animate="visible"
                             transition={{ delay: 0.1 }}
+                            className="bg-red-500 rounded-2xl p-4 text-white shadow-lg shadow-red-500/20 flex flex-col gap-0.5"
+                        >
+                            <p className="text-[9px] font-black uppercase tracking-widest opacity-80 leading-none">Overdue</p>
+                            <p className="text-xl font-black leading-none">{stats.overdue}</p>
+                        </motion.div>
+                        <motion.div
+                            variants={fadeInUp}
+                            initial="hidden"
+                            animate="visible"
+                            transition={{ delay: 0.2 }}
                             className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-md rounded-2xl p-4 border border-white dark:border-slate-800 shadow-sm flex flex-col gap-0.5"
                         >
                             <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">Pending</p>
@@ -129,7 +139,7 @@ const TaskHome = () => {
                             variants={fadeInUp}
                             initial="hidden"
                             animate="visible"
-                            transition={{ delay: 0.2 }}
+                            transition={{ delay: 0.3 }}
                             className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-md rounded-2xl p-4 border border-white dark:border-slate-800 shadow-sm flex flex-col gap-0.5"
                         >
                             <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">Done</p>

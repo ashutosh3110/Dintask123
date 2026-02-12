@@ -1,6 +1,6 @@
 import React from 'react';
 import { format } from 'date-fns';
-import { Clock, MessageSquare, Paperclip, CheckCircle2 } from 'lucide-react';
+import { Clock, MessageSquare, Paperclip, CheckCircle2, Repeat } from 'lucide-react';
 import { cn } from '@/shared/utils/cn';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 
@@ -86,6 +86,12 @@ const TaskCardNew = ({ task, onClick, managers = [] }) => {
                             : `Due ${format(new Date(task.deadline), 'MMM dd, h:mm a')}`
                         }
                     </p>
+                    {task.recurrence && task.recurrence.type !== 'none' && (
+                        <div className="flex items-center gap-1 ml-2 text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase">
+                            <Repeat size={10} />
+                            {task.recurrence.type}
+                        </div>
+                    )}
                 </div>
             </div>
 

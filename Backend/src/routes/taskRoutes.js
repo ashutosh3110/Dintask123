@@ -1,6 +1,7 @@
 const express = require('express');
 const {
   getTasks,
+  getTask,
   createTask,
   updateTask,
   deleteTask
@@ -12,16 +13,19 @@ const router = express.Router();
 
 router.use(protect); // All routes protected
 
-// Get tasks (filtered by user role)
+// Get tasks
 router.get('/', getTasks);
 
-// Create Task (Manager, Admin) - Employees usually just consume or update status
-router.post('/', authorize('manager', 'admin'), createTask);
+// Get single task
+router.get('/:id', getTask);
+
+// Create Task (Manager, Admin, Employee)
+router.post('/', authorize('manager', 'admin', 'employee', 'sales_executive'), createTask);
 
 // Update Task (Manager, Admin, Employee can update status)
 router.put('/:id', updateTask);
 
-// Delete Task (Manager, Admin)
-router.delete('/:id', authorize('manager', 'admin'), deleteTask);
+// Delete Task (Manager, Admin, Employee - owner only)
+router.delete('/:id', authorize('manager', 'admin', 'employee', 'sales_executive'), deleteTask);
 
 module.exports = router;
