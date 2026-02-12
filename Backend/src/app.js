@@ -34,7 +34,7 @@ const supportTickets = require('./routes/supportTicketRoutes');
 const payment = require('./routes/paymentRoutes');
 
 const testimonials = require('./routes/testimonialRoutes');
-const landingPage = require('./routes/landingPageRoutes');
+
 const uploadRoutes = require('./routes/uploadRoutes'); // Import upload routes
 
 // Mount routers
@@ -49,7 +49,7 @@ app.use('/api/v1/support-tickets', supportTickets);
 app.use('/api/v1/payments', payment);
 
 app.use('/api/v1/testimonials', testimonials);
-app.use('/api/v1/landing-page', landingPage);
+
 app.use('/api/v1/upload', uploadRoutes); // Mount upload routes
 app.use('/api/v1/crm', require('./routes/crmRoutes')); // New CRM Routes
 app.use('/api/v1/projects', require('./routes/projectRoutes')); // Project Routes
@@ -65,6 +65,8 @@ app.use('/api/v1/system-intel', require('./routes/systemIntelRoutes'));
 app.use('/api/v1/follow-ups', require('./routes/followUpRoutes'));
 app.use('/api/v1/chat', require('./routes/chatRoutes'));
 app.use('/api/v1/notes', require('./routes/noteRoutes'));
+app.use('/api/v1/landing-page', require('./routes/landingPageRoutes'));
+app.use('/api/v1/landing-page-plans', require('./routes/pricingRoutes'));
 
 app.use(errorHandler);
 

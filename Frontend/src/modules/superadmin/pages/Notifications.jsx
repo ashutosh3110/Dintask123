@@ -141,7 +141,7 @@ const Notifications = () => {
 
             {/* Filters & Actions */}
             <motion.div variants={fadeInUp} className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                <Card className="lg:col-span-12 border-none shadow-sm bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-100 dark:border-slate-800/50">
+                <Card className="lg:col-span-12 border-2 border-slate-100 dark:border-slate-800 shadow-lg shadow-slate-200/20 bg-white dark:bg-slate-900 rounded-[2rem] overflow-hidden">
                     <CardContent className="p-4 flex flex-col sm:flex-row items-center gap-4">
                         <div className="relative flex-1 w-full">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -188,13 +188,13 @@ const Notifications = () => {
                     {filteredNotifications.length === 0 ? (
                         <motion.div
                             variants={fadeInUp}
-                            className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2.5rem] p-12 flex flex-col items-center justify-center text-center"
+                            className="bg-white dark:bg-slate-900 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-[3rem] p-16 flex flex-col items-center justify-center text-center shadow-inner bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:30px_30px]"
                         >
-                            <div className="size-20 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6">
-                                <Inbox size={32} className="text-slate-200" />
+                            <div className="size-24 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6 shadow-sm border border-slate-100">
+                                <Inbox size={40} className="text-slate-200" />
                             </div>
-                            <h3 className="text-base font-black uppercase tracking-widest text-slate-900 dark:text-white">Operational Silence</h3>
-                            <p className="text-xs font-bold text-slate-400 mt-2 max-w-[280px]">No intelligence parameters match your current filter criteria.</p>
+                            <h3 className="text-lg font-black uppercase tracking-widest text-slate-900 dark:text-white italic underline underline-offset-8 decoration-primary-500/30 leading-loose">Operational Silence</h3>
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mt-4 max-w-[280px]">No intelligence parameters match your current filters.</p>
                         </motion.div>
                     ) : (
                         <div className="space-y-3">
@@ -206,8 +206,8 @@ const Notifications = () => {
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.98 }}
                                     className={cn(
-                                        "group relative bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-[2rem] border transition-all flex items-start gap-4 sm:gap-6",
-                                        !n.isRead ? "border-primary-100 dark:border-primary-900/30 shadow-md shadow-primary-500/5 bg-primary-50/10" : "border-slate-100 dark:border-slate-800/50 hover:border-primary-200",
+                                        "group relative bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-[2rem] border-2 transition-all flex items-start gap-4 sm:gap-6 hover:-translate-y-0.5 duration-300",
+                                        !n.isRead ? "border-primary-500 ring-4 ring-primary-500/5 shadow-xl shadow-primary-500/10 bg-primary-50/5" : "border-slate-100 dark:border-slate-800 shadow-lg shadow-slate-200/20 hover:border-primary-200",
                                         selectedIds.includes(n._id) && "bg-primary-50 border-primary-500"
                                     )}
                                 >
