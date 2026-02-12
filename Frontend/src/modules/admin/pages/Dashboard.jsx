@@ -73,42 +73,48 @@ const AdminDashboard = () => {
                 : '₹0',
             icon: DollarSign,
             color: "text-emerald-600",
-            bg: "bg-emerald-50 dark:bg-emerald-900/20",
-            description: "From won deals",
-            trend: "+12.5%"
+            bg: "bg-emerald-100",
+            border: 'border-emerald-100 dark:border-emerald-900',
+            shadow: 'shadow-lg shadow-emerald-200/50 dark:shadow-none',
+            gradient: 'bg-gradient-to-br from-white to-emerald-50 dark:from-slate-900 dark:to-emerald-900/20',
+            trend: "+12.5%",
+            label: "WON REVENUE"
         },
         {
             title: "Active Projects",
-            value: dashboardStats?.activeProjects || 0,
+            value: (dashboardStats?.activeProjects || 0).toString(),
             icon: FolderKanban,
             color: "text-blue-600",
-            bg: "bg-blue-50 dark:bg-blue-900/20",
-            description: "In progress",
-            trend: "+3"
+            bg: "bg-blue-100",
+            border: 'border-blue-100 dark:border-blue-900',
+            shadow: 'shadow-lg shadow-blue-200/50 dark:shadow-none',
+            gradient: 'bg-gradient-to-br from-white to-blue-50 dark:from-slate-900 dark:to-blue-900/20',
+            trend: "+3",
+            label: "ACTIVE ASSETS"
         },
         {
             title: "Total Staff",
-            value: dashboardStats?.totalStaff || 0,
+            value: (dashboardStats?.totalStaff || 0).toString(),
             icon: Users,
             color: "text-purple-600",
-            bg: "bg-purple-50 dark:bg-purple-900/20",
-            description: dashboardStats?.staffLimit
-                ? `of ${dashboardStats.staffLimit} limit`
-                : "No limit set",
-            breakdown: dashboardStats?.breakdown
-                ? `${dashboardStats.breakdown.managers}M / ${dashboardStats.breakdown.employees}E / ${dashboardStats.breakdown.salesReps}S`
-                : ""
+            bg: "bg-purple-100",
+            border: 'border-purple-100 dark:border-purple-900',
+            shadow: 'shadow-lg shadow-purple-200/50 dark:shadow-none',
+            gradient: 'bg-gradient-to-br from-white to-purple-50 dark:from-slate-900 dark:to-purple-900/20',
+            trend: dashboardStats?.staffLimit ? `of ${dashboardStats.staffLimit}` : "No limit",
+            label: "HUMAN RESOURCES"
         },
         {
             title: "Pending Actions",
-            value: dashboardStats?.pendingActions || 0,
+            value: (dashboardStats?.pendingActions || 0).toString(),
             icon: Bell,
             color: "text-amber-600",
-            bg: "bg-amber-50 dark:bg-amber-900/20",
-            description: "Require attention",
-            breakdown: dashboardStats?.breakdown
-                ? `${dashboardStats.breakdown.openTickets} tickets, ${dashboardStats.breakdown.pendingProjectConversions} conversions`
-                : ""
+            bg: "bg-amber-100",
+            border: 'border-amber-100 dark:border-amber-900',
+            shadow: 'shadow-lg shadow-amber-200/50 dark:shadow-none',
+            gradient: 'bg-gradient-to-br from-white to-amber-50 dark:from-slate-900 dark:to-amber-900/20',
+            trend: "Priority",
+            label: "ALERTS ACTIVE"
         }
     ];
 
@@ -162,29 +168,36 @@ const AdminDashboard = () => {
             {/* High-Level Metrics Cards */}
             {!loading && (
                 <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                         {stats.map((stat, i) => (
                             <motion.div key={i} variants={fadeInUp}>
-                                <Card className="border-none shadow-sm shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-900 overflow-hidden group hover:shadow-md transition-all duration-300 rounded-2xl sm:rounded-3xl">
-                                    <CardContent className="p-4 sm:p-6">
-                                        <div className="flex items-center justify-between mb-3 sm:mb-4">
-                                            <div className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl ${stat.bg} ${stat.color} transition-transform group-hover:scale-110 duration-300`}>
-                                                <stat.icon size={20} className="sm:w-6 sm:h-6" />
+                                <Card className={cn(
+                                    "border-2 rounded-2xl overflow-hidden group transition-all duration-300 hover:-translate-y-1",
+                                    stat.border,
+                                    stat.shadow,
+                                    stat.gradient
+                                )}>
+                                    <CardContent className="p-4 sm:p-5 flex items-center justify-between">
+                                        <div className="space-y-3 sm:space-y-4">
+                                            <div className={cn(
+                                                "size-9 sm:size-10 rounded-xl flex items-center justify-center transition-all group-hover:scale-105 duration-500 shadow-inner",
+                                                stat.bg
+                                            )}>
+                                                <stat.icon className={cn("size-4.5 sm:size-5", stat.color)} />
                                             </div>
-                                            {stat.trend && (
-                                                <Badge variant="secondary" className="bg-slate-50 dark:bg-slate-800 text-[8px] sm:text-[10px] font-black uppercase tracking-tighter px-2 h-5 flex items-center gap-1">
-                                                    <TrendingUp size={10} />
-                                                    {stat.trend}
-                                                </Badge>
-                                            )}
+                                            <div className="space-y-0.5 sm:space-y-1">
+                                                <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{stat.label}</p>
+                                                <p className={cn("text-lg sm:text-2xl font-black tracking-tight leading-none", stat.color)}>{stat.value}</p>
+                                                <div className="flex items-center gap-1 pt-1">
+                                                    <div className={cn("flex items-center justify-center size-3.5 rounded-full", stat.bg)}>
+                                                        <TrendingUp size={10} className={stat.color} />
+                                                    </div>
+                                                    <span className={cn("text-[8px] sm:text-[9px] font-black uppercase tracking-tighter", stat.color)}>{stat.trend}</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-widest">{stat.title}</p>
-                                            <h4 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1 tracking-tighter">{stat.value}</h4>
-                                            <p className="text-[9px] sm:text-xs text-slate-500 font-medium mt-1">{stat.description}</p>
-                                            {stat.breakdown && (
-                                                <p className="text-[8px] sm:text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-wider">{stat.breakdown}</p>
-                                            )}
+                                        <div className={cn("hidden sm:block size-16 -mr-2 opacity-10 transform rotate-12 transition-transform group-hover:rotate-0 duration-700", stat.color)}>
+                                            <stat.icon size={64} />
                                         </div>
                                     </CardContent>
                                 </Card>
