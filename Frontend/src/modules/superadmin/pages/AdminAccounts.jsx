@@ -160,8 +160,24 @@ const AdminAccounts = () => {
 
     const handleAddAdmin = async (e) => {
         e.preventDefault();
-        if (!newAdmin.name || !newAdmin.owner || !newAdmin.email) {
-            toast.error("Please fill all required fields");
+
+        // Client-side validation
+        if (!newAdmin.name) {
+            toast.error("Company Name is required");
+            return;
+        }
+        if (!newAdmin.owner) {
+            toast.error("Owner Name is required");
+            return;
+        }
+        if (!newAdmin.email) {
+            toast.error("Email Address is required");
+            return;
+        }
+
+        const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+        if (!emailRegex.test(newAdmin.email)) {
+            toast.error("Please provide a valid email address");
             return;
         }
 

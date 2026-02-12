@@ -51,7 +51,7 @@ import useManagerStore from '@/store/managerStore'; // Kept in case required by 
 
 
 const SalesManagement = () => {
-    const { salesReps, salesPagination, fetchSalesReps, addSalesRep, updateSalesRep, deleteSalesRep, crmStats, fetchCRMStats } = useSalesStore();
+    const { salesReps, salesPagination, fetchSalesReps, updateSalesRep, deleteSalesRep, crmStats, fetchCRMStats } = useSalesStore();
     const { leads, getPipelineData, moveLead, addLead, assignLead, requestProjectConversion, fetchLeads } = useCRMStore();
     const { employees, fetchSubscriptionLimit, limitStatus } = useEmployeeStore();
     const { managers } = useManagerStore();
@@ -62,9 +62,7 @@ const SalesManagement = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    const [isAddRepModalOpen, setIsAddRepModalOpen] = useState(false);
     const [isAddDealModalOpen, setIsAddDealModalOpen] = useState(false);
-    const [newRepData, setNewRepData] = useState({ name: '', email: '' });
     const [newDealData, setNewDealData] = useState({
         name: '',
         company: '',
@@ -120,27 +118,6 @@ const SalesManagement = () => {
     };
 
 
-    const handleAddRep = async (e) => {
-        e.preventDefault();
-
-        if (isLimitReached) {
-            toast.error(limitStatus?.error || 'Subscription limit reached. Please upgrade your plan.');
-            return;
-        }
-
-        try {
-            await addSalesRep(newRepData);
-            setNewRepData({ name: '', email: '' });
-            setIsAddRepModalOpen(false);
-            // Refresh limit status
-            await fetchSubscriptionLimit();
-        } catch (error) {
-            // error handled in store
-            if (error.message && error.message.includes('limit')) {
-                await fetchSubscriptionLimit();
-            }
-        }
-    };
 
     const handleExport = () => {
         try {
@@ -313,14 +290,6 @@ const SalesManagement = () => {
                             >
                                 <Download size={14} />
                                 <span className="hidden sm:inline">Export</span>
-                            </Button>
-                            <Button
-                                onClick={() => setIsAddRepModalOpen(true)}
-                                disabled={isLimitReached}
-                                className="flex-1 sm:flex-none gap-2 bg-primary-600 hover:bg-primary-700 h-9 sm:h-10 rounded-xl shadow-lg shadow-primary-500/20 text-[10px] font-black uppercase tracking-widest"
-                            >
-                                <Plus size={14} />
-                                <span>Add Rep</span>
                             </Button>
                         </div>
                     </div>
@@ -648,29 +617,6 @@ const SalesManagement = () => {
                 </TabsContent>
             </Tabs >
 
-            {/* Add Rep Dialog */}
-            < Dialog open={isAddRepModalOpen} onOpenChange={setIsAddRepModalOpen} >
-                <DialogContent className="sm:max-w-md rounded-3xl">
-                    <DialogHeader>
-                        <DialogTitle>Add New Sales Rep</DialogTitle>
-                        <DialogDescription>Input personnel details to initialize a new sales representative account.</DialogDescription>
-                    </DialogHeader>
-                    <form onSubmit={handleAddRep} className="space-y-4 py-4">
-                        <div className="grid gap-2 text-left">
-                            <label className="text-xs font-bold text-slate-500 uppercase">Full Name</label>
-                            <Input value={newRepData.name} onChange={(e) => setNewRepData({ ...newRepData, name: e.target.value })} placeholder="Rep Name" className="rounded-xl h-11" required />
-                        </div>
-                        <div className="grid gap-2 text-left">
-                            <label className="text-xs font-bold text-slate-500 uppercase">Email Address</label>
-                            <Input type="email" value={newRepData.email} onChange={(e) => setNewRepData({ ...newRepData, email: e.target.value })} placeholder="sales@dintask.com" className="rounded-xl h-11" required />
-                        </div>
-                        <DialogFooter className="pt-4">
-                            <Button type="button" variant="outline" onClick={() => setIsAddRepModalOpen(false)} className="rounded-xl h-11 px-6">Cancel</Button>
-                            <Button type="submit" className="rounded-xl h-11 px-6 bg-primary-600 hover:bg-primary-700">Add Rep</Button>
-                        </DialogFooter>
-                    </form>
-                </DialogContent>
-            </Dialog >
 
             {/* Add Deal Dialog */}
             < Dialog open={isAddDealModalOpen} onOpenChange={setIsAddDealModalOpen} >

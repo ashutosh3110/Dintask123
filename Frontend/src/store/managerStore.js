@@ -62,6 +62,7 @@ const useManagerStore = create((set, get) => ({
                     managers: [...state.managers, res.data],
                     loading: false
                 }));
+                get().fetchManagers(); // Re-fetch to sync pagination and lists
                 toast.success('Manager added successfully');
                 return true;
             }
@@ -92,6 +93,7 @@ const useManagerStore = create((set, get) => ({
                 set((state) => ({
                     managers: state.managers.filter((m) => m._id !== id),
                 }));
+                get().fetchManagers(); // Re-fetch to sync pagination and lists
                 toast.success('Manager deleted');
             }
         } catch (error) {

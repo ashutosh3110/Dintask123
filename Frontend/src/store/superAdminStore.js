@@ -93,7 +93,7 @@ const useSuperAdminStore = create(
                         body: data
                     });
                     if (response.success) {
-                        set({ landingPageContent: response.data });
+                        get().fetchLandingPageContent();
                         return true;
                     }
                 } catch (err) {
@@ -125,7 +125,7 @@ const useSuperAdminStore = create(
                     });
 
                     if (response.success) {
-                        set({ platformContent: response.data });
+                        get().fetchPlatformContent();
                         return true;
                     }
                 } catch (err) {
@@ -153,7 +153,7 @@ const useSuperAdminStore = create(
                         body: { faqs: faqsData }
                     });
                     if (response.success) {
-                        set({ faqsContent: response.data });
+                        get().fetchFaqsContent();
                         return true;
                     }
                 } catch (err) {
@@ -182,7 +182,7 @@ const useSuperAdminStore = create(
                     });
 
                     if (response.success) {
-                        set({ tacticalContent: response.data });
+                        get().fetchTacticalContent();
                         return true;
                     }
                 } catch (err) {
@@ -211,7 +211,7 @@ const useSuperAdminStore = create(
                     });
 
                     if (response.success) {
-                        set({ footerCtaContent: response.data });
+                        get().fetchFooterCtaContent();
                         return true;
                     }
                 } catch (err) {
@@ -240,7 +240,7 @@ const useSuperAdminStore = create(
                         headers: { 'Content-Type': 'application/json' }
                     });
                     if (response.success) {
-                        set((state) => ({ pricingPlans: [...state.pricingPlans, response.data] }));
+                        get().fetchPricingPlans();
                         return true;
                     }
                 } catch (err) {
@@ -257,9 +257,7 @@ const useSuperAdminStore = create(
                         headers: { 'Content-Type': 'application/json' }
                     });
                     if (response.success) {
-                        set((state) => ({
-                            pricingPlans: state.pricingPlans.map(plan => plan._id === id ? response.data : plan)
-                        }));
+                        get().fetchPricingPlans();
                         return true;
                     }
                 } catch (err) {
@@ -274,9 +272,7 @@ const useSuperAdminStore = create(
                         method: 'DELETE'
                     });
                     if (response.success) {
-                        set((state) => ({
-                            pricingPlans: state.pricingPlans.filter(plan => plan._id !== id)
-                        }));
+                        get().fetchPricingPlans();
                         return true;
                     }
                 } catch (err) {
@@ -303,11 +299,7 @@ const useSuperAdminStore = create(
                         body: data
                     });
                     if (response.success) {
-                        set((state) => ({
-                            systemIntel: state.systemIntel.map(item =>
-                                item.role === role ? response.data : item
-                            )
-                        }));
+                        get().fetchSystemIntel();
                         return true;
                     }
                 } catch (err) {
@@ -320,7 +312,7 @@ const useSuperAdminStore = create(
                 try {
                     const response = await apiRequest('/system-intel/seed', { method: 'POST' });
                     if (response.success) {
-                        set({ systemIntel: response.data });
+                        get().fetchSystemIntel();
                         return true;
                     }
                 } catch (err) {
@@ -416,11 +408,7 @@ const useSuperAdminStore = create(
                     });
 
                     if (response.success) {
-                        set((state) => ({
-                            supportTickets: state.supportTickets.map((t) =>
-                                t._id === id ? response.data : t
-                            )
-                        }));
+                        get().fetchSupportTickets();
                         return true;
                     }
                 } catch (err) {
@@ -436,11 +424,7 @@ const useSuperAdminStore = create(
                         body: { status }
                     });
                     if (response.success) {
-                        set((state) => ({
-                            supportTickets: state.supportTickets.map((t) =>
-                                t._id === id ? response.data : t
-                            )
-                        }));
+                        get().fetchSupportTickets();
                         return true;
                     }
                 } catch (err) {
@@ -505,11 +489,7 @@ const useSuperAdminStore = create(
                         body: { subscriptionStatus: status }
                     });
                     if (response.success) {
-                        set((state) => ({
-                            admins: state.admins.map((adm) =>
-                                adm._id === id ? response.data : adm
-                            ),
-                        }));
+                        get().fetchAdmins();
                         return true;
                     }
                 } catch (err) {
@@ -522,9 +502,7 @@ const useSuperAdminStore = create(
                 try {
                     const response = await apiRequest(`/superadmin/admins/${id}`, { method: 'DELETE' });
                     if (response.success) {
-                        set((state) => ({
-                            admins: state.admins.filter((adm) => adm._id !== id),
-                        }));
+                        get().fetchAdmins();
                         return true;
                     }
                 } catch (err) {
@@ -546,9 +524,7 @@ const useSuperAdminStore = create(
                         }
                     });
                     if (response.success) {
-                        set((state) => ({
-                            admins: [response.data, ...state.admins]
-                        }));
+                        get().fetchAdmins();
                         return { success: true };
                     }
                 } catch (err) {
@@ -578,9 +554,7 @@ const useSuperAdminStore = create(
                         body: newPlan
                     });
                     if (response.success) {
-                        set((state) => ({
-                            plans: [...state.plans, response.data]
-                        }));
+                        get().fetchPlans();
                         return true;
                     }
                 } catch (err) {
@@ -596,11 +570,7 @@ const useSuperAdminStore = create(
                         body: updatedPlan
                     });
                     if (response.success) {
-                        set((state) => ({
-                            plans: state.plans.map((p) =>
-                                p._id === id ? response.data : p
-                            ),
-                        }));
+                        get().fetchPlans();
                         return true;
                     }
                 } catch (err) {
@@ -613,9 +583,7 @@ const useSuperAdminStore = create(
                 try {
                     const response = await apiRequest(`/superadmin/plans/${id}`, { method: 'DELETE' });
                     if (response.success) {
-                        set((state) => ({
-                            plans: state.plans.filter((p) => p._id !== id),
-                        }));
+                        get().fetchPlans();
                         return true;
                     }
                 } catch (err) {
@@ -631,11 +599,7 @@ const useSuperAdminStore = create(
                         body: { planId, planName }
                     });
                     if (response.success) {
-                        set((state) => ({
-                            admins: state.admins.map(adm =>
-                                adm._id === adminId ? response.data : adm
-                            )
-                        }));
+                        get().fetchAdmins();
                         return true;
                     }
                 } catch (err) {
@@ -661,11 +625,7 @@ const useSuperAdminStore = create(
                     });
 
                     if (response.success) {
-                        set((state) => ({
-                            inquiries: state.inquiries.map((inq) =>
-                                (inq._id === id || inq.id === id) ? { ...inq, status } : inq
-                            ),
-                        }));
+                        get().fetchInquiries();
                         return true;
                     }
                 } catch (err) {
@@ -816,13 +776,7 @@ const useSuperAdminStore = create(
                         body: staffData
                     });
                     if (response.success) {
-                        set((state) => ({
-                            staffMembers: [response.data, ...state.staffMembers],
-                            staffPagination: {
-                                ...state.staffPagination,
-                                total: state.staffPagination.total + 1
-                            }
-                        }));
+                        get().fetchStaff();
                         return true;
                     }
                 } catch (err) {
@@ -838,9 +792,7 @@ const useSuperAdminStore = create(
                         body: staffData
                     });
                     if (response.success) {
-                        set((state) => ({
-                            staffMembers: state.staffMembers.map(s => s._id === id ? response.data : s)
-                        }));
+                        get().fetchStaff();
                         return true;
                     }
                 } catch (err) {
@@ -855,13 +807,7 @@ const useSuperAdminStore = create(
                         method: 'DELETE'
                     });
                     if (response.success) {
-                        set((state) => ({
-                            staffMembers: state.staffMembers.filter(s => s._id !== id),
-                            staffPagination: {
-                                ...state.staffPagination,
-                                total: Math.max(0, state.staffPagination.total - 1)
-                            }
-                        }));
+                        get().fetchStaff();
                         return true;
                     }
                 } catch (err) {

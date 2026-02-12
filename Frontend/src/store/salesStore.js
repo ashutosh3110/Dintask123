@@ -75,16 +75,7 @@ const useSalesStore = create(
                     });
 
                     if (res.success) {
-                        set((state) => ({
-                            salesReps: [...state.salesReps, {
-                                ...res.data,
-                                id: res.data._id,
-                                totalSales: 0,
-                                activeDeals: 0,
-                                conversionRate: 0
-                            }],
-                            loading: false
-                        }));
+                        get().fetchSalesReps();
                         toast.success('Sales Representative added successfully');
                     }
                 } catch (error) {
@@ -95,24 +86,32 @@ const useSalesStore = create(
                 }
             },
 
-            updateSalesRep: (salesRepId, updatedData) => {
-                set((state) => ({
-                    salesReps: state.salesReps.map((salesRep) =>
-                        salesRep.id === salesRepId ? { ...salesRep, ...updatedData } : salesRep
-                    ),
-                }));
+            updateSalesRep: async (salesRepId, updatedData) => {
+                try {
+                    const res = await api(`/admin/users/${salesRepId}`, {
+                        method: 'PUT',
+                        body: { ...updatedData, role: 'sales_executive' }
+                    });
+                    if (res.success) {
+                        get().fetchSalesReps();
+                        toast.success('Sales Representative updated');
+                    }
+                } catch (error) {
+                    console.error("Update Sales Rep Error", error);
+                    toast.error(error.message || 'Failed to update sales rep');
+                }
             },
 
             deleteSalesRep: async (salesRepId) => {
                 try {
-                    await api(`/admin/users/${salesRepId}`, {
+                    const res = await api(`/admin/users/${salesRepId}`, {
                         method: 'DELETE',
                         body: { role: 'sales_executive' }
                     });
-                    set((state) => ({
-                        salesReps: state.salesReps.filter((salesRep) => salesRep.id !== salesRepId),
-                    }));
-                    toast.success('Sales Representative removed');
+                    if (res.success) {
+                        get().fetchSalesReps();
+                        toast.success('Sales Representative removed');
+                    }
                 } catch (error) {
                     console.error("Delete Sales Rep Error", error);
                     toast.error(error.message || 'Failed to remove sales rep');

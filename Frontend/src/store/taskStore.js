@@ -41,6 +41,7 @@ const useTaskStore = create((set, get) => ({
                 set((state) => ({
                     tasks: [normalizedTask, ...state.tasks]
                 }));
+                get().fetchTasks(); // Re-fetch to sync lists and stats
                 return normalizedTask;
             }
         } catch (error) {
@@ -64,7 +65,9 @@ const useTaskStore = create((set, get) => ({
                 body: updatedData
             });
 
-            if (!res.success) {
+            if (res.success) {
+                get().fetchTasks();
+            } else {
                 toast.error("Failed to update task");
                 get().fetchTasks(); // Revert
             }
@@ -85,6 +88,7 @@ const useTaskStore = create((set, get) => ({
                 set((state) => ({
                     tasks: state.tasks.filter((task) => task._id !== taskId),
                 }));
+                get().fetchTasks(); // Re-fetch to sync lists and stats
                 toast.success("Task deleted");
             }
         } catch (error) {

@@ -10,7 +10,6 @@ import {
     Calendar as CalendarIcon,
     ArrowRight,
     Target,
-    Plus,
     Mail,
     Shield
 } from 'lucide-react';
@@ -191,14 +190,6 @@ const SalesDashboard = () => {
 
                 <div className="flex items-center gap-2 sm:gap-3">
 
-                    <Button
-                        className="h-10 sm:h-12 px-4 sm:px-6 bg-primary-600 hover:bg-primary-700 shadow-xl shadow-primary-500/20 rounded-xl font-black text-[10px] uppercase tracking-widest text-white gap-2 transition-all active:scale-95"
-                        onClick={() => navigate('/sales/deals')}
-                    >
-                        <Plus size={16} />
-                        <span className="hidden sm:inline">New Operation</span>
-                        <span className="sm:hidden">Add Deal</span>
-                    </Button>
                 </div>
             </div>
 

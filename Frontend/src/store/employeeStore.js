@@ -128,6 +128,8 @@ const useEmployeeStore = create((set, get) => ({
                     employees: [...state.employees, res.data],
                     loading: false
                 }));
+                get().fetchEmployees();
+                get().fetchSubscriptionLimit();
                 toast.success('Team member added successfully');
                 return true;
             }
@@ -151,6 +153,9 @@ const useEmployeeStore = create((set, get) => ({
                     pendingRequests: state.pendingRequests.filter(r => r._id !== id),
                     employees: [...state.employees, res.data]
                 }));
+                get().fetchEmployees();
+                get().fetchPendingRequests();
+                get().fetchSubscriptionLimit();
                 return true;
             }
         } catch (error) {
@@ -169,6 +174,7 @@ const useEmployeeStore = create((set, get) => ({
             set((state) => ({
                 pendingRequests: state.pendingRequests.filter(r => r._id !== id)
             }));
+            get().fetchPendingRequests();
             return true;
         } catch (error) {
             console.error("Reject Request Error", error);
@@ -186,6 +192,8 @@ const useEmployeeStore = create((set, get) => ({
             set((state) => ({
                 employees: state.employees.filter((emp) => emp._id !== id),
             }));
+            get().fetchEmployees();
+            get().fetchSubscriptionLimit();
             toast.success('User deleted');
         } catch (error) {
             console.error("Delete User Error", error);
