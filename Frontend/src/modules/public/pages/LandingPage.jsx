@@ -804,8 +804,8 @@ const LandingPage = () => {
 
                                             <div className="mt-auto">
                                                 <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#FFEE8C]/30 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300 font-bold text-[8px] sm:text-xs uppercase">
-                                                    {index === 0 ? <Monitor size={10} className="sm:size-[14px]" /> : <Smartphone size={10} className="sm:size-[14px]" />}
-                                                    <span className="truncate">{index === 0 ? "Web" : "App"}</span>
+                                                    {(index === 0 || index === 2) ? <Monitor size={10} className="sm:size-[14px]" /> : <Smartphone size={10} className="sm:size-[14px]" />}
+                                                    <span className="truncate">{(index === 0 || index === 2) ? "Web" : "App"}</span>
                                                 </div>
                                             </div>
                                         </div>
