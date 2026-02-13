@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { cn } from '@/shared/utils/cn';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import useProjectStore from '@/store/projectStore';
 import { Badge } from '@/shared/components/ui/badge';
@@ -49,8 +50,11 @@ const ManagerProjects = () => {
           <div className="col-span-full text-center py-12 text-slate-400 font-medium border-2 border-dashed rounded-3xl">No projects found.</div>
         ) : (
           filteredProjects.map(project => (
-            <Card key={project._id} className="group border-none shadow-sm hover:shadow-lg transition-all duration-300 rounded-3xl overflow-hidden cursor-pointer" onClick={() => navigate(`/manager/projects/${project._id}`)}>
-              <div className={`h-1.5 w-full ${project.status === 'active' ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+            <Card key={project._id} className="group border-2 border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 rounded-[2rem] overflow-hidden cursor-pointer bg-white dark:bg-slate-900" onClick={() => navigate(`/manager/projects/${project._id}`)}>
+              <div className={cn(
+                "h-1.5 w-full transition-colors",
+                project.status === 'active' ? 'bg-emerald-500' : 'bg-slate-300'
+              )} />
               <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <Badge variant="outline" className="uppercase tracking-widest text-[10px] font-black border-slate-100 bg-slate-50 text-slate-600">

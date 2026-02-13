@@ -103,14 +103,14 @@ const EmployeeProfile = () => {
     // Default Profile View
     return (
         <div className="min-h-screen w-full bg-white dark:bg-slate-950 relative flex flex-col items-center justify-start font-sans overflow-x-hidden pb-20">
-            {/* Enhanced Background Visibility */}
+            {/* Calendar-Style Brand Background Integration */}
             <div className="absolute inset-0 h-[480px] z-0 overflow-hidden">
                 <img
                     src="/WLCOMPAGE .png"
                     alt="Background"
-                    className="w-full h-full object-cover object-center opacity-70 dark:opacity-30 translate-y-[-10%]"
+                    className="w-full h-full object-cover object-center pointer-events-none"
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-white/80 to-white dark:from-slate-950/40 dark:via-slate-950/80 dark:to-slate-950" />
+                <div className="absolute inset-0 bg-slate-950/40 dark:bg-black/60 pointer-events-none" />
             </div>
 
             {/* Profile Content Content */}
@@ -118,10 +118,10 @@ const EmployeeProfile = () => {
                 {/* Header Section */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                        <h1 className="text-3xl font-black text-white tracking-tight">
                             My Profile
                         </h1>
-                        <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mt-1">
+                        <p className="text-[11px] font-bold text-white/70 uppercase tracking-widest mt-1">
                             Identity & security settings
                         </p>
                     </div>

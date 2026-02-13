@@ -258,8 +258,6 @@ const AppRouter = () => {
                     <Route path="history" element={<SubscriptionHistory />} />
                     <Route path="settings" element={<SuperAdminSettings />} />
                     <Route path="notifications" element={<SuperAdminNotifications />} />
-
-
                     <Route path="system-intel" element={<IntelManager />} />
                     <Route path="landing-page" element={<LandingPageManager />} />
                     <Route path="testimonials" element={<TestimonialsManager />} />
@@ -273,8 +271,6 @@ const AppRouter = () => {
                     </Route>
                 </Route>
 
-
-
                 {/* --- MANAGER ROUTES --- */}
                 {/* Main Manager Panel */}
                 <Route path="/manager" element={<ProtectedRoute allowedRoles={['manager']}><ManagerLayout /></ProtectedRoute>}>
@@ -284,7 +280,6 @@ const AppRouter = () => {
                     <Route path="assign-task" element={<AssignTask />} />
                     <Route path="my-tasks" element={<MyTasks />} />
                     <Route path="tasks/:id" element={<TaskDetail />} />
-
                     <Route path="team" element={<TeamManagement />} />
                     <Route path="progress" element={<TeamProgress />} />
                     <Route path="chat" element={<ManagerChat />} />
@@ -318,7 +313,7 @@ const AppRouter = () => {
 
                 {/* Default Redirection */}
                 <Route path="*" element={<NotFoundRedirect />} />
-            </Routes >
+            </Routes>
         </Suspense>
     );
 };
