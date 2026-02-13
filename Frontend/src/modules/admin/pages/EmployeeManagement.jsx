@@ -58,7 +58,7 @@ import api from '@/lib/api';
 
 const EmployeeManagement = () => {
     const navigate = useNavigate();
-    const { employees, deleteEmployee, addEmployee, employeePagination, fetchEmployees, fetchSubscriptionLimit, limitStatus } = useEmployeeStore();
+    const { employees, deleteEmployee, addEmployee, updateEmployee, employeePagination, fetchEmployees, fetchSubscriptionLimit, limitStatus } = useEmployeeStore();
     const { user } = useAuthStore();
     const { tasks } = useTaskStore();
     const { allManagers, fetchAllManagers } = useManagerStore();
@@ -69,8 +69,11 @@ const EmployeeManagement = () => {
     const [limit, setLimit] = useState(10);
 
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [expandedEmployee, setExpandedEmployee] = useState(null);
+    const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [newEmployee, setNewEmployee] = useState({ name: '', email: '', role: '', managerId: '' });
+    const [editEmployeeData, setEditEmployeeData] = useState({ name: '', email: '', role: '', managerId: '' });
 
     const [parent] = useAutoAnimate();
 
@@ -148,6 +151,33 @@ const EmployeeManagement = () => {
             await deleteEmployee(id, 'employee');
             // Refresh list
             fetchEmployees({ page, limit, search: searchTerm });
+        }
+    };
+
+    const openEditModal = (emp) => {
+        setSelectedEmployee(emp);
+        setEditEmployeeData({
+            name: emp.name,
+            email: emp.email,
+            role: emp.role,
+            managerId: emp.managerId || ''
+        });
+        setIsEditModalOpen(true);
+    };
+
+    const handleEditEmployee = async (e) => {
+        e.preventDefault();
+        try {
+            const success = await updateEmployee(selectedEmployee._id || selectedEmployee.id, editEmployeeData, 'employee');
+            if (success) {
+                setIsEditModalOpen(false);
+                setSelectedEmployee(null);
+                // List refresh is already handled in store background re-fetch, 
+                // but we explicitly call it here too for UI consistency if needed.
+                fetchEmployees({ page, limit, search: searchTerm });
+            }
+        } catch (error) {
+            console.error("Edit Error:", error);
         }
     };
 
@@ -331,7 +361,12 @@ const EmployeeManagement = () => {
                                                 </td>
                                                 <td className="p-5 text-right">
                                                     <div className="flex justify-end gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg"
+                                                            onClick={() => openEditModal(emp)}
+                                                        >
                                                             <Edit2 size={14} />
                                                         </Button>
                                                         <Button
@@ -572,6 +607,65 @@ const EmployeeManagement = () => {
                         <DialogFooter className="pt-4">
                             <Button type="button" variant="outline" onClick={() => setIsAddModalOpen(false)} className="rounded-xl h-11 px-6">Cancel</Button>
                             <Button type="submit" className="rounded-xl h-11 px-6 bg-primary-600 hover:bg-primary-700">Add Employee</Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+            {/* Edit Employee Dialog */}
+            <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+                <DialogContent className="sm:max-w-md rounded-3xl duration-200">
+                    <DialogHeader>
+                        <DialogTitle>Edit Employee Details</DialogTitle>
+                        <DialogDescription>Modify employee information and platform access.</DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleEditEmployee} className="space-y-4 py-4">
+                        <div className="grid gap-2">
+                            <label className="text-xs font-bold text-slate-500 uppercase">Full Name</label>
+                            <Input
+                                value={editEmployeeData.name}
+                                onChange={(e) => setEditEmployeeData({ ...editEmployeeData, name: e.target.value })}
+                                placeholder="Chirag J"
+                                className="rounded-xl h-11"
+                                required
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <label className="text-xs font-bold text-slate-500 uppercase">Email Address</label>
+                            <Input
+                                type="email"
+                                value={editEmployeeData.email}
+                                onChange={(e) => setEditEmployeeData({ ...editEmployeeData, email: e.target.value })}
+                                placeholder="chirag.j@example.com"
+                                className="rounded-xl h-11"
+                                required
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <label className="text-xs font-bold text-slate-500 uppercase">Role</label>
+                            <Input
+                                value={editEmployeeData.role}
+                                onChange={(e) => setEditEmployeeData({ ...editEmployeeData, role: e.target.value })}
+                                placeholder="Software Engineer"
+                                className="rounded-xl h-11"
+                                required
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <label className="text-xs font-bold text-slate-500 uppercase">Assign Manager</label>
+                            <select
+                                className="w-full h-11 rounded-xl bg-slate-50 border-slate-200 px-3 text-sm focus:ring-2 focus:ring-primary-500/10 outline-none transition-all cursor-pointer"
+                                value={editEmployeeData.managerId}
+                                onChange={(e) => setEditEmployeeData({ ...editEmployeeData, managerId: e.target.value })}
+                            >
+                                <option value="">No Manager (Unassigned)</option>
+                                {allManagers.map(mgr => (
+                                    <option key={mgr._id} value={mgr._id}>{mgr.name} ({mgr.department || 'No Dept'})</option>
+                                ))}
+                            </select>
+                        </div>
+                        <DialogFooter className="pt-4 gap-2">
+                            <Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)} className="rounded-xl h-11 px-6 flex-1 sm:flex-none">Cancel</Button>
+                            <Button type="submit" className="rounded-xl h-11 px-6 bg-primary-600 hover:bg-primary-700 flex-1 sm:flex-none">Save Changes</Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>

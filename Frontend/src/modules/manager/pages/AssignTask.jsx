@@ -141,6 +141,12 @@ const AssignTask = () => {
             return;
         }
 
+        // Validate Deadline is not in the past
+        if (date < new Date(new Date().setSeconds(0, 0) - 60000)) {
+            toast.error("Tactical Failure: Deadline cannot be set in the temporal past.");
+            return;
+        }
+
         // Validate Recurrence
         if (formData.recurrenceType !== 'none') {
             if (parseInt(formData.recurrenceInterval) < 1) {
@@ -478,7 +484,7 @@ const AssignTask = () => {
                                             selected={date}
                                             onSelect={setDate}
                                             initialFocus
-                                            fromDate={new Date()} // Prevent past dates
+                                            disabled={{ before: new Date() }} // Prevent past dates
                                             className="font-sans"
                                         />
                                     </PopoverContent>
@@ -550,6 +556,7 @@ const AssignTask = () => {
                                         <Input
                                             type="date"
                                             name="recurrenceEndDate"
+                                            min={new Date().toISOString().split('T')[0]}
                                             value={formData.recurrenceEndDate}
                                             onChange={handleInputChange}
                                             className="h-11 bg-slate-50 border-none dark:bg-slate-800/50 rounded-xl font-bold text-sm px-4"

@@ -64,7 +64,12 @@ const useProjectStore = create((set, get) => ({
           currentProject: state.currentProject?._id === id ? { ...state.currentProject, status } : state.currentProject
         }));
         get().fetchProjects(); // Re-fetch to sync lists and stats
-        toast.success("Project status updated");
+
+        // Background re-fetch for global state synchronization
+        import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+          .catch(err => console.error("Background sync error:", err));
+
+        toast.success('Project status updated');
       }
     } catch (error) {
       toast.error("Failed to update status");

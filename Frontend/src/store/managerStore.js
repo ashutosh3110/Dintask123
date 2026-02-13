@@ -63,6 +63,13 @@ const useManagerStore = create((set, get) => ({
                     loading: false
                 }));
                 get().fetchManagers(); // Re-fetch to sync pagination and lists
+
+                // Background re-fetches for global state synchronization
+                Promise.all([
+                    import('./adminStore').then(m => m.default.getState().fetchDashboardStats()),
+                    import('./employeeStore').then(m => m.default.getState().fetchSubscriptionLimit())
+                ]).catch(err => console.error("Background sync error:", err));
+
                 toast.success('Manager added successfully');
                 return true;
             }
@@ -75,11 +82,35 @@ const useManagerStore = create((set, get) => ({
     },
 
     updateManager: async (id, updatedData) => {
-        // TODO: Implement update API if exists, for now just local or generic update
-        // Assuming generic update might not exist yet or varies.
-        // For dashboard count, this is less critical.
-        // We will keep local update for now or implement if we find the endpoint.
-        console.warn("Update Manager API not fully implemented yet");
+        set({ loading: true });
+        try {
+            const res = await api(`/admin/users/${id}`, {
+                method: 'PUT',
+                body: { ...updatedData, role: 'manager' }
+            });
+
+            if (res.success) {
+                set((state) => ({
+                    managers: state.managers.map((m) => (m._id === id ? res.data : m)),
+                    loading: false
+                }));
+                get().fetchManagers();
+
+                // Background re-fetches for global state synchronization
+                Promise.all([
+                    import('./adminStore').then(m => m.default.getState().fetchDashboardStats()),
+                    import('./employeeStore').then(m => m.default.getState().fetchSubscriptionLimit())
+                ]).catch(err => console.error("Background sync error:", err));
+
+                toast.success('Manager updated successfully');
+                return true;
+            }
+        } catch (error) {
+            console.error("Update Manager Error", error);
+            toast.error(error.message || 'Failed to update manager');
+            set({ loading: false });
+            return false;
+        }
     },
 
     deleteManager: async (id) => {
@@ -94,6 +125,13 @@ const useManagerStore = create((set, get) => ({
                     managers: state.managers.filter((m) => m._id !== id),
                 }));
                 get().fetchManagers(); // Re-fetch to sync pagination and lists
+
+                // Background re-fetches for global state synchronization
+                Promise.all([
+                    import('./adminStore').then(m => m.default.getState().fetchDashboardStats()),
+                    import('./employeeStore').then(m => m.default.getState().fetchSubscriptionLimit())
+                ]).catch(err => console.error("Background sync error:", err));
+
                 toast.success('Manager deleted');
             }
         } catch (error) {

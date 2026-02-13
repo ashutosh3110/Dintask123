@@ -130,6 +130,11 @@ const useEmployeeStore = create((set, get) => ({
                 }));
                 get().fetchEmployees();
                 get().fetchSubscriptionLimit();
+
+                // Background re-fetch for global state synchronization
+                import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+                    .catch(err => console.error("Background sync error:", err));
+
                 toast.success('Team member added successfully');
                 return true;
             }
@@ -156,6 +161,11 @@ const useEmployeeStore = create((set, get) => ({
                 get().fetchEmployees();
                 get().fetchPendingRequests();
                 get().fetchSubscriptionLimit();
+
+                // Background re-fetch for global state synchronization
+                import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+                    .catch(err => console.error("Background sync error:", err));
+
                 return true;
             }
         } catch (error) {
@@ -194,10 +204,45 @@ const useEmployeeStore = create((set, get) => ({
             }));
             get().fetchEmployees();
             get().fetchSubscriptionLimit();
+
+            // Background re-fetch for global state synchronization
+            import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+                .catch(err => console.error("Background sync error:", err));
+
             toast.success('User deleted');
         } catch (error) {
             console.error("Delete User Error", error);
             toast.error(error.message || 'Failed to delete');
+        }
+    },
+
+    updateEmployee: async (id, updatedData, role) => {
+        set({ loading: true });
+        try {
+            const res = await api(`/admin/users/${id}`, {
+                method: 'PUT',
+                body: { ...updatedData, role }
+            });
+
+            if (res.success) {
+                set((state) => ({
+                    employees: state.employees.map((e) => (e._id === id ? res.data : e)),
+                    loading: false
+                }));
+                get().fetchEmployees();
+
+                // Background re-fetch for global state synchronization
+                import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+                    .catch(err => console.error("Background sync error:", err));
+
+                toast.success('Employee updated successfully');
+                return true;
+            }
+        } catch (error) {
+            console.error("Update Employee Error", error);
+            toast.error(error.message || 'Failed to update member');
+            set({ loading: false });
+            return false;
         }
     },
 

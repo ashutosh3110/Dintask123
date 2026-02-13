@@ -76,6 +76,11 @@ const useSalesStore = create(
 
                     if (res.success) {
                         get().fetchSalesReps();
+
+                        // Background re-fetch for global state synchronization
+                        import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+                            .catch(err => console.error("Background sync error:", err));
+
                         toast.success('Sales Representative added successfully');
                     }
                 } catch (error) {
@@ -94,6 +99,11 @@ const useSalesStore = create(
                     });
                     if (res.success) {
                         get().fetchSalesReps();
+
+                        // Background re-fetch for global state synchronization
+                        import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+                            .catch(err => console.error("Background sync error:", err));
+
                         toast.success('Sales Representative updated');
                     }
                 } catch (error) {
@@ -110,6 +120,11 @@ const useSalesStore = create(
                     });
                     if (res.success) {
                         get().fetchSalesReps();
+
+                        // Background re-fetch for global state synchronization
+                        import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+                            .catch(err => console.error("Background sync error:", err));
+
                         toast.success('Sales Representative removed');
                     }
                 } catch (error) {
