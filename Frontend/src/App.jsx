@@ -9,6 +9,9 @@ import SubscriptionExpiredModal from './shared/components/SubscriptionExpiredMod
 import AdminSubscriptionExpiredModal from './shared/components/AdminSubscriptionExpiredModal';
 import './index.css';
 
+import { requestForToken, onMessageListener } from './firebase';
+import { toast } from 'sonner';
+
 function App() {
   const { isAuthenticated, fetchProfile } = useAuthStore();
   const { showTeamExpiredModal, showAdminExpiredModal, handleTeamLogout, adminExpiryDate } = useSubscriptionMonitor();
@@ -19,8 +22,20 @@ function App() {
   useEffect(() => {
     if (isAuthenticated) {
       fetchProfile();
+      // Setup Push Notifications
+      requestForToken();
     }
   }, [isAuthenticated, fetchProfile]);
+
+  useEffect(() => {
+    onMessageListener()
+      .then((payload) => {
+        toast(payload.notification.title, {
+          description: payload.notification.body,
+        });
+      })
+      .catch((err) => console.log('failed: ', err));
+  }, []);
 
   return (
     <BrowserRouter>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import useAuthStore from '@/store/authStore';
-import { Shield, KeyRound } from 'lucide-react';
+
 import { toast } from 'sonner';
 
 import { Button } from '@/shared/components/ui/button';
@@ -159,22 +159,7 @@ const SuperAdminLogin = () => {
                     </Card>
 
                     <div className="space-y-4 text-center">
-                        <div className="inline-block p-4 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-left w-full">
-                            <div className="flex items-center gap-3">
-                                <KeyRound className="shrink-0 text-slate-400" size={18} />
-                                <div className="text-xs w-full">
-                                    <div className="flex justify-between items-center mb-1">
-                                        <span className="font-bold text-slate-700 dark:text-slate-300">Admin</span>
-                                        <span className="font-mono text-slate-500">superadmin@dintask.com / super123</span>
-                                    </div>
-                                    <div className="w-full h-px bg-slate-100 dark:bg-slate-700 my-2" />
-                                    <div className="flex justify-between items-center">
-                                        <span className="font-bold text-slate-700 dark:text-slate-300">Staff</span>
-                                        <span className="font-mono text-slate-500">staff@dintask.com / staff123</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+
                         <p className="text-xs text-slate-400 font-mono">
                             SECURE SYSTEM CONNECTION // 2026 DINTASK
                         </p>

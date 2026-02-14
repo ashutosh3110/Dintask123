@@ -33,12 +33,32 @@ const SuperAdminSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  fcmToken: {
+    app: {
+      type: String,
+      default: ''
+    },
+    web: {
+      type: String,
+      default: ''
+    }
+  },
   resetPasswordToken: String,
   resetPasswordExpire: Date,
   status: {
     type: String,
     enum: ['active', 'inactive'],
     default: 'inactive'
+  },
+  fcmToken: {
+    app: {
+      type: String,
+      default: ''
+    },
+    web: {
+      type: String,
+      default: ''
+    }
   }
 }, { timestamps: true });
 

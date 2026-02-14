@@ -42,6 +42,16 @@ const ManagerSchema = new mongoose.Schema({
     enum: ['pending', 'active', 'inactive', 'rejected'],
     default: 'pending'
   },
+  fcmToken: {
+    app: {
+      type: String,
+      default: ''
+    },
+    web: {
+      type: String,
+      default: ''
+    }
+  },
   resetPasswordToken: String,
   resetPasswordExpire: Date
 }, { timestamps: true });

@@ -1,5 +1,12 @@
 const express = require('express');
-const { getNotifications, markAsRead, markAllAsRead, deleteNotification, bulkDeleteNotifications } = require('../controllers/notificationController');
+const {
+    getNotifications,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+    bulkDeleteNotifications,
+    updateFcmToken
+} = require('../controllers/notificationController');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
@@ -8,6 +15,9 @@ router.use(protect);
 
 router.route('/')
     .get(getNotifications);
+
+router.route('/fcm-token')
+    .put(updateFcmToken);
 
 router.route('/read-all')
     .put(markAllAsRead);
