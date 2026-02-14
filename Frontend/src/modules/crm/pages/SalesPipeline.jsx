@@ -51,6 +51,8 @@ import { cn } from '@/shared/utils/cn';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useDebounce } from '@/shared/hooks/use-debounce';
+import useAuthStore from '@/store/authStore';
+import { Shield } from 'lucide-react';
 
 const SalesPipeline = () => {
   const {
@@ -64,6 +66,9 @@ const SalesPipeline = () => {
     requestProjectConversion,
     fetchLeads
   } = useCRMStore();
+
+  const { role } = useAuthStore();
+  const canEdit = role === 'sales';
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterPriority, setFilterPriority] = useState('all');
@@ -244,8 +249,15 @@ const SalesPipeline = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-br from-white to-primary-50/20 dark:from-slate-900 dark:to-primary-900/10 p-2.5 sm:p-4 rounded-3xl shadow-xl shadow-primary-200/30 border-2 border-primary-100 dark:border-primary-900/30 shrink-0">
         <div className="flex items-center gap-3 px-1">
           <div>
-            <h1 className="text-base sm:text-xl font-black tracking-tight text-slate-900 dark:text-white uppercase leading-none">Sales <span className="text-primary-600">Pipeline</span></h1>
-            <p className="text-slate-500 dark:text-slate-400 text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] leading-none mt-1">Manage deal flow and conversions</p>
+            <div className="flex items-center gap-2 mb-1">
+              <h1 className="text-base sm:text-xl font-black tracking-tight text-slate-900 dark:text-white uppercase leading-none">Sales <span className="text-primary-600">Pipeline</span></h1>
+              {!canEdit && (
+                <Badge className="bg-amber-500/10 text-amber-600 border-amber-200 text-[7px] uppercase font-black tracking-widest px-1.5 py-0 flex items-center gap-1 h-4">
+                  <Shield size={8} /> View Only
+                </Badge>
+              )}
+            </div>
+            <p className="text-slate-500 dark:text-slate-400 text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] leading-none">Manage deal flow and conversions</p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -269,10 +281,12 @@ const SalesPipeline = () => {
               <SelectItem value="low" className="text-[9px] font-black uppercase">Low</SelectItem>
             </SelectContent>
           </Select>
-          <Button onClick={() => setIsAddOpen(true)} className="gap-1.5 h-8 sm:h-9 bg-primary-600 hover:bg-primary-700 rounded-xl shadow-lg shadow-primary-500/20 px-3 sm:px-4">
-            <Plus size={14} />
-            <span className="text-[9px] font-black uppercase tracking-widest whitespace-nowrap">Add deal</span>
-          </Button>
+          {canEdit && (
+            <Button onClick={() => setIsAddOpen(true)} className="gap-1.5 h-8 sm:h-9 bg-primary-600 hover:bg-primary-700 rounded-xl shadow-lg shadow-primary-500/20 px-3 sm:px-4">
+              <Plus size={14} />
+              <span className="text-[9px] font-black uppercase tracking-widest whitespace-nowrap">Add deal</span>
+            </Button>
+          )}
         </div>
       </div>
 
@@ -284,7 +298,7 @@ const SalesPipeline = () => {
               key={stage}
               className="flex flex-col w-[260px] bg-gradient-to-b from-slate-50/80 to-slate-100/30 dark:from-slate-800/20 dark:to-slate-900/20 rounded-[2rem] border-2 border-slate-100/50 dark:border-slate-800 h-full max-h-full transition-colors hover:border-primary-100/50 dark:hover:border-primary-900/30"
               onDragOver={handleDragOver}
-              onDrop={() => handleDrop(stage)}
+              onDrop={() => canEdit && handleDrop(stage)}
             >
               {/* Column Header */}
               <div className="p-4 border-b border-slate-100 dark:border-slate-800/50 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-t-3xl sticky top-0 z-10">
@@ -315,9 +329,12 @@ const SalesPipeline = () => {
                   stageLeads.map((lead) => (
                     <div
                       key={lead._id || lead.id}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, lead._id || lead.id, stage)}
-                      className="group bg-white dark:bg-slate-900 p-3.5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 cursor-grab active:cursor-grabbing hover:shadow-xl hover:border-primary-100/50 dark:hover:border-primary-900/50 transition-all relative overflow-hidden"
+                      draggable={canEdit}
+                      onDragStart={(e) => canEdit && handleDragStart(e, lead._id || lead.id, stage)}
+                      className={cn(
+                        "group bg-white dark:bg-slate-900 p-3.5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 cursor-grab active:cursor-grabbing hover:shadow-xl hover:border-primary-100/50 dark:hover:border-primary-900/50 transition-all relative overflow-hidden",
+                        !canEdit && "cursor-default active:cursor-default"
+                      )}
                     >
                       <div className="absolute top-0 right-0 w-12 h-12 bg-slate-50 dark:bg-slate-800/30 rounded-bl-full -mr-6 -mt-6 group-hover:scale-110 transition-transform" />
 
@@ -328,36 +345,38 @@ const SalesPipeline = () => {
                         >
                           {lead.priority}
                         </Badge>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-50">
-                              <MoreHorizontal size={14} />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="rounded-2xl border-slate-100 shadow-2xl p-1.5">
-                            <DropdownMenuItem onClick={() => handleEditClick(lead)} className="text-[10px] font-black uppercase tracking-widest rounded-xl px-3 py-2">
-                              <Edit2 className="mr-2 h-3.5 w-3.5" /> Edit Parameters
-                            </DropdownMenuItem>
-                            {lead.status === 'Won' && !lead.approvalStatus && (
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  if (!lead.deadline) {
-                                    toast.error("Project deadline is mandatory. Please set a deadline first.");
-                                    handleEditClick(lead);
-                                    return;
-                                  }
-                                  requestProjectConversion(lead.id || lead._id);
-                                }}
-                                className="text-[10px] font-black uppercase tracking-widest text-emerald-600 focus:text-emerald-600 rounded-xl px-3 py-2"
-                              >
-                                <Building2 className="mr-2 h-3.5 w-3.5" /> Project Deployment
+                        {canEdit && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-50">
+                                <MoreHorizontal size={14} />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="rounded-2xl border-slate-100 shadow-2xl p-1.5">
+                              <DropdownMenuItem onClick={() => handleEditClick(lead)} className="text-[10px] font-black uppercase tracking-widest rounded-xl px-3 py-2">
+                                <Edit2 className="mr-2 h-3.5 w-3.5" /> Edit Parameters
                               </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem className="text-red-500 focus:text-red-500 text-[10px] font-black uppercase tracking-widest rounded-xl px-3 py-2" onClick={() => handleDeleteDeal(lead._id || lead.id)}>
-                              <Trash2 className="mr-2 h-3.5 w-3.5" /> Purge Deal
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                              {lead.status === 'Won' && !lead.approvalStatus && (
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    if (!lead.deadline) {
+                                      toast.error("Project deadline is mandatory. Please set a deadline first.");
+                                      handleEditClick(lead);
+                                      return;
+                                    }
+                                    requestProjectConversion(lead.id || lead._id);
+                                  }}
+                                  className="text-[10px] font-black uppercase tracking-widest text-emerald-600 focus:text-emerald-600 rounded-xl px-3 py-2"
+                                >
+                                  <Building2 className="mr-2 h-3.5 w-3.5" /> Project Deployment
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuItem className="text-red-500 focus:text-red-500 text-[10px] font-black uppercase tracking-widest rounded-xl px-3 py-2" onClick={() => handleDeleteDeal(lead._id || lead.id)}>
+                                <Trash2 className="mr-2 h-3.5 w-3.5" /> Purge Deal
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
                       </div>
 
                       <h4 className="font-black text-slate-900 dark:text-white text-xs mb-1 line-clamp-1 relative z-10 leading-tight tracking-tight uppercase">{lead.name}</h4>
@@ -446,26 +465,28 @@ const SalesPipeline = () => {
                         </div>
                       </div>
 
-                      <div className="pt-3 border-t border-slate-50 dark:border-slate-800/50 flex items-center justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-9 px-4 rounded-xl text-primary-600 hover:bg-primary-50 font-black text-[10px] uppercase tracking-widest"
-                          onClick={() => handleEditClick(lead)}
-                        >
-                          <Edit2 className="size-3.5 mr-2" />
-                          Edit Deal
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-9 px-4 rounded-xl text-red-500 hover:bg-red-50 font-black text-[10px] uppercase tracking-widest"
-                          onClick={() => handleDeleteDeal(lead._id || lead.id)}
-                        >
-                          <Trash2 className="size-3.5 mr-2" />
-                          Delete
-                        </Button>
-                      </div>
+                      {canEdit && (
+                        <div className="pt-3 border-t border-slate-50 dark:border-slate-800/50 flex items-center justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-9 px-4 rounded-xl text-primary-600 hover:bg-primary-50 font-black text-[10px] uppercase tracking-widest"
+                            onClick={() => handleEditClick(lead)}
+                          >
+                            <Edit2 className="size-3.5 mr-2" />
+                            Edit Deal
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-9 px-4 rounded-xl text-red-500 hover:bg-red-50 font-black text-[10px] uppercase tracking-widest"
+                            onClick={() => handleDeleteDeal(lead._id || lead.id)}
+                          >
+                            <Trash2 className="size-3.5 mr-2" />
+                            Delete
+                          </Button>
+                        </div>
+                      )}
                     </motion.div>
                   ))}
                 </div>

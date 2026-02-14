@@ -94,10 +94,9 @@ const useTicketStore = create((set, get) => ({
             });
 
             if (res.success) {
-                set((state) => ({
-                    tickets: [res.data, ...state.tickets],
-                    loading: false
-                }));
+                // We rely on socket listener or fetchTickets to avoid duplicate key issues
+                // Simply clear the loading state and fetch fresh data
+                set({ loading: false });
                 get().fetchTickets(get().pagination);
                 get().fetchTicketStats();
 
@@ -214,6 +213,7 @@ const useTicketStore = create((set, get) => ({
     },
 
     initializeSocket: (userId) => {
+        // Prevent multiple listeners
         socketService.onSupportResponse(({ ticketId, updatedTicket }) => {
             set((state) => ({
                 tickets: state.tickets.map((t) =>
@@ -221,18 +221,40 @@ const useTicketStore = create((set, get) => ({
                 )
             }));
 
-            // Optional: If we want to show a toast if the user is not looking at the ticket
-            // But usually, real-time update in the view is enough.
+            // If the ticket was resolved/closed, refresh stats
+            if (['Resolved', 'Closed'].includes(updatedTicket.status)) {
+                get().fetchTicketStats();
+                // Refresh admin dashboard stats if applicable
+                import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+                    .catch(e => console.error("Stats sync error:", e));
+            }
         });
 
         socketService.onSupportTicket((newTicket) => {
-            // Check if it belongs to current admin/company
-            // Actually the backend already emits to the correct room if not escalated.
-            // If escalated, it might be for SuperAdmin.
-            set((state) => ({
-                tickets: [newTicket, ...state.tickets]
-            }));
-            toast.info(`New support ticket: ${newTicket.title}`);
+            set((state) => {
+                // Prevent duplicate tickets in state
+                const exists = state.tickets.some(t => t._id === newTicket._id);
+                if (exists) return state;
+
+                return {
+                    tickets: [newTicket, ...state.tickets]
+                };
+            });
+
+            toast.info(`New support ticket: ${newTicket.title}`, {
+                description: `Category: ${newTicket.category}`,
+                action: {
+                    label: 'View',
+                    onClick: () => {
+                        // Logic to navigate can be added here if needed
+                    }
+                }
+            });
+
+            // Refresh global stats
+            get().fetchTicketStats();
+            import('./adminStore').then(m => m.default.getState().fetchDashboardStats())
+                .catch(e => console.error("Stats sync error:", e));
         });
     },
 

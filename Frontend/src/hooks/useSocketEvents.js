@@ -2,29 +2,33 @@ import { useEffect } from 'react';
 import socketService from '@/services/socket';
 import useChatStore from '@/store/chatStore';
 import useAuthStore from '@/store/authStore';
+import useTicketStore from '@/store/ticketStore';
 
 const useSocketEvents = () => {
     const { isAuthenticated, user } = useAuthStore();
     const { addMessage } = useChatStore();
+
+    const { tickets, initializeSocket } = useTicketStore();
 
     useEffect(() => {
         if (isAuthenticated && user) {
             // Connect socket
             socketService.connect(user);
 
-            // Set up listeners
+            // Set up chat listeners
             socketService.onMessageReceived((message) => {
                 console.log('New message received via socket:', message);
                 addMessage(message);
             });
 
+            // Set up support ticket listeners globally
+            initializeSocket(user._id || user.id);
+
             return () => {
-                // We might not want to disconnect every time this hook unmounts 
-                // if it's used in App.jsx. But for safety:
                 // socketService.disconnect();
             };
         }
-    }, [isAuthenticated, user, addMessage]);
+    }, [isAuthenticated, user, addMessage, initializeSocket]);
 };
 
 export default useSocketEvents;

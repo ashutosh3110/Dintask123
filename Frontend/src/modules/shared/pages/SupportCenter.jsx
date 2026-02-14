@@ -149,6 +149,14 @@ const SupportCenter = () => {
     }, [selectedTicket]);
 
     const handleTicketSelect = (ticket) => {
+        // Leave previous ticket room if any
+        if (selectedTicket) {
+            socketService.leaveTicket(selectedTicket._id);
+        }
+
+        // Join new ticket room
+        socketService.joinTicket(ticket._id);
+
         setSelectedTicket(ticket);
         if (window.innerWidth < 1024) setIsSheetOpen(true);
         setReplyMessage('');

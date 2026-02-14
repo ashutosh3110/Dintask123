@@ -820,12 +820,14 @@ exports.getSubscriptionLimitStatus = async (req, res, next) => {
 // @access  Private (Admin only)
 exports.getDashboardStats = async (req, res, next) => {
   try {
-    // Ensure user is authenticated and has admin role
-    if (!req.user || req.user.role !== 'admin') {
-      return next(new ErrorResponse('Not authorized to access dashboard stats', 403));
+    // Dashboard stats are accessible by admin, manager and superadmin (via adminRoutes middleware)
+    // For Managers, we use their associated adminId
+    const adminId = req.user.role === 'admin' ? req.user.id : req.user.adminId;
+
+    if (!adminId && req.user.role !== 'superadmin_global') { // Standard check
+      return next(new ErrorResponse('Workspace ID not found for this user', 400));
     }
 
-    const adminId = req.user.id;
     const adminObjectId = new mongoose.Types.ObjectId(adminId);
 
     // Get Total Revenue from all Sales (Won deals) + Completed Projects
@@ -932,11 +934,9 @@ exports.getDashboardStats = async (req, res, next) => {
 // @access  Private (Admin only)
 exports.getRevenueChart = async (req, res, next) => {
   try {
-    if (!req.user || req.user.role !== 'admin') {
-      return next(new ErrorResponse('Not authorized to access revenue chart', 403));
-    }
+    const adminId = req.user.role === 'admin' ? req.user.id : req.user.adminId;
+    if (!adminId) return next(new ErrorResponse('Workspace ID not found', 400));
 
-    const adminId = req.user.id;
     const adminObjectId = new mongoose.Types.ObjectId(adminId);
 
     // Get period from query, default to 6 months
@@ -1039,11 +1039,8 @@ exports.getRevenueChart = async (req, res, next) => {
 // @access  Private (Admin only)
 exports.getSalesPipelineChart = async (req, res, next) => {
   try {
-    if (!req.user || req.user.role !== 'admin') {
-      return next(new ErrorResponse('Not authorized to access pipeline chart', 403));
-    }
-
-    const adminId = req.user.id;
+    const adminId = req.user.role === 'admin' ? req.user.id : req.user.adminId;
+    if (!adminId) return next(new ErrorResponse('Workspace ID not found', 400));
     const adminObjectId = new mongoose.Types.ObjectId(adminId);
 
     const Lead = require('../models/Lead');
@@ -1090,11 +1087,8 @@ exports.getSalesPipelineChart = async (req, res, next) => {
 // @access  Private (Admin only)
 exports.getProjectHealthChart = async (req, res, next) => {
   try {
-    if (!req.user || req.user.role !== 'admin') {
-      return next(new ErrorResponse('Not authorized to access project chart', 403));
-    }
-
-    const adminId = req.user.id;
+    const adminId = req.user.role === 'admin' ? req.user.id : req.user.adminId;
+    if (!adminId) return next(new ErrorResponse('Workspace ID not found', 400));
     const adminObjectId = new mongoose.Types.ObjectId(adminId);
 
     const Project = require('../models/Project');

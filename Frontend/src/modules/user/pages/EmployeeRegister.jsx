@@ -102,6 +102,33 @@ const EmployeeRegister = () => {
         }
     };
 
+    if (!adminId && !referralCode) {
+        return (
+            <div className="min-h-screen w-full bg-slate-50 flex flex-col items-center justify-center p-6 font-sans">
+                <div className="w-full max-w-[440px] bg-white rounded-[2.5rem] shadow-2xl p-10 text-center border border-slate-100">
+                    <div className="w-20 h-20 bg-amber-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                        <Mail size={32} className="text-amber-500" />
+                    </div>
+                    <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight mb-4">Invitation <span className="text-[#4461f2]">Required</span></h1>
+                    <p className="text-slate-500 text-sm font-medium leading-relaxed mb-8">
+                        To join the DinTask ecosystem, you must be invited via a secure link or have a valid workspace referral code.
+                    </p>
+                    <div className="space-y-4">
+                        <Button
+                            onClick={() => navigate('/employee/login')}
+                            className="w-full h-12 bg-slate-900 hover:bg-black text-white rounded-xl font-bold transition-all"
+                        >
+                            Return to Login
+                        </Button>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-loose">
+                            Contact your company administrator <br /> to receive a registration link.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen w-full bg-slate-50 relative flex flex-col items-center justify-start font-sans overflow-x-hidden">
             {/* Horizontal Top Background */}
@@ -119,14 +146,14 @@ const EmployeeRegister = () => {
                 <div className="bg-white rounded-[2.5rem] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.08)] p-10 md:p-12 border border-white/40">
                     <div className="text-center mb-10">
                         <h1 className="text-3xl font-bold text-slate-800 tracking-tight mb-2">
-                            {referralCode ? 'Join Team' : adminId ? 'Accept Invite' : 'Register'}
+                            {referralCode ? 'Join Team' : 'Accept Invite'}
                         </h1>
-                        <p className="text-slate-400 text-xs font-medium italic">Create your profile to get started</p>
-                        {referralCode && (
-                            <div className="mt-4 inline-flex items-center gap-2 bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full border border-emerald-100">
-                                <span className="text-[10px] font-bold uppercase tracking-widest">ID: {referralCode}</span>
-                            </div>
-                        )}
+                        <p className="text-slate-400 text-xs font-medium italic">Establishing secure connection to workspace</p>
+                        <div className="mt-4 inline-flex items-center gap-2 bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full border border-emerald-100">
+                            <span className="text-[10px] font-bold uppercase tracking-widest">
+                                {referralCode ? `CODE: ${referralCode}` : `ID: ${adminId.substring(0, 8)}...`}
+                            </span>
+                        </div>
                     </div>
 
                     <form onSubmit={handleRegister} className="space-y-6">

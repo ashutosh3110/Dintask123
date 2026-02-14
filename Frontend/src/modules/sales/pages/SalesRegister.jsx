@@ -102,6 +102,33 @@ const SalesRegister = () => {
         }
     };
 
+    if (!adminId && !referralCode) {
+        return (
+            <div className="min-h-screen w-full bg-slate-900 flex flex-col items-center justify-center p-6 font-sans">
+                <div className="w-full max-w-[440px] bg-slate-800 rounded-[2.5rem] shadow-2xl p-10 text-center border border-slate-700">
+                    <div className="w-20 h-20 bg-primary-900/30 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                        <ShieldCheck size={32} className="text-primary-500" />
+                    </div>
+                    <h1 className="text-2xl font-black text-white uppercase tracking-tight mb-4">Tactical <span className="text-primary-500">Access Only</span></h1>
+                    <p className="text-slate-400 text-sm font-medium leading-relaxed mb-8">
+                        Sales Division registration requires a verified workspace invitation or unit authorization code.
+                    </p>
+                    <div className="space-y-4">
+                        <Button
+                            onClick={() => navigate('/sales/login')}
+                            className="w-full h-12 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-bold transition-all"
+                        >
+                            Return to HQ
+                        </Button>
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-loose">
+                            Verify your credentials with <br /> workspace command.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen w-full bg-slate-50 relative flex flex-col items-center justify-start font-sans overflow-x-hidden">
             {/* Horizontal Top Background */}
@@ -119,15 +146,14 @@ const SalesRegister = () => {
                 <div className="bg-gradient-to-br from-white to-primary-50/30 dark:from-slate-900 dark:to-primary-900/10 rounded-[2.5rem] shadow-xl shadow-primary-500/20 p-10 md:p-12 border-2 border-primary-100 dark:border-primary-900">
                     <div className="text-center mb-10">
                         <h1 className="text-3xl font-bold text-slate-800 tracking-tight mb-2 uppercase">
-                            {referralCode ? 'Force Link' : adminId ? 'Invite Sync' : 'Operator Sync'}
+                            {referralCode ? 'Force Link' : 'Invite Sync'}
                         </h1>
-                        <p className="text-slate-400 text-xs font-medium italic">Establish your tactical presence</p>
-
-                        {referralCode && (
-                            <div className="mt-4 inline-flex items-center gap-2 bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full border border-emerald-100">
-                                <span className="text-[10px] font-bold uppercase tracking-widest">Workspace: {referralCode}</span>
-                            </div>
-                        )}
+                        <p className="text-slate-400 text-xs font-medium italic">Establishing secure tactical sync with workspace</p>
+                        <div className="mt-4 inline-flex items-center gap-2 bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full border border-emerald-100">
+                            <span className="text-[10px] font-bold uppercase tracking-widest">
+                                {referralCode ? `UNIT: ${referralCode}` : `HQ ID: ${adminId.substring(0, 8)}...`}
+                            </span>
+                        </div>
                     </div>
 
                     <form onSubmit={handleRegister} className="space-y-6">

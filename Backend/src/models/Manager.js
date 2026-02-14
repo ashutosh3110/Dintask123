@@ -34,7 +34,8 @@ const ManagerSchema = new mongoose.Schema({
   },
   adminId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Admin'
+    ref: 'Admin',
+    required: [true, 'Admin ID is required to link this manager to a workspace']
   },
   status: {
     type: String,

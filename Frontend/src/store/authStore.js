@@ -121,6 +121,10 @@ const useAuthStore = create(
                     } else {
                         await apiRequest('/auth/logout');
                     }
+
+                    // Disconnect socket on logout
+                    const socketService = (await import('../services/socket')).default;
+                    socketService.disconnect();
                 } catch (err) {
                     console.error('Logout API failed:', err);
                 }
