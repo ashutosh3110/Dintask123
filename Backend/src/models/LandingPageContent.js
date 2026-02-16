@@ -126,6 +126,72 @@ const LandingPageContentSchema = new mongoose.Schema({
             type: [String],
             default: []
         }
+    },
+    privacyPolicy: {
+        policySections: {
+            type: [{
+                title: { type: String, required: true },
+                content: { type: String, required: true }
+            }],
+            default: [
+                {
+                    title: "Information Collection",
+                    content: "We collect information you provide directly to us when you create an account, use our tactical modules, or communicate with us. This includes your name, email address, and any company data you upload to DinTask."
+                },
+                {
+                    title: "How We Use Information",
+                    content: "We use the information we collect to maintain and improve our services, develop new modules, and protect DinTask and our users. This allows us to provide a seamless experience across Sales, Project, and HR modules."
+                },
+                {
+                    title: "Data Security",
+                    content: "We use military-grade encryption to protect your data. However, no security system is impenetrable and we cannot guarantee the security of our database, nor can we guarantee that information you supply won't be intercepted while being transmitted to us."
+                },
+                {
+                    title: "Third-Party Sharing",
+                    content: "We do not sell your personal data. We only share information with tactical partners who help us provide our service (e.g., cloud hosting, email providers) and when required by military or legal authorities."
+                }
+            ]
+        }
+    },
+    termsService: {
+        policySections: {
+            type: [{
+                title: { type: String, required: true },
+                content: { type: String, required: true }
+            }],
+            default: [
+                {
+                    title: "Acceptance of Terms",
+                    content: "By accessing or using DinTask, you agree to be bound by these terms. If you do not agree, you may not use the platform."
+                },
+                {
+                    title: "User Accounts",
+                    content: "You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account."
+                },
+                {
+                    title: "Subscription & Billing",
+                    content: "Access to certain modules requires a paid subscription. All fees are non-refundable unless otherwise specified."
+                }
+            ]
+        }
+    },
+    cookiePolicy: {
+        policySections: {
+            type: [{
+                title: { type: String, required: true },
+                content: { type: String, required: true }
+            }],
+            default: [
+                {
+                    title: "What are Cookies",
+                    content: "Cookies are small text files stored on your device that help us provide a better tactical experience."
+                },
+                {
+                    title: "How We Use Cookies",
+                    content: "We use cookies to remember your login state, preferences, and to analyze how you interact with our platform to improve performance."
+                }
+            ]
+        }
     }
 }, { timestamps: true });
 

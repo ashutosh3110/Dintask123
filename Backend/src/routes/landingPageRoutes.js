@@ -10,7 +10,13 @@ const {
     getTacticalContent,
     updateTacticalContent,
     getFooterCtaContent,
-    updateFooterCtaContent
+    updateFooterCtaContent,
+    getPrivacyPolicy,
+    updatePrivacyPolicy,
+    getTermsOfService,
+    updateTermsOfService,
+    getCookiePolicy,
+    updateCookiePolicy
 } = require('../controllers/landingPageController');
 const { protect, authorize } = require('../middleware/auth');
 const upload = require('../middleware/upload');
@@ -43,5 +49,17 @@ router.put('/footer-cta', protect, authorize('superadmin', 'super_admin'), uploa
     { name: 'image_2', maxCount: 1 },
     { name: 'image_3', maxCount: 1 }
 ]), updateFooterCtaContent);
+
+// Privacy Policy Routes
+router.get('/privacy_policy', getPrivacyPolicy);
+router.put('/privacy_policy', protect, authorize('superadmin', 'super_admin'), updatePrivacyPolicy);
+
+// Terms of Service Routes
+router.get('/terms_service', getTermsOfService);
+router.put('/terms_service', protect, authorize('superadmin', 'super_admin'), updateTermsOfService);
+
+// Cookie Policy Routes
+router.get('/cookie_policy', getCookiePolicy);
+router.put('/cookie_policy', protect, authorize('superadmin', 'super_admin'), updateCookiePolicy);
 
 module.exports = router;
