@@ -73,6 +73,9 @@ const useSuperAdminStore = create(
             },
             systemIntel: [],
             landingPageContent: null,
+            privacyContent: null,
+            termsContent: null,
+            cookieContent: null,
             loading: false,
 
             fetchLandingPageContent: async () => {
@@ -158,6 +161,87 @@ const useSuperAdminStore = create(
                     }
                 } catch (err) {
                     console.error('Failed to update FAQs content:', err);
+                }
+                return false;
+            },
+
+            fetchPrivacyContent: async () => {
+                try {
+                    const response = await apiRequest('/landing-page/privacy_policy');
+                    if (response.success) {
+                        set({ privacyContent: response.data });
+                    }
+                } catch (err) {
+                    console.error('Failed to fetch Privacy Policy:', err);
+                }
+            },
+
+            updatePrivacyPolicy: async (policySections) => {
+                try {
+                    const response = await apiRequest('/landing-page/privacy_policy', {
+                        method: 'PUT',
+                        body: { policySections }
+                    });
+                    if (response.success) {
+                        get().fetchPrivacyContent();
+                        return true;
+                    }
+                } catch (err) {
+                    console.error('Failed to update Privacy Policy:', err);
+                }
+                return false;
+            },
+
+            fetchTermsContent: async () => {
+                try {
+                    const response = await apiRequest('/landing-page/terms_service');
+                    if (response.success) {
+                        set({ termsContent: response.data });
+                    }
+                } catch (err) {
+                    console.error('Failed to fetch Terms:', err);
+                }
+            },
+
+            updateTermsService: async (policySections) => {
+                try {
+                    const response = await apiRequest('/landing-page/terms_service', {
+                        method: 'PUT',
+                        body: { policySections }
+                    });
+                    if (response.success) {
+                        get().fetchTermsContent();
+                        return true;
+                    }
+                } catch (err) {
+                    console.error('Failed to update Terms:', err);
+                }
+                return false;
+            },
+
+            fetchCookieContent: async () => {
+                try {
+                    const response = await apiRequest('/landing-page/cookie_policy');
+                    if (response.success) {
+                        set({ cookieContent: response.data });
+                    }
+                } catch (err) {
+                    console.error('Failed to fetch Cookie Policy:', err);
+                }
+            },
+
+            updateCookiePolicy: async (policySections) => {
+                try {
+                    const response = await apiRequest('/landing-page/cookie_policy', {
+                        method: 'PUT',
+                        body: { policySections }
+                    });
+                    if (response.success) {
+                        get().fetchCookieContent();
+                        return true;
+                    }
+                } catch (err) {
+                    console.error('Failed to update Cookie Policy:', err);
                 }
                 return false;
             },

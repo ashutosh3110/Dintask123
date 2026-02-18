@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Shield } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
-import axios from 'axios';
+import apiRequest from '@/lib/api';
 
 const Privacy = () => {
     const navigate = useNavigate();
@@ -13,9 +13,9 @@ const Privacy = () => {
     useEffect(() => {
         const fetchContent = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/v1/landing-page/privacy_policy');
-                if (response.data.success && response.data.data) {
-                    setSections(response.data.data.policySections || []);
+                const response = await apiRequest('/landing-page/privacy_policy');
+                if (response.success && response.data) {
+                    setSections(response.data.policySections || []);
                 }
             } catch (error) {
                 console.error('Error fetching privacy policy:', error);
@@ -27,9 +27,9 @@ const Privacy = () => {
     }, []);
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans selection:bg-primary-500 selection:text-white pb-20">
+        <div className="min-h-screen bg-gradient-to-b from-[#FFEE8C] via-[#FFF9C4] to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 font-sans selection:bg-primary-500 selection:text-white pb-20">
             {/* Header Area */}
-            <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50">
+            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50">
                 <div className="max-w-4xl mx-auto px-6 h-24 flex items-center justify-between">
                     <button
                         onClick={() => navigate('/')}
@@ -48,15 +48,15 @@ const Privacy = () => {
             </div>
 
             {/* Hero Section */}
-            <div className="py-20 px-6 bg-primary-600 relative overflow-hidden">
+            <div className="py-20 px-6 relative overflow-hidden border-b border-yellow-200/50 dark:border-slate-800">
                 {/* Background Pattern */}
-                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#000_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
 
                 <div className="max-w-4xl mx-auto text-center relative z-10">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.5 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="inline-flex items-center justify-center mb-6 text-white"
+                        className="inline-flex items-center justify-center mb-6 text-slate-900 dark:text-white"
                     >
                         <Shield size={64} strokeWidth={1.5} className="drop-shadow-lg" />
                     </motion.div>
@@ -64,7 +64,7 @@ const Privacy = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="text-4xl md:text-6xl font-black text-white tracking-tight mb-4 drop-shadow-md"
+                        className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tight mb-4 drop-shadow-sm"
                     >
                         Privacy Policy
                     </motion.h1>
@@ -72,7 +72,7 @@ const Privacy = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="text-primary-100 font-bold uppercase tracking-[0.2em] text-sm"
+                        className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-[0.2em] text-sm"
                     >
                         Last Updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                     </motion.p>
@@ -104,12 +104,12 @@ const Privacy = () => {
                     )}
                 </motion.div>
 
-                <div className="mt-20 p-10 bg-primary-600 rounded-[2rem] text-white text-center">
+                <div className="mt-20 p-10 bg-slate-900 dark:bg-white rounded-[2rem] text-white dark:text-slate-900 text-center shadow-2xl">
                     <h3 className="text-2xl font-black mb-4">Have questions about your privacy?</h3>
-                    <p className="text-primary-100 mb-8 font-medium">Our tactical support team is here to help you understand our data practices.</p>
+                    <p className="text-slate-400 dark:text-slate-500 mb-8 font-medium">Our tactical support team is here to help you understand our data practices.</p>
                     <Button
                         onClick={() => navigate('/contact')}
-                        className="bg-white text-primary-600 hover:bg-slate-50 font-black uppercase tracking-widest px-8 rounded-xl h-12"
+                        className="bg-yellow-400 text-slate-900 hover:bg-yellow-500 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800 font-black uppercase tracking-widest px-8 rounded-xl h-12"
                     >
                         Contact Support
                     </Button>

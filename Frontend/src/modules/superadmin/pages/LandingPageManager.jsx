@@ -7,7 +7,7 @@ import { Input } from '@/shared/components/ui/input';
 import { Textarea } from '@/shared/components/ui/textarea';
 import { Label } from '@/shared/components/ui/label';
 import { toast } from 'sonner';
-import { FileEdit, LayoutTemplate, Save, Loader2, Star, Layers, ArrowRight, ArrowLeft, HelpCircle, ChevronDown, Monitor, CheckCircle2, CreditCard } from 'lucide-react';
+import { FileEdit, LayoutTemplate, Save, Loader2, Star, Layers, ArrowRight, ArrowLeft, HelpCircle, ChevronDown, Monitor, CheckCircle2, CreditCard, Shield, Trash2, Plus, FileText, Cookie } from 'lucide-react';
 import useSuperAdminStore from '@/store/superAdminStore';
 import { Badge } from '@/shared/components/ui/badge';
 import { cn } from '@/shared/utils/cn';
@@ -35,7 +35,16 @@ const LandingPageManager = () => {
         updatePricingPlan,
         tacticalModules,
         fetchTacticalModules,
-        updateTacticalModule
+        updateTacticalModule,
+        privacyContent,
+        fetchPrivacyContent,
+        updatePrivacyPolicy,
+        termsContent,
+        fetchTermsContent,
+        updateTermsService,
+        cookieContent,
+        fetchCookieContent,
+        updateCookiePolicy
     } = useSuperAdminStore();
 
     const [activeSection, setActiveSection] = useState('hero');
@@ -91,6 +100,11 @@ const LandingPageManager = () => {
         previewUrls: ['', '', '', '']
     });
 
+    // Legal Policies Form State
+    const [privacyForm, setPrivacyForm] = useState([]);
+    const [termsForm, setTermsForm] = useState([]);
+    const [cookiesForm, setCookiesForm] = useState([]);
+
     // Module Edit State
     const [editingModule, setEditingModule] = useState(null); // moduleId
     const [moduleForm, setModuleForm] = useState({
@@ -113,6 +127,9 @@ const LandingPageManager = () => {
         fetchTacticalModules(); // Fetch modules
         fetchFooterCtaContent();
         fetchPricingPlans();
+        fetchPrivacyContent();
+        fetchTermsContent();
+        fetchCookieContent();
     }, []);
 
     useEffect(() => {
@@ -184,6 +201,18 @@ const LandingPageManager = () => {
             }));
         }
     }, [footerCtaContent]);
+
+    useEffect(() => {
+        if (privacyContent) setPrivacyForm(privacyContent.policySections || []);
+    }, [privacyContent]);
+
+    useEffect(() => {
+        if (termsContent) setTermsForm(termsContent.policySections || []);
+    }, [termsContent]);
+
+    useEffect(() => {
+        if (cookieContent) setCookiesForm(cookieContent.policySections || []);
+    }, [cookieContent]);
 
     const handleHeroChange = (e) => {
         const { name, value } = e.target;
@@ -443,6 +472,42 @@ const LandingPageManager = () => {
         }
     };
 
+    const handlePolicyChange = (type, index, field, value) => {
+        const setter = type === 'privacy' ? setPrivacyForm : type === 'terms' ? setTermsForm : setCookiesForm;
+        setter(prev => {
+            const updated = [...prev];
+            updated[index] = { ...updated[index], [field]: value };
+            return updated;
+        });
+    };
+
+    const addPolicySection = (type) => {
+        const setter = type === 'privacy' ? setPrivacyForm : type === 'terms' ? setTermsForm : setCookiesForm;
+        setter(prev => [...prev, { title: '', content: '' }]);
+    };
+
+    const removePolicySection = (type, index) => {
+        const setter = type === 'privacy' ? setPrivacyForm : type === 'terms' ? setTermsForm : setCookiesForm;
+        setter(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const handlePolicySubmit = async (type) => {
+        setLoading(true);
+        try {
+            let success = false;
+            if (type === 'privacy') success = await updatePrivacyPolicy(privacyForm);
+            else if (type === 'terms') success = await updateTermsService(termsForm);
+            else if (type === 'cookies') success = await updateCookiePolicy(cookiesForm);
+
+            if (success) toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} Policy updated!`);
+            else toast.error(`Failed to update ${type} policy.`);
+        } catch (error) {
+            toast.error('An error occurred.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <motion.div
             initial="initial"
@@ -469,6 +534,7 @@ const LandingPageManager = () => {
                     <button onClick={() => setActiveSection('pricing')} className={cn("px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all", activeSection === 'pricing' ? "bg-white dark:bg-slate-800 text-primary-600 shadow-sm" : "text-slate-400 hover:text-slate-600")}>Pricing</button>
                     <button onClick={() => setActiveSection('footerCta')} className={cn("px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all", activeSection === 'footerCta' ? "bg-white dark:bg-slate-800 text-primary-600 shadow-sm" : "text-slate-400 hover:text-slate-600")}>Command Center</button>
                     <button onClick={() => setActiveSection('testimonials')} className={cn("px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all", activeSection === 'testimonials' ? "bg-white dark:bg-slate-800 text-primary-600 shadow-sm" : "text-slate-400 hover:text-slate-600")}>Testimonials</button>
+                    <button onClick={() => setActiveSection('policies')} className={cn("px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all", activeSection === 'policies' ? "bg-white dark:bg-slate-800 text-primary-600 shadow-sm" : "text-slate-400 hover:text-slate-600")}>Policies</button>
                 </div>
             </motion.div>
 
@@ -1015,6 +1081,141 @@ const LandingPageManager = () => {
                                     </div>
                                 ))}
                             </div>
+                        </div>
+                    </motion.div>
+                ) : activeSection === 'policies' ? (
+                    <motion.div key="policies" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-8">
+                        <div className="grid grid-cols-1 gap-8">
+                            {/* Policy Section Map */}
+                            {[
+                                { id: 'privacy', title: 'Privacy Policy', form: privacyForm, icon: Shield, color: 'blue' },
+                                { id: 'terms', title: 'Terms of Service', form: termsForm, icon: FileText, color: 'indigo' },
+                                { id: 'cookies', title: 'Cookie Policy', form: cookiesForm, icon: Cookie, color: 'amber' }
+                            ].map((policy) => (
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                    {/* Policy Editor */}
+                                    <Card className="border-2 border-slate-100 shadow-lg bg-white dark:bg-slate-900 rounded-[2rem] overflow-hidden">
+                                        <CardHeader className="border-b border-slate-50 dark:border-slate-800 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                            <div className="flex items-center gap-3 w-full sm:w-auto">
+                                                <div className={`p-2 bg-${policy.color}-50 dark:bg-${policy.color}-900/20 rounded-xl`}>
+                                                    <policy.icon className={`text-${policy.color}-500`} size={20} />
+                                                </div>
+                                                <div>
+                                                    <CardTitle className="text-lg font-black uppercase tracking-tight">{policy.title} Editor</CardTitle>
+                                                    <CardDescription className="text-xs font-bold">Manage landing page legal sections</CardDescription>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2 w-full sm:w-auto">
+                                                <Button variant="outline" size="sm" onClick={() => addPolicySection(policy.id)} className="font-bold uppercase text-[10px]">
+                                                    <Plus size={14} className="mr-1" /> Add
+                                                </Button>
+                                                <Button onClick={() => handlePolicySubmit(policy.id)} disabled={loading} size="sm" className="font-bold uppercase">
+                                                    {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
+                                                    <span className="ml-2 text-xs">Save</span>
+                                                </Button>
+                                            </div>
+                                        </CardHeader>
+                                        <CardContent className="p-6 space-y-6">
+                                            {policy.form.length === 0 ? (
+                                                <div className="text-center py-12 border-2 border-dashed border-slate-100 rounded-2xl">
+                                                    <p className="text-slate-400 font-bold text-sm uppercase">No sections added yet</p>
+                                                    <Button variant="link" onClick={() => addPolicySection(policy.id)} className="text-primary-600 font-black uppercase text-xs">Initialize sections</Button>
+                                                </div>
+                                            ) : (
+                                                <div className="grid grid-cols-1 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                                                    {policy.form.map((section, sIndex) => (
+                                                        <div key={sIndex} className="p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 relative group">
+                                                            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <Button variant="ghost" size="icon" onClick={() => removePolicySection(policy.id, sIndex)} className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-full">
+                                                                    <Trash2 size={16} />
+                                                                </Button>
+                                                            </div>
+                                                            <div className="space-y-4">
+                                                                <div className="space-y-2">
+                                                                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Section Title</Label>
+                                                                    <Input
+                                                                        value={section.title}
+                                                                        onChange={(e) => handlePolicyChange(policy.id, sIndex, 'title', e.target.value)}
+                                                                        placeholder="e.g. Information Collection"
+                                                                        className="font-black"
+                                                                    />
+                                                                </div>
+                                                                <div className="space-y-2">
+                                                                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Section Content</Label>
+                                                                    <Textarea
+                                                                        value={section.content}
+                                                                        onChange={(e) => handlePolicyChange(policy.id, sIndex, 'content', e.target.value)}
+                                                                        placeholder="Describe the policy details..."
+                                                                        className="min-h-[100px] text-sm leading-relaxed"
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+
+                                    {/* Policy Preview (Mobiles/Small Screen Styled) */}
+                                    <div className="rounded-[2.5rem] border-8 border-slate-900 shadow-2xl bg-white dark:bg-slate-950 overflow-hidden flex flex-col h-[750px] relative">
+                                        {/* Phone Notch/Status Bar Style */}
+                                        <div className="h-12 bg-slate-900 flex items-center justify-center">
+                                            <div className="w-20 h-5 bg-black rounded-b-2xl" />
+                                        </div>
+
+                                        {/* Browser Header Mockup */}
+                                        <div className="border-b border-slate-100 dark:border-slate-800 p-4 flex items-center gap-2 bg-slate-50 dark:bg-slate-900">
+                                            <div className="flex gap-1">
+                                                <div className="size-2 rounded-full bg-red-400" />
+                                                <div className="size-2 rounded-full bg-yellow-400" />
+                                                <div className="size-2 rounded-full bg-green-400" />
+                                            </div>
+                                            <div className="flex-1 bg-white dark:bg-slate-800 rounded-full px-3 py-1 text-[10px] text-slate-400 truncate font-medium flex items-center gap-2">
+                                                <Shield size={10} /> dintask.com/legal/{policy.id}
+                                            </div>
+                                        </div>
+
+                                        {/* Preview Content */}
+                                        <div className="flex-1 overflow-y-auto p-6 scroll-smooth bg-gradient-to-b from-yellow-50/50 to-white dark:from-slate-900/50 dark:to-slate-950">
+                                            <Badge className="bg-primary-100 text-primary-700 border-none mb-4 font-black text-[9px] uppercase tracking-widest">
+                                                Tactical Document
+                                            </Badge>
+                                            <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-6 uppercase tracking-tight">
+                                                {policy.title}
+                                            </h2>
+
+                                            <div className="space-y-8">
+                                                {policy.form.length > 0 ? (
+                                                    policy.form.map((section, idx) => (
+                                                        <div key={idx} className="space-y-3">
+                                                            <h3 className="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-wide border-l-4 border-yellow-400 pl-3">
+                                                                {section.title || "Section Title"}
+                                                            </h3>
+                                                            <p className="text-[12px] text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                                                                {section.content || "Section content will appear here once you start typing..."}
+                                                            </p>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
+                                                        <div className="size-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                                                            <policy.icon className="text-slate-400" size={32} />
+                                                        </div>
+                                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No Content to Display</p>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Footer Mockup */}
+                                            <div className="mt-12 pt-8 border-t border-slate-100 dark:border-slate-800 text-center">
+                                                <div className="size-8 rounded-lg bg-slate-900 mx-auto mb-2" />
+                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">© 2026 DINTASK TACTICAL</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </motion.div>
                 ) : (
