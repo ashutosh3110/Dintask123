@@ -11,6 +11,14 @@ const sendEmail = async (options) => {
         },
     });
 
+    transporter.verify((err, success) => {
+        if (err) {
+            console.error("SMTP ERROR 👉", err);
+        } else {
+            console.log("SMTP READY ✅");
+        }
+    });
+
     const message = {
         from: `${process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
         to: options.email,
